@@ -1,0 +1,31 @@
+<script setup>
+import SearchButton from '../atoms/SearchButton.vue'
+
+const props = defineProps({
+  onSearch: {
+    type: Function,
+    default: () => (value) => {},
+  },
+})
+
+const modelValue = defineModel({
+  type: String,
+  default: '',
+})
+
+const onSearch = () => {
+  props.onSearch(modelValue.value)
+}
+</script>
+<template>
+  <div class="input-group">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="검색어를 입력해주세요."
+      v-model="modelValue"
+      v-bind="$attrs"
+    />
+    <SearchButton @click="onSearch" />
+  </div>
+</template>
