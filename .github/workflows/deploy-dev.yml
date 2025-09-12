@@ -1,0 +1,13 @@
+name: Deploy Frontend to DEV Server
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Execute frontend deployment script
+        run: ~/scripts/deploy-frontend-dev.sh
