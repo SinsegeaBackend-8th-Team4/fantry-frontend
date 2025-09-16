@@ -1,18 +1,20 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
+import { useUiStore } from '@/stores/uiStore'; // UI 스토어를 가져옵니다.
 
-// 레이아웃 컴포넌트들을 가져옵니다.
-// 레이아웃은 여러 페이지에서 공통적으로 사용되는 뼈대(헤더, 푸터 등)라고 생각하면 쉬워요.
+// 레이아웃 컴포넌트들은 앱 시작 시 필요하므로 그대로 둡니다.
 import UserLayout from '@/layouts/UserLayout.vue'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 
-// 페이지 컴포넌트들을 가져옵니다.
-// 실제 컨텐츠가 표시되는 개별 페이지들입니다.
-import HomePage from '@/pages/HomePage.vue'
-import LoginPage from '@/pages/LoginPage.vue'
-import ProductListPage from '@/pages/product/ProductListPage.vue'
-import ProductDetailPage from '@/pages/product/ProductDetailPage.vue'
-import AdminDashboardPage from '@/pages/admin/DashboardPage.vue'
+// 페이지 컴포넌트들은 동적 임포트(Lazy Loading)로 변경합니다.
+// 이렇게 하면 앱이 처음 로딩될 때 모든 페이지 코드를 불러오지 않고,
+// 해당 페이지에 접속하는 시점에 코드를 불러오므로 초기 로딩 속도가 빨라집니다.
+const HomePage = () => import('@/pages/HomePage.vue')
+const LoginPage = () => import('@/pages/LoginPage.vue')
+const ProductListPage = () => import('@/pages/product/ProductListPage.vue')
+const ProductDetailPage = () => import('@/pages/product/ProductDetailPage.vue')
+const AdminDashboardPage = () => import('@/pages/admin/DashboardPage.vue')
+const AdminDummyPage = () => import('@/pages/admin/DummyPage.vue')
 
 
 // 라우트(경로) 목록을 정의합니다.
@@ -61,6 +63,25 @@ const routes = [
         component: AdminDashboardPage,
         // meta: { requiresAdmin: true } // 나중에 관리자 권한 체크가 필요하면 이런 식으로 meta 정보를 추가할 수 있어요.
       },
+      // 추가될 관리자 메뉴들을 위한 라우트를 여기에 정의합니다.
+      // 모든 메뉴가 일단은 동일한 더미 페이지를 보여주도록 설정합니다.
+      // 팀원들이 각자 맡은 페이지를 개발할 때 component만 실제 페이지로 교체하면 됩니다.
+      { path: 'settlement/dashboard', name: 'AdminSettlementDashboard', component: AdminDummyPage },
+      { path: 'return/dashboard', name: 'AdminReturnDashboard', component: AdminDummyPage },
+      { path: 'cs/dashboard', name: 'AdminCsDashboard', component: AdminDummyPage },
+      { path: 'inspection/dashboard', name: 'AdminInspectionDashboard', component: AdminDummyPage },
+      { path: 'inventory/dashboard', name: 'AdminInventoryDashboard', component: AdminDummyPage },
+      { path: 'member/dashboard', name: 'AdminMemberDashboard', component: AdminDummyPage },
+      { path: 'auction/dashboard', name: 'AdminAuctionDashboard', component: AdminDummyPage },
+
+      // '(임시)일괄조회' 메뉴를 위한 라우트를 추가합니다.
+      { path: 'settlement/list', name: 'AdminSettlementList', component: AdminDummyPage },
+      { path: 'return/list', name: 'AdminReturnList', component: AdminDummyPage },
+      { path: 'cs/list', name: 'AdminCsList', component: AdminDummyPage },
+      { path: 'inspection/list', name: 'AdminInspectionList', component: AdminDummyPage },
+      { path: 'inventory/list', name: 'AdminInventoryList', component: AdminDummyPage },
+      { path: 'member/list', name: 'AdminMemberList', component: AdminDummyPage },
+      { path: 'auction/list', name: 'AdminAuctionList', component: AdminDummyPage },
     ]
   },
 ]
@@ -75,6 +96,9 @@ const router = createRouter({
 // 모든 페이지 이동을 감시하면서 특정 조건(예: 로그인 여부)에 따라 접근을 제어할 수 있어요.
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore() // Pinia 스토어에서 사용자 로그인 정보를 가져옵니다.
+  const uiStore = useUiStore(); // UI 스토어를 사용합니다.
+
+  uiStore.startLoading(); // 페이지 이동이 시작되면 로딩 상태를 true로 만듭니다.
 
   // 이동하려는 페이지(to)가 로그인이 필요한지(meta.requiresAuth) 확인하고,
   // 로그인이 되어있지 않다면(!userStore.isLoggedIn) 로그인 페이지로 보냅니다.
@@ -85,6 +109,14 @@ router.beforeEach((to, from, next) => {
     next() // 그 외의 경우는 원래 이동하려던 페이지로 이동을 허용합니다.
   }
 })
+
+// afterEach는 페이지 이동이 완전히 끝난 후에 실행됩니다.
+router.afterEach(() => {
+  const uiStore = useUiStore();
+  // 약간의 딜레이를 주어 너무 빨리 사라지는 것을 방지하고,
+  // 페이지 렌더링이 완료될 시간을 확보합니다.
+  setTimeout(() => uiStore.stopLoading(), 300); // 0.3초 후에 로딩 상태를 false로 만듭니다.
+});
 
 
 export default router
