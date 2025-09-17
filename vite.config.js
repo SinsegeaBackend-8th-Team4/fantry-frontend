@@ -3,18 +3,24 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
-import path from 'path' // 💡 alias를 위해 path 모듈 import (이미 있다면 유지)
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
-    // vueDevTools(), // 💡 devtools도 plugins 배열에 추가해야 활성화됩니다.
+    vueDevTools(),
   ],
   resolve: {
     alias: {
-      // 💡 __dirname을 사용하려면 path 모듈이 필요합니다.
-      '@': path.resolve(__dirname, './src'),
-    },
+      '@': fileURLToPath(new URL('./src', import.meta.url))
+    }
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // node_modules에서 발생하는 Sass 경고를 무시하도록 설정
+        quietDeps: true
+      }
+    }
+  }
 })

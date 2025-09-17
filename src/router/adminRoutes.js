@@ -25,6 +25,7 @@ const ReturnListPage = () => import('@/pages/admin/return/ReturnListPage.vue');
 // CS 관리
 const CsDashboardPage = () => import('@/pages/admin/cs/CsDashboardPage.vue');
 const CsListPage = () => import('@/pages/admin/cs/CsListPage.vue');
+const CsWritePage = () => import('@/pages/admin/cs/CsWritePage.vue'); // 글쓰기 페이지 import
 
 // 검수 관리
 const InspectionDashboardPage = () => import('@/pages/admin/inspection/InspectionDashboardPage.vue');
@@ -87,6 +88,7 @@ const adminRoutes = {
           children: [
             { path: 'dashboard', name: 'AdminCsDashboard', component: CsDashboardPage },
             { path: 'list', name: 'AdminCsList', component: CsListPage },
+            { path: 'write', name: 'AdminCsWrite', component: CsWritePage }, // 글쓰기 페이지 라우트 추가
           ]
         },
         // --- 검수 관리 ---

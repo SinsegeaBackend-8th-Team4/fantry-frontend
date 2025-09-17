@@ -18,11 +18,13 @@ const menuItems = computed(() => {
   return contentLayoutRoute.children
     .filter(route => route.meta && route.meta.menu)
     .map(route => {
-      // 4. 각 메뉴의 서브메뉴(Dashboard, List)를 구성합니다.
+      // 4. 각 메뉴의 서브메뉴(Dashboard, List 등)를 구성합니다.
       const subMenus = route.children ? route.children.map(child => {
         let title = '대시보드'; // 기본 서브메뉴 이름
         if (child.path === 'list') {
           title = '목록 조회';
+        } else if (child.path === 'write') {
+          title = '글쓰기 (샘플)';
         }
         return {
           to: { name: child.name },
@@ -49,7 +51,7 @@ const menuItems = computed(() => {
       <div class="sidebar-brand-icon">
         <i class="fas fa-cogs"></i>
       </div>
-      <div class="sidebar-brand-text mx-3">Fantry 관리자</div>
+      <div class="sidebar-brand-text mx-3">Fantry 관리</div>
     </RouterLink>
 
     <!-- 구분선 -->

@@ -1,144 +1,105 @@
-# Fantry 프론트엔드 개발 가이드
+# Fantry FE 개발 핵심 가이드 (내부용)
 
-## ✨ 핵심 아키텍처
-
-Fantry FE는 두 가지 핵심 컨셉을 기반으로 설계되었습니다.
-
-### 1. 레이아웃 기반의 스타일 분리
-
-**사용자 페이지**와 **관리자 페이지**는 완전히 다른 UI/UX를 가집니다. 두 영역의 스타일(CSS)이 서로 충돌하는 것을 원천적으로 방지하기 위해, 각 영역의 최상위 레이아웃 컴포넌트(`UserLayout.vue`, `AdminLayout.vue`)가 마운트될 때 `<body>` 태그에 고유 클래스를 동적으로 추가/제거합니다. 모든 SCSS 코드는 이 고유 클래스 하위에서만 적용되도록 작성되어 있어 스타일 충돌이 발생하지 않습니다.
-
-### 2. 기능(도메인) 중심의 폴더 구조
-
-팀원들이 각자 맡은 기능 개발에 집중하고, 코드 충돌을 최소화하기 위해 **기능(도메인) 중심**으로 폴더를 구조화했습니다. 예를 들어, '정산 관리' 기능과 관련된 모든 페이지와 컴포넌트는 `settlement`라는 폴더 안에 모여있습니다.
+이 문서는 Fantry 프론트엔드 프로젝트의 핵심 구조와 개발 워크플로우를 안내합니다.
 
 ---
 
-## 📁 폴더 구조 가이드
+## 1. 핵심 아키텍처
 
-프로젝트의 주요 폴더 구조와 각 파일의 역할은 다음과 같습니다.
+-   **폴더 구조**: **기능(도메인) 중심**입니다. `pages/admin/settlement`, `components/admin/settlement` 와 같이 각자 맡은 기능 폴더 내에서 작업하세요.
+-   **API 관리**: **`src/api` 폴더에서 기능별로 모듈화**하여 관리합니다. 컴포넌트에서 `axios`를 직접 사용하지 마세요.
+-   **상태 관리**: **`Pinia`**를 사용합니다. (`stores/userStore.js`, `stores/uiStore.js`)
+-   **스타일**: `UserLayout`과 `AdminLayout`에 의해 자동으로 분리되므로 신경 쓸 필요 없습니다.
 
-```
-fantry-frontend/
-├── public/               # 이미지, 폰트 등 빌드 시 압축되지 않는 정적 파일
-│
-├── src/
-│   ├── pages/            # 라우터에 직접 연결되는 페이지 단위 컴포넌트
-│   │   └── admin/
-│   │       ├── settlement/ # ✅ [정산] 기능 페이지
-│   │       ├── auction/    # ✅ [경매] 기능 페이지
-│   │       ├── cs/         # ✅ [CS] 기능 페이지
-│   │       └── ... (기타 기능별 폴더)
-│   │
-│   ├── components/       # 재사용 가능한 UI 컴포넌트
-│   │   └── admin/
-│   │       ├── common/     # 여러 기능에서 공통으로 사용하는 컴포넌트
-│   │       ├── settlement/ # ✅ [정산] 기능 전용 컴포넌트
-│   │       ├── auction/    # ✅ [경매] 기능 전용 컴포넌트
-│   │       └── ... (기타 기능별 폴더)
-│   │
-│   ├── router/           # Vue Router 설정
-│   │   ├── index.js      # 라우터 전역 설정 및 가드
-│   │   ├── userRoutes.js  # 사용자 페이지 경로
-│   │   └── adminRoutes.js# ⭐️ 관리자 페이지 경로 (새 페이지 추가 시 수정)
-│   │
-│   ├── stores/           # Pinia를 사용한 전역 상태 관리 (로그인, UI 상태 등)
-│   │
-│   ├── styles/           # SCSS 스타일 파일
-│   │   └── scss/
-│   │       ├── main-admin.scss # 관리자 페이지 전역 스타일
-│   │       └── main-user.scss  # 사용자 페이지 전역 스타일
-│   │
-│   ├── layouts/          # 페이지의 전체적인 뼈대(레이아웃)
-│   │
-│   ├── App.vue           # Vue 앱 최상위 컴포넌트
-│   └── main.js           # 앱 시작점 (라이브러리 초기화)
-│
-├── package.json          # ⭐️ 모든 라이브러리 의존성 관리
-└── vite.config.js        # Vite 빌드 도구 설정
+---
+
+## 2. 주요 개발 워크플로우 (관리자 페이지 추가)
+
+1.  **페이지 생성**: `src/pages/admin/[기능명]/MyNewPage.vue` 파일을 생성합니다.
+2.  **라우터 등록**: `src/router/adminRoutes.js`를 열고, 생성한 페이지를 `import` 한 뒤 `children` 배열에 경로를 추가합니다.
+3.  **사이드바 메뉴**: 라우터 등록 시 `meta` 객체에 `{ menu: true, title: '메뉴명', icon: '...' }`을 추가하면 사이드바 메뉴가 **자동으로 생성**됩니다. `AdminSidebar.vue`를 직접 수정할 필요 없습니다.
+
+---
+
+## 3. 자주 수정하는 파일
+
+-   **라우팅 & 사이드바**: `src/router/adminRoutes.js`
+-   **페이지 컴포넌트**: `src/pages/admin/[기능명]/`
+-   **재사용 컴포넌트**: `src/components/admin/[기능명]/` 또는 `src/components/common/`
+-   **API 요청 함수**: `src/api/[기능명].js`
+-   **공통 에디터**: `src/components/common/organisms/CommonEditor.vue`
+
+---
+
+## 4. 프로젝트 실행
+
+```bash
+# 1. 의존성 설치 (최초 한 번)
+npm install
+
+# 2. 개발 서버 실행
+npm run dev
 ```
 
 ---
 
-## 🚀 개발 워크플로우
+## 5. 기술 스택 및 주요 라이브러리
 
-새로운 페이지나 컴포넌트를 추가하는 일반적인 절차입니다.
-(예시: '정산 관리' 기능에 '상세보기 페이지'를 추가하는 경우)
+### 프레임워크 및 빌드 도구
 
-### 1. 페이지 컴포넌트 생성
+-   **Vue 3**: Composition API (`<script setup>`) 기반으로 작성되었습니다.
+-   **Vite**: 빠르고 효율적인 개발 및 빌드 환경을 제공합니다.
+-   **Pinia**: Vue의 공식 상태 관리 라이브러리입니다.
+-   **Vue Router**: 페이지 라우팅을 관리합니다.
 
--   `src/pages/admin/settlement/` 폴더 안에 `SettlementDetailPage.vue` 파일을 생성합니다.
+### 주요 UI 라이브러리
 
-### 2. (선택) 하위 컴포넌트 생성
+-   **DataTables (`datatables.net-vue3`)**: 관리자 페이지의 모든 목록 페이지에서 사용되는 강력한 테이블 라이브러리입니다. 정렬, 검색, 페이징 기능이 기본 제공됩니다.
+-   **Chart.js**: 대시보드 등에서 데이터를 시각화하기 위한 차트 라이브러리입니다.
+-   **Vue-Quill (`@vueup/vue-quill`)**: 상품 설명, CS 답변 등 서식이 필요한 텍스트 입력을 위한 스마트 에디터입니다.
+-   **Bootstrap 5 & SB Admin 2**: 관리자 페이지의 전체적인 UI 템플릿으로 사용됩니다.
 
--   상세보기 페이지 내부에서 재사용될 UI 조각이 있다면, `src/components/admin/settlement/` 폴더 안에 `SettlementDetailCard.vue` 와 같은 컴포넌트를 생성하여 사용합니다.
+### API 통신
 
-### 3. 라우터에 페이지 등록 (⭐️ 중요)
-
--   `src/router/adminRoutes.js` 파일을 엽니다.
--   새로 만든 페이지 컴포넌트를 `import` 합니다.
-    ```javascript
-    // src/router/adminRoutes.js
-
-    // ... 기존 import 구문 ...
-    const SettlementDetailPage = () => import('@/pages/admin/settlement/SettlementDetailPage.vue');
-    ```
--   `settlement` 기능의 `children` 배열 안에 새로운 경로를 추가합니다.
-    ```javascript
-    // ...
-    {
-      path: 'settlement',
-      // ...
-      children: [
-        { path: 'dashboard', name: 'AdminSettlementDashboard', component: SettlementDashboardPage },
-        { path: 'list', name: 'AdminSettlementList', component: SettlementListPage },
-        // 👇 새로 추가된 경로
-        { path: 'detail/:id', name: 'AdminSettlementDetail', component: SettlementDetailPage },
-      ]
-    },
-    // ...
-    ```
-
-### 4. 사이드바 메뉴 자동 생성
-
--   우리 프로젝트의 관리자 사이드바(`AdminSidebar.vue`)는 **라우터 설정을 기반으로 메뉴를 자동으로 생성**합니다.
--   새로운 기능 그룹(예: '주문 관리')을 사이드바 메뉴에 추가하고 싶다면, `adminRoutes.js`에서 해당 기능의 최상위 라우트 `meta` 객체에 `menu: true` 속성을 추가하면 됩니다.
-
-    ```javascript
-    // src/router/adminRoutes.js
-    {
-      path: 'order', // 새로운 기능의 경로
-      redirect: { name: 'AdminOrderDashboard' },
-      // 👇 사이드바 메뉴 자동 생성을 위한 meta 정보
-      meta: { title: '주문 관리', icon: 'fas fa-fw fa-box', menu: true },
-      children: [
-        // ...
-      ]
-    }
-    ```
--   `title`은 메뉴의 이름이 되고, `icon`은 Font Awesome 아이콘 클래스가 됩니다.
--   기존 기능의 하위 메뉴(예: '상세보기')는 자동으로 '대시보드', '목록 조회'와 같은 그룹에 포함되므로 별도의 사이드바 수정이 필요 없습니다.
+-   **Axios**: 백엔드 서버와의 모든 HTTP 통신을 담당합니다. `src/api` 폴더에서 중앙 관리됩니다.
 
 ---
 
-## 📦 의존성 관리
+## 6. 스타일링 가이드라인 (SCSS)
 
--   모든 외부 라이브러리(jQuery, Chart.js, FontAwesome 등)는 `public` 폴더가 아닌 **NPM**을 통해 설치되고 `package.json`에서 관리됩니다.
--   새로운 라이브러리가 필요할 경우, `npm install [라이브러리명]` 명령으로 설치 후 사용하세요.
--   CSS/JS 파일은 `src/main.js` 또는 사용하는 컴포넌트에서 직접 `import`하여 번들링 파이프라인에 포함시켜야 합니다.
+**모든 스타일은 SCSS 문법으로 작성하는 것을 원칙으로 합니다.** 스타일을 추가할 때는 다음 **"2단계 원칙"**을 우선순위대로 따라주세요.
+
+### 1순위: 특정 페이지/컴포넌트에서만 쓰이는 '한정 스타일'
+
+-   **목적**: 가장 일반적이고 안전한 방법입니다. 스타일 충돌을 원천적으로 방지합니다.
+-   **작성 위치**: 해당 `.vue` 파일 내부의 `<style scoped lang="scss">` 블록
+-   **예시**: '정산 목록 페이지' 테이블의 특정 컬럼 색상, 'CS 글쓰기 페이지'의 레이아웃 등
+
+```vue
+<style scoped lang="scss">
+/* 이 스타일은 이 컴포넌트 안에서만 적용됩니다. */
+.my-component-wrapper {
+  padding: 20px;
+}
+</style>
+```
+
+### 2순위: 특정 영역 전반에서 쓰이는 '영역별 공통 스타일'
+
+-   **목적**: **관리자 페이지 전체** 또는 **사용자 페이지 전체**에서 공통으로 재사용되는 스타일을 정의합니다.
+-   **작성 위치**:
+    -   관리자용: `src/styles/scss/main-admin.scss` 파일 하단
+    -   사용자용: `src/styles/scss/main-user.scss` 파일 하단
+-   **예시**: 관리자 페이지의 모든 카드 헤더 디자인, 사용자 페이지의 공통 섹션 제목 디자인 등
+
+> **참고**: `style.scss` 파일은 사용자/관리자 양쪽에 모두 적용되므로, 정말 필요한 경우가 아니면 수정하지 않는 것을 권장합니다.
 
 ---
 
-## ▶️ 프로젝트 실행
+## 7. 터미널 경고 메시지에 대하여
 
-1.  **의존성 설치** (최초 한 번)
-    ```bash
-    npm install
-    ```
+`npm run dev` 실행 시, 터미널에 Sass와 관련된 **"Deprecation Warning"** 메시지가 많이 나타날 수 있습니다.
 
-2.  **개발 서버 실행**
-    ```bash
-    npm run dev
-    ```
-
-이제 브라우저에서 `http://localhost:5173` (또는 터미널에 표시되는 주소)으로 접속하여 개발을 시작할 수 있습니다.
+-   **이것은 에러가 아니며, 프로젝트 실행에 아무런 문제가 없습니다.**
+-   **원인**: 우리가 사용하는 `Bootstrap`과 `SB Admin 2` 라이브러리가 내부적으로 오래된 `@import` 문법을 사용하기 때문에 나타나는 단순 **알림**입니다.
+-   **결론**: 이 경고들은 외부 라이브러리에서 발생하는 것이므로, **안심하고 무시하셔도 괜찮습니다.**
