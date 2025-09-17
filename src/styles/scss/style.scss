@@ -34,7 +34,7 @@ $input-btn-focus-box-shadow: none;
 
 $input-placeholder-color: #999999;
 
-@import "bootstrap/scss/bootstrap";
+// @import "bootstrap/scss/bootstrap"; // main-*.scss에서 이미 불러오므로 여기서 중복으로 불러올 필요 없음
 
 
 /********** Custom CSS ************/

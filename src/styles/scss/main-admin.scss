@@ -1,0 +1,23 @@
+/*
+  관리자 페이지 레이아웃(AdminLayout)이 활성화되었을 때 적용될 스타일 묶음입니다.
+  AdminLayout.vue에서 body에 'admin-layout-active' 클래스를 추가/제거하는 방식으로
+  스타일 적용을 제어하고 있어요. 덕분에 사용자 페이지와 스타일이 충돌하지 않죠.
+*/
+
+// body에 'admin-layout-active' 클래스가 있을 때만 하위 스타일이 적용됩니다.
+body.admin-layout-active {
+  // --- 라이브러리 및 템플릿 스타일 (node_modules에서 직접 로드) ---
+  @import "bootstrap/scss/bootstrap.scss";
+  @import "startbootstrap-sb-admin-2/scss/sb-admin-2.scss";
+
+  // --- 프로젝트 커스텀 스타일 ---
+  @import "./style.scss";
+  @import "../css/style.extension.css";
+
+  // --- 관리자 페이지 커스텀 스타일 ---
+  // TODO: 관리자 페이지 전반에 적용될 공통 스타일은 이 아래에 작성하세요.
+  // 예:
+  // .admin-wide-table {
+  //   width: 100%;
+  // }
+}
