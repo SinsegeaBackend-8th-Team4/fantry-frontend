@@ -1,5 +1,9 @@
 import HomePage from '@/pages/HomePage.vue'
 import LoginPage from '@/pages/LoginPage.vue'
+import SignupTerms from '@/pages/access/user/SignupTerms.vue'
+import SignupForm from '@/pages/access/user/SignupForm.vue'
+import SignupComplete from '@/pages/access/user/SignupComplete.vue'
+import SignupFail from '@/pages/access/user/SignupFail.vue'
 import ProductDetailPage from '@/pages/product/ProductDetailPage.vue'
 import ProductListPage from '@/pages/product/ProductListPage.vue'
 import { createRouter, createWebHistory } from 'vue-router'
@@ -16,6 +20,35 @@ const routes = [
     name: 'Login',
     component: LoginPage,
     meta: { requiredLogin: false },
+  },
+  {
+    path: '/signup',
+    children: [
+      {
+        path: 'terms',
+        name: 'SignupTerms',
+        component: SignupTerms,
+        meta: { requiredLogin: false }
+      },
+      {
+        path: 'form',
+        name: 'SignupForm',
+        component: SignupForm,
+        meta: { requiredLogin: false }
+      },
+      {
+        path: 'complete',
+        name: "SignupComplete",
+        component: SignupComplete,
+        meta: { requiredLogin: false }
+      },
+      {
+        path: 'fail',
+        name: "SignupFail",
+        component: SignupFail,
+        meta: { requiredLogin: false }
+      }
+    ]
   },
   {
     path: '/product',
