@@ -1,122 +1,55 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { useUserStore } from '@/stores/userStore'
-import { useUiStore } from '@/stores/uiStore'; // UI 스토어를 가져옵니다.
+import { createRouter, createWebHistory } from 'vue-router';
+import { useUserStore } from '@/stores/userStore';
+import { useUiStore } from '@/stores/uiStore';
+import userRoutes from './userRoutes';
+import adminRoutes from './adminRoutes';
 
-// 레이아웃 컴포넌트들은 앱 시작 시 필요하므로 그대로 둡니다.
-import UserLayout from '@/layouts/UserLayout.vue'
-import AdminLayout from '@/layouts/AdminLayout.vue'
+/**
+ * Vue Router 설정의 중심 파일입니다.
+ * - 사용자/관리자 라우트 모듈을 통합합니다.
+ * - 전역 네비게이션 가드를 설정하여 인증 및 권한을 검사합니다.
+ * - 페이지 전환 시 스크롤 동작을 제어합니다.
+ */
+const routes = [userRoutes, adminRoutes];
 
-// 페이지 컴포넌트들은 동적 임포트(Lazy Loading)로 변경합니다.
-// 이렇게 하면 앱이 처음 로딩될 때 모든 페이지 코드를 불러오지 않고,
-// 해당 페이지에 접속하는 시점에 코드를 불러오므로 초기 로딩 속도가 빨라집니다.
-const HomePage = () => import('@/pages/HomePage.vue')
-const LoginPage = () => import('@/pages/LoginPage.vue')
-const ProductListPage = () => import('@/pages/product/ProductListPage.vue')
-const ProductDetailPage = () => import('@/pages/product/ProductDetailPage.vue')
-const AdminDashboardPage = () => import('@/pages/admin/DashboardPage.vue')
-const AdminDummyPage = () => import('@/pages/admin/DummyPage.vue')
-
-
-// 라우트(경로) 목록을 정의합니다.
-// 웹사이트의 각 페이지 경로와 어떤 컴포넌트를 보여줄지 짝지어주는 곳이에요.
-const routes = [
-  // 사용자 페이지들 (UserLayout 사용)
-  {
-    path: '/',
-    component: UserLayout, // 이 경로와 하위 경로들은 모두 UserLayout 안에서 보여집니다.
-    children: [
-      {
-        path: '', // path가 비어있으면 기본 페이지가 됩니다. (예: http://localhost:5173/)
-        name: 'Home',
-        component: HomePage,
-      },
-      {
-        path: 'login', // (예: http://localhost:5173/login)
-        name: 'Login',
-        component: LoginPage,
-        meta: { requiredLogin: false }, // meta 정보: 페이지에 대한 추가 데이터 (여기선 로그인이 필요 없는 페이지로 표시)
-      },
-      {
-        path: 'product',
-        name: 'ProductList',
-        component: ProductListPage,
-        meta: { requiredLogin: false },
-      },
-      {
-        path: 'product/detail/:id', // ':id'는 동적인 값(파라미터)을 의미해요. 상품 ID가 들어오겠죠?
-        name: 'ProductDetail',
-        component: ProductDetailPage,
-        meta: { requiresAuth: true }, // 이 페이지는 로그인이 필요하다고 표시!
-      },
-    ]
-  },
-  
-  // 관리자 페이지들 (AdminLayout 사용)
-  {
-    path: '/admin',
-    component: AdminLayout, // '/admin'으로 시작하는 모든 경로는 AdminLayout 안에서 보여집니다.
-    // beforeEnter: ... // 특정 경로에 들어오기 전에만 실행할 로직이 있다면 여기에! (지금은 전역으로 처리 중)
-    children: [
-      {
-        path: '', // '/admin' 경로로 접속하면 바로 대시보드가 보입니다.
-        name: 'AdminDashboard',
-        component: AdminDashboardPage,
-        // meta: { requiresAdmin: true } // 나중에 관리자 권한 체크가 필요하면 이런 식으로 meta 정보를 추가할 수 있어요.
-      },
-      // 추가될 관리자 메뉴들을 위한 라우트를 여기에 정의합니다.
-      // 모든 메뉴가 일단은 동일한 더미 페이지를 보여주도록 설정합니다.
-      // 팀원들이 각자 맡은 페이지를 개발할 때 component만 실제 페이지로 교체하면 됩니다.
-      { path: 'settlement/dashboard', name: 'AdminSettlementDashboard', component: AdminDummyPage },
-      { path: 'return/dashboard', name: 'AdminReturnDashboard', component: AdminDummyPage },
-      { path: 'cs/dashboard', name: 'AdminCsDashboard', component: AdminDummyPage },
-      { path: 'inspection/dashboard', name: 'AdminInspectionDashboard', component: AdminDummyPage },
-      { path: 'inventory/dashboard', name: 'AdminInventoryDashboard', component: AdminDummyPage },
-      { path: 'member/dashboard', name: 'AdminMemberDashboard', component: AdminDummyPage },
-      { path: 'auction/dashboard', name: 'AdminAuctionDashboard', component: AdminDummyPage },
-
-      // '(임시)일괄조회' 메뉴를 위한 라우트를 추가합니다.
-      { path: 'settlement/list', name: 'AdminSettlementList', component: AdminDummyPage },
-      { path: 'return/list', name: 'AdminReturnList', component: AdminDummyPage },
-      { path: 'cs/list', name: 'AdminCsList', component: AdminDummyPage },
-      { path: 'inspection/list', name: 'AdminInspectionList', component: AdminDummyPage },
-      { path: 'inventory/list', name: 'AdminInventoryList', component: AdminDummyPage },
-      { path: 'member/list', name: 'AdminMemberList', component: AdminDummyPage },
-      { path: 'auction/list', name: 'AdminAuctionList', component: AdminDummyPage },
-    ]
-  },
-]
-
-// Vue Router 인스턴스를 생성합니다.
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL), // 웹 브라우저의 history API를 사용해 URL을 관리해요. (뒤로가기/앞으로가기 가능)
-  routes: routes, // 위에서 정의한 경로 목록을 사용합니다.
-})
-
-// 네비게이션 가드(Navigation Guard): 페이지 이동이 일어나기 전에 항상 실행되는 부분
-// 모든 페이지 이동을 감시하면서 특정 조건(예: 로그인 여부)에 따라 접근을 제어할 수 있어요.
-router.beforeEach((to, from, next) => {
-  const userStore = useUserStore() // Pinia 스토어에서 사용자 로그인 정보를 가져옵니다.
-  const uiStore = useUiStore(); // UI 스토어를 사용합니다.
-
-  uiStore.startLoading(); // 페이지 이동이 시작되면 로딩 상태를 true로 만듭니다.
-
-  // 이동하려는 페이지(to)가 로그인이 필요한지(meta.requiresAuth) 확인하고,
-  // 로그인이 되어있지 않다면(!userStore.isLoggedIn) 로그인 페이지로 보냅니다.
-  if (to.meta.requiresAuth && !userStore.isLoggedIn) {
-    alert('로그인이 필요한 서비스입니다.')
-    next('/login') // '/login' 경로로 리다이렉트
-  } else {
-    next() // 그 외의 경우는 원래 이동하려던 페이지로 이동을 허용합니다.
-  }
-})
-
-// afterEach는 페이지 이동이 완전히 끝난 후에 실행됩니다.
-router.afterEach(() => {
-  const uiStore = useUiStore();
-  // 약간의 딜레이를 주어 너무 빨리 사라지는 것을 방지하고,
-  // 페이지 렌더링이 완료될 시간을 확보합니다.
-  setTimeout(() => uiStore.stopLoading(), 300); // 0.3초 후에 로딩 상태를 false로 만듭니다.
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes,
+  scrollBehavior: () => ({ top: 0 }), // 페이지 전환 시 항상 최상단으로 스크롤
 });
 
+// 전역 네비게이션 가드: 모든 페이지 이동 전에 실행됩니다.
+router.beforeEach((to, from, next) => {
+  const userStore = useUserStore();
+  const uiStore = useUiStore();
 
-export default router
+  // 1. 페이지 이동 시작 시 로딩 인디케이터를 활성화합니다.
+  uiStore.startLoading();
+
+  // --- 개발 편의성을 위해 로그인 및 권한 검사 임시 비활성화 ---
+  /*
+  // 2. 인증이 필요한 페이지에 비로그인 상태로 접근하는 경우를 처리합니다.
+  if (to.meta.requiresAuth && !userStore.isLoggedIn) {
+    alert('로그인이 필요한 서비스입니다.');
+    return next('/login'); // 로그인 페이지로 리디렉션합니다.
+  }
+
+  // 3. 관리자 페이지에 일반 사용자가 접근하는 경우를 처리합니다.
+  if (to.meta.isAdmin && !userStore.isAdmin) {
+    alert('접근 권한이 없습니다.');
+    return next('/'); // 메인 페이지로 리디렉션합니다.
+  }
+  */
+
+  // 4. 모든 검사를 통과한 경우, 요청된 라우트로 정상적으로 이동합니다.
+  next();
+});
+
+// 전역 후행 가드: 모든 페이지 이동이 완료된 후 실행됩니다.
+router.afterEach(() => {
+  const uiStore = useUiStore();
+  // 페이지 렌더링이 완료될 시간을 고려하여 약간의 딜레이 후 로딩 인디케이터를 비활성화합니다.
+  setTimeout(() => uiStore.stopLoading(), 300);
+});
+
+export default router;

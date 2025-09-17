@@ -4,56 +4,49 @@ import AdminSidebar from '@/components/common/organisms/admin/AdminSidebar.vue';
 import AdminNavbar from '@/components/common/organisms/admin/AdminNavbar.vue';
 import AdminFooter from '@/components/common/organisms/admin/AdminFooter.vue';
 
-// 1. 관리자 페이지 전용 스타일 파일을 불러옵니다.
-//    UserLayout과 마찬가지로, 아래 로직과 함께 동작하며 스타일 충돌을 막아줘요.
-import '@/styles/scss/main-admin.scss'; 
+// 관리자 페이지 전용 스타일 및 템플릿 스크립트를 가져옵니다.
+import '@/styles/scss/main-admin.scss';
+import 'startbootstrap-sb-admin-2/js/sb-admin-2.min.js';
 
-// 이 컴포넌트(레이아웃)가 화면에 나타날 때 실행되는 부분이에요.
-onMounted(() => {
-  // 2. body에 관리자 템플릿이 요구하는 id와, 우리가 정의한 식별용 클래스를 추가합니다.
-  //    - 'page-top': SB Admin 2 템플릿의 일부 기능(ex: 스크롤 상단 이동 버튼)이 이 id를 필요로 해요.
-  //    - 'admin-layout-active': main-admin.scss 스타일을 활성화시키는 역할을 합니다.
+/**
+ * 관리자 레이아웃에 필요한 body 클래스와 id를 설정합니다.
+ */
+const applyAdminBodyAttributes = () => {
   document.body.id = 'page-top';
   document.body.classList.add('admin-layout-active');
+};
 
-  // 3. SB Admin 2 템플릿의 메인 JavaScript 파일을 동적으로 불러옵니다.
-  //    템플릿의 접기/펼치기 같은 동적 기능들이 이 파일에 들어있어요.
-  //    Vue 컴포넌트 안에서 이렇게 직접 스크립트를 추가하는 건 특별한 경우!
-  const adminScript = document.createElement('script');
-  adminScript.src = '/js/sb-admin-2.min.js';
-  adminScript.id = 'sb-admin-dynamic-script'; // 나중에 지우기 쉽도록 id를 붙여줍니다.
-  document.body.appendChild(adminScript);
-});
-
-// 이 컴포넌트가 화면에서 사라질 때 실행되는 부분이에요.
-onUnmounted(() => {
-  // 4. 다른 페이지(특히 사용자 페이지)로 이동할 때, 관리자 페이지의 스타일과 스크립트가
-  //    영향을 주지 않도록 깨끗하게 정리합니다.
+/**
+ * 컴포넌트가 언마운트될 때 추가했던 속성을 제거합니다.
+ */
+const cleanupAdminBodyAttributes = () => {
   document.body.id = '';
   document.body.classList.remove('admin-layout-active');
+};
 
-  const adminScript = document.getElementById('sb-admin-dynamic-script');
-  if (adminScript) {
-    document.body.removeChild(adminScript);
-  }
-});
+// 컴포넌트가 마운트될 때 속성을 적용합니다.
+onMounted(applyAdminBodyAttributes);
+
+// 컴포넌트가 언마운트될 때 속성을 정리합니다.
+onUnmounted(cleanupAdminBodyAttributes);
 </script>
 
 <template>
-  <!-- SB Admin 2 템플릿의 기본 HTML 구조입니다. -->
+  <!-- SB Admin 2 템플릿의 기본 HTML 구조 -->
   <div id="wrapper">
-    <!-- 사이드바 -->
+    <!-- 사이드바 (메뉴) -->
     <AdminSidebar />
 
-    <!-- 메인 컨텐츠 영역 -->
+    <!-- 메인 컨텐츠 래퍼 -->
     <div id="content-wrapper" class="d-flex flex-column">
+      <!-- 메인 컨텐츠 -->
       <div id="content">
         <!-- 상단 네비게이션 바 -->
         <AdminNavbar />
 
-        <!-- 페이지 컨텐츠가 들어올 자리 -->
+        <!-- 페이지별 컨텐츠가 렌더링되는 영역 -->
         <div class="container-fluid">
-          <!-- 라우터에 연결된 관리자 페이지(예: DashboardPage)가 여기에 표시됩니다. -->
+          <!-- vue-router에 의해 현재 경로에 맞는 페이지 컴포넌트가 표시됩니다. -->
           <router-view />
         </div>
       </div>
@@ -64,10 +57,9 @@ onUnmounted(() => {
   </div>
 </template>
 
-
 <style scoped>
-/* 
-  이 레이아웃 자체에만 적용할 스타일이 있다면 여기에 작성하세요.
-  대부분의 스타일은 main-admin.scss에서 관리하는 것이 좋습니다.
+/*
+  이 레이아웃 컴포넌트 자체에만 한정되는 스타일을 정의할 수 있습니다.
+  하지만 전역적인 관리자 스타일은 main-admin.scss에서 관리하는 것을 권장합니다.
 */
 </style>

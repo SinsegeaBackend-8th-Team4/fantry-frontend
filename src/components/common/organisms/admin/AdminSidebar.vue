@@ -1,18 +1,43 @@
 <script setup>
-// Vue의 라우터 링크 컴포넌트를 가져옵니다. a 태그 대신 사용해요.
-import { RouterLink } from 'vue-router';
+import { computed } from 'vue';
+import { RouterLink, useRouter } from 'vue-router';
 
-// 메뉴 데이터를 배열로 정의해서 관리하면 훨씬 깔끔하고 유지보수하기 쉬워요.
-// 나중에 메뉴를 추가하거나 수정할 때 이 배열만 건드리면 됩니다.
-const menuItems = [
-  { id: 'settlement', name: '정산관리', icon: 'fas fa-fw fa-dollar-sign' },
-  { id: 'return', name: '반품관리', icon: 'fas fa-fw fa-undo' },
-  { id: 'cs', name: 'CS관리', icon: 'fas fa-fw fa-headset' },
-  { id: 'inspection', name: '검수관리', icon: 'fas fa-fw fa-check-circle' },
-  { id: 'inventory', name: '재고관리', icon: 'fas fa-fw fa-boxes' },
-  { id: 'member', name: '회원관리', icon: 'fas fa-fw fa-users' },
-  { id: 'auction', name: '경매관리', icon: 'fas fa-fw fa-gavel' },
-];
+const router = useRouter();
+
+// 라우터 설정에서 사이드바에 표시할 메뉴들을 동적으로 가져옵니다.
+const menuItems = computed(() => {
+  // 1. 전체 라우트 설정에서 '/admin' 경로를 찾습니다.
+  const adminRoute = router.options.routes.find(r => r.path === '/admin');
+  if (!adminRoute) return [];
+
+  // 2. '/admin'의 자식 중 AdminContentLayout을 사용하는 라우트를 찾습니다.
+  const contentLayoutRoute = adminRoute.children.find(r => r.component.name === 'AdminContentLayout');
+  if (!contentLayoutRoute || !contentLayoutRoute.children) return [];
+
+  // 3. AdminContentLayout의 자식 라우트들 중에서 meta.menu가 true인 것만 필터링합니다.
+  return contentLayoutRoute.children
+    .filter(route => route.meta && route.meta.menu)
+    .map(route => {
+      // 4. 각 메뉴의 서브메뉴(Dashboard, List)를 구성합니다.
+      const subMenus = route.children ? route.children.map(child => {
+        let title = '대시보드'; // 기본 서브메뉴 이름
+        if (child.path === 'list') {
+          title = '목록 조회';
+        }
+        return {
+          to: { name: child.name },
+          title: title
+        };
+      }) : [];
+
+      return {
+        id: route.path, // 고유 ID로 사용
+        name: route.meta.title, // 메뉴 이름 (예: 정산관리)
+        icon: route.meta.icon,  // 메뉴 아이콘
+        subMenus: subMenus      // 서브메뉴 배열
+      };
+    });
+});
 </script>
 
 <template>
@@ -21,8 +46,8 @@ const menuItems = [
       
     <!-- 사이드바 로고/브랜드 -->
     <RouterLink to="/admin" class="sidebar-brand d-flex align-items-center justify-content-center">
-      <div class="sidebar-brand-icon rotate-n-15">
-        <i class="fas fa-laugh-wink"></i>
+      <div class="sidebar-brand-icon">
+        <i class="fas fa-cogs"></i>
       </div>
       <div class="sidebar-brand-text mx-3">Fantry 관리자</div>
     </RouterLink>
@@ -58,19 +83,9 @@ const menuItems = [
       <div :id="`collapse-${item.id}`" class="collapse" :aria-labelledby="`heading-${item.id}`" data-parent="#accordionSidebar">
         <div class="bg-white py-2 collapse-inner rounded">
           <h6 class="collapse-header">{{ item.name }}:</h6>
-          <!-- 모든 메뉴에 공통적으로 들어가는 'Dashboard(요약)' 서브 메뉴 -->
-          <!-- to 속성에 라우터에 정의된 name을 사용하면 경로가 바뀌어도 안전해요. -->
-          <RouterLink :to="{ name: `Admin${item.id.charAt(0).toUpperCase() + item.id.slice(1)}Dashboard` }" class="collapse-item">
-            Dashboard(요약)
+          <RouterLink v-for="subMenu in item.subMenus" :key="subMenu.to.name" :to="subMenu.to" class="collapse-item">
+            {{ subMenu.title }}
           </RouterLink>
-          <RouterLink :to="{ name: `Admin${item.id.charAt(0).toUpperCase() + item.id.slice(1)}List` }" class="collapse-item">
-            (임시)일괄조회
-          </RouterLink>
-          <!-- 
-            여기에 추가적인 서브 메뉴들을 넣을 수 있습니다.
-            팀원들이 <RouterLink>를 사용해서 새 페이지 링크를 추가하면 돼요.
-            <RouterLink to="/admin/settlement/list" class="collapse-item">정산 목록</RouterLink>
-          -->
         </div>
       </div>
     </li>

@@ -1,84 +1,137 @@
-# Fantry 프론트엔드 프로젝트 구조
+# Fantry 프론트엔드 개발 가이드
 
-안녕하세요! Fantry 프로젝트에 오신 것을 환영합니다.
-이 문서는 프로젝트의 전체적인 구조를 파악하여 새로운 팀원이 빠르게 적응하고, 협업의 효율을 높이기 위해 작성되었습니다.
+## ✨ 핵심 아키텍처
 
-## ✨ 핵심 컨셉: 레이아웃 기반의 스타일 분리
+Fantry FE는 두 가지 핵심 컨셉을 기반으로 설계되었습니다.
 
-우리 프로젝트는 **사용자 페이지**와 **관리자 페이지**라는 두 개의 큰 부분으로 나뉩니다. 두 페이지는 완전히 다른 디자인 템플릿을 사용하기 때문에, 스타일(CSS)이 서로 충돌하지 않도록 하는 것이 매우 중요합니다.
+### 1. 레이아웃 기반의 스타일 분리
 
-이를 위해 다음과 같은 전략을 사용합니다.
+**사용자 페이지**와 **관리자 페이지**는 완전히 다른 UI/UX를 가집니다. 두 영역의 스타일(CSS)이 서로 충돌하는 것을 원천적으로 방지하기 위해, 각 영역의 최상위 레이아웃 컴포넌트(`UserLayout.vue`, `AdminLayout.vue`)가 마운트될 때 `<body>` 태그에 고유 클래스를 동적으로 추가/제거합니다. 모든 SCSS 코드는 이 고유 클래스 하위에서만 적용되도록 작성되어 있어 스타일 충돌이 발생하지 않습니다.
 
-1.  **레이아웃 컴포넌트 분리**:
-    *   `src/layouts/UserLayout.vue`: 사용자 페이지의 공통적인 뼈대(헤더, 푸터 등)를 담당합니다.
-    *   `src/layouts/AdminLayout.vue`: 관리자 페이지의 공통적인 뼈대(사이드바, 상단바 등)를 담당합니다.
+### 2. 기능(도메인) 중심의 폴더 구조
 
-2.  **동적 스타일 로딩**:
-    *   Vue Router가 특정 페이지로 이동할 때, 해당 페이지에 맞는 레이아웃 컴포넌트를 불러옵니다.
-    *   각 레이아웃 컴포넌트는 화면에 표시되는 시점(`onMounted`)에 `<body>` 태그에 고유한 클래스(`user-layout-active` 또는 `admin-layout-active`)를 추가합니다.
-    *   화면에서 사라지는 시점(`onUnmounted`)에는 추가했던 클래스를 다시 제거합니다.
-
-3.  **범위가 지정된 SCSS**:
-    *   `src/styles/scss/main-user.scss` 와 `main-admin.scss` 파일은 위에서 추가한 `<body>` 클래스 하위에서만 스타일이 적용되도록 작성되었습니다.
-    *   결과적으로, 사용자 페이지를 보고 있을 때는 사용자용 스타일만, 관리자 페이지를 보고 있을 때는 관리자용 스타일만 적용되어 충돌이 원천적으로 방지됩니다.
+팀원들이 각자 맡은 기능 개발에 집중하고, 코드 충돌을 최소화하기 위해 **기능(도메인) 중심**으로 폴더를 구조화했습니다. 예를 들어, '정산 관리' 기능과 관련된 모든 페이지와 컴포넌트는 `settlement`라는 폴더 안에 모여있습니다.
 
 ---
 
-## 📁 폴더 및 파일 구조
+## 📁 폴더 구조 가이드
 
-주요 폴더와 파일의 역할은 다음과 같습니다.
+프로젝트의 주요 폴더 구조와 각 파일의 역할은 다음과 같습니다.
 
 ```
 fantry-frontend/
-├── public/
-│   └── js/
-│       └── sb-admin-2.min.js  # 관리자 템플릿의 핵심 JS 파일
-│   └── ... (이미지, 폰트 등 정적 파일)
+├── public/               # 이미지, 폰트 등 빌드 시 압축되지 않는 정적 파일
 │
 ├── src/
-│   ├── components/         # 재사용 가능한 작은 UI 조각들 (버튼, 인풋, 카드 등)
-│   │   ├── common/
-│   │   │   ├── atoms/      # 가장 작은 단위의 컴포넌트
-│   │   │   ├── molecules/  # atoms를 조합한 컴포넌트 (예: 검색창)
-│   │   │   └── organisms/  # molecules를 조합한 큰 단위 (예: 헤더, 푸터, 사이드바)
-│   │   └── ...
+│   ├── pages/            # 라우터에 직접 연결되는 페이지 단위 컴포넌트
+│   │   └── admin/
+│   │       ├── settlement/ # ✅ [정산] 기능 페이지
+│   │       ├── auction/    # ✅ [경매] 기능 페이지
+│   │       ├── cs/         # ✅ [CS] 기능 페이지
+│   │       └── ... (기타 기능별 폴더)
 │   │
-│   ├── layouts/            # 페이지의 전체적인 뼈대를 잡는 레이아웃 컴포넌트
-│   │   ├── AdminLayout.vue # 관리자 페이지용 레이아웃
-│   │   └── UserLayout.vue  # 사용자 페이지용 레이아웃
+│   ├── components/       # 재사용 가능한 UI 컴포넌트
+│   │   └── admin/
+│   │       ├── common/     # 여러 기능에서 공통으로 사용하는 컴포넌트
+│   │       ├── settlement/ # ✅ [정산] 기능 전용 컴포넌트
+│   │       ├── auction/    # ✅ [경매] 기능 전용 컴포넌트
+│   │       └── ... (기타 기능별 폴더)
 │   │
-│   ├── pages/              # 실제 컨텐츠가 들어가는 페이지 단위 컴포넌트
-│   │   ├── admin/          # 관리자 페이지들
-│   │   ├── product/        # 상품 관련 페이지들
-│   │   └── ...
+│   ├── router/           # Vue Router 설정
+│   │   ├── index.js      # 라우터 전역 설정 및 가드
+│   │   ├── userRoutes.js  # 사용자 페이지 경로
+│   │   └── adminRoutes.js# ⭐️ 관리자 페이지 경로 (새 페이지 추가 시 수정)
 │   │
-│   ├── router/             # 페이지 경로(URL)와 컴포넌트를 연결해주는 설정
-│   │   └── index.js        # Vue Router의 핵심 설정 파일
+│   ├── stores/           # Pinia를 사용한 전역 상태 관리 (로그인, UI 상태 등)
 │   │
-│   ├── stores/             # Pinia를 사용한 전역 상태 관리 (예: 로그인 정보)
-│   │   └── userStore.js
-│   │
-│   ├── styles/             # 스타일(SCSS) 파일 모음
+│   ├── styles/           # SCSS 스타일 파일
 │   │   └── scss/
-│   │       ├── main-admin.scss # 관리자 페이지 스타일의 진입점
-│   │       ├── main-user.scss  # 사용자 페이지 스타일의 진입점
-│   │       └── ... (부트스트랩, 템플릿 SCSS 등)
+│   │       ├── main-admin.scss # 관리자 페이지 전역 스타일
+│   │       └── main-user.scss  # 사용자 페이지 전역 스타일
 │   │
-│   ├── App.vue             # Vue 앱의 가장 최상위 컴포넌트. <router-view>를 통해 페이지를 표시.
-│   └── main.js             # Vue 앱을 생성하고, 라우터와 Pinia를 연결하는 시작점.
+│   ├── layouts/          # 페이지의 전체적인 뼈대(레이아웃)
+│   │
+│   ├── App.vue           # Vue 앱 최상위 컴포넌트
+│   └── main.js           # 앱 시작점 (라이브러리 초기화)
 │
-├── index.html              # 모든 컨텐츠가 마운트될 기본 HTML 파일
-├── package.json            # 프로젝트 정보 및 의존성(라이브러리) 목록
-└── vite.config.js          # Vite 빌드 도구 설정 파일
+├── package.json          # ⭐️ 모든 라이브러리 의존성 관리
+└── vite.config.js        # Vite 빌드 도구 설정
 ```
 
 ---
 
-## 🚀 시작하기
+## 🚀 개발 워크플로우
 
-프로젝트를 로컬 환경에서 실행하려면 다음 단계를 따르세요.
+새로운 페이지나 컴포넌트를 추가하는 일반적인 절차입니다.
+(예시: '정산 관리' 기능에 '상세보기 페이지'를 추가하는 경우)
 
-1.  **의존성 설치** (최초 한 번만 실행)
+### 1. 페이지 컴포넌트 생성
+
+-   `src/pages/admin/settlement/` 폴더 안에 `SettlementDetailPage.vue` 파일을 생성합니다.
+
+### 2. (선택) 하위 컴포넌트 생성
+
+-   상세보기 페이지 내부에서 재사용될 UI 조각이 있다면, `src/components/admin/settlement/` 폴더 안에 `SettlementDetailCard.vue` 와 같은 컴포넌트를 생성하여 사용합니다.
+
+### 3. 라우터에 페이지 등록 (⭐️ 중요)
+
+-   `src/router/adminRoutes.js` 파일을 엽니다.
+-   새로 만든 페이지 컴포넌트를 `import` 합니다.
+    ```javascript
+    // src/router/adminRoutes.js
+
+    // ... 기존 import 구문 ...
+    const SettlementDetailPage = () => import('@/pages/admin/settlement/SettlementDetailPage.vue');
+    ```
+-   `settlement` 기능의 `children` 배열 안에 새로운 경로를 추가합니다.
+    ```javascript
+    // ...
+    {
+      path: 'settlement',
+      // ...
+      children: [
+        { path: 'dashboard', name: 'AdminSettlementDashboard', component: SettlementDashboardPage },
+        { path: 'list', name: 'AdminSettlementList', component: SettlementListPage },
+        // 👇 새로 추가된 경로
+        { path: 'detail/:id', name: 'AdminSettlementDetail', component: SettlementDetailPage },
+      ]
+    },
+    // ...
+    ```
+
+### 4. 사이드바 메뉴 자동 생성
+
+-   우리 프로젝트의 관리자 사이드바(`AdminSidebar.vue`)는 **라우터 설정을 기반으로 메뉴를 자동으로 생성**합니다.
+-   새로운 기능 그룹(예: '주문 관리')을 사이드바 메뉴에 추가하고 싶다면, `adminRoutes.js`에서 해당 기능의 최상위 라우트 `meta` 객체에 `menu: true` 속성을 추가하면 됩니다.
+
+    ```javascript
+    // src/router/adminRoutes.js
+    {
+      path: 'order', // 새로운 기능의 경로
+      redirect: { name: 'AdminOrderDashboard' },
+      // 👇 사이드바 메뉴 자동 생성을 위한 meta 정보
+      meta: { title: '주문 관리', icon: 'fas fa-fw fa-box', menu: true },
+      children: [
+        // ...
+      ]
+    }
+    ```
+-   `title`은 메뉴의 이름이 되고, `icon`은 Font Awesome 아이콘 클래스가 됩니다.
+-   기존 기능의 하위 메뉴(예: '상세보기')는 자동으로 '대시보드', '목록 조회'와 같은 그룹에 포함되므로 별도의 사이드바 수정이 필요 없습니다.
+
+---
+
+## 📦 의존성 관리
+
+-   모든 외부 라이브러리(jQuery, Chart.js, FontAwesome 등)는 `public` 폴더가 아닌 **NPM**을 통해 설치되고 `package.json`에서 관리됩니다.
+-   새로운 라이브러리가 필요할 경우, `npm install [라이브러리명]` 명령으로 설치 후 사용하세요.
+-   CSS/JS 파일은 `src/main.js` 또는 사용하는 컴포넌트에서 직접 `import`하여 번들링 파이프라인에 포함시켜야 합니다.
+
+---
+
+## ▶️ 프로젝트 실행
+
+1.  **의존성 설치** (최초 한 번)
     ```bash
     npm install
     ```
