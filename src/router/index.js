@@ -48,8 +48,13 @@ router.beforeEach((to, from, next) => {
 // 전역 후행 가드: 모든 페이지 이동이 완료된 후 실행됩니다.
 router.afterEach(() => {
   const uiStore = useUiStore();
-  // 페이지 렌더링이 완료될 시간을 고려하여 약간의 딜레이 후 로딩 인디케이터를 비활성화합니다.
-  setTimeout(() => uiStore.stopLoading(), 300);
+  uiStore.stopLoading();
+});
+
+// 라우트 에러 시 로딩 상태가 남지 않도록 처리
+router.onError(() => {
+  const uiStore = useUiStore();
+  uiStore.stopLoading();
 });
 
 export default router;
