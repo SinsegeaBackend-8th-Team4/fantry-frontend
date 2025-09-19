@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getGoodsCategories, getArtists, getAlbumsByArtist } from '@/api/catalog.js'
 import SelectedArtistModal from '@/pages/user/inspection/SelectedArtistModal.vue'
+import SelectedAlbumModal from '@/pages/user/inspection/SelectedAlbumModal.vue'
 
 const router = useRouter()
 
@@ -316,16 +317,10 @@ const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.va
     </div>
   </main>
 
-  <!-- 아티스트 선택 모달 -->
+  <!-- 아티스트 모달 -->
   <SelectedArtistModal v-model:show="showArtistModal" :artists="artists" @select="onSelectArtist" />
-
-  <!-- TODO: 앨범 선택 모달
-  <SelectedAlbumModal
-    v-model:show="showAlbumModal"
-    :albums="albums"
-    @select="onSelectAlbum"
-  />
-  -->
+  <!-- 앨범 모달 -->
+  <SelectedAlbumModal v-model:show="showAlbumModal" :albums="albums" @select="onSelectAlbum" />
 </template>
 
 <style lang="scss" scoped>
