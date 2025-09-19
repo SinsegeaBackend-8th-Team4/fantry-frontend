@@ -1,22 +1,21 @@
 <script setup>
-import '@/styles/css/inspection.css'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getGoodsCategories, getArtists, getAlbumsByArtist } from '@/api/catalog.js'
-import SelectedArtistModal from '@/pages/inspection/user/SelectedArtistModal.vue'
+import SelectedArtistModal from '@/pages/user/inspection/SelectedArtistModal.vue'
 
 const router = useRouter()
 
 // 상태
-const categories = ref([])       // 굿즈 카테고리
-const artists = ref([])          // 아티스트
-const albums = ref([])           // 앨범
+const categories = ref([]) // 굿즈 카테고리
+const artists = ref([]) // 아티스트
+const albums = ref([]) // 앨범
 const selectedCategory = ref('') // 카테고리 코드
 const selectedArtist = ref(null) // 아티스트
-const selectedAlbum = ref(null)  // 앨범
-const itemName = ref('')         // 상품명
-const description = ref('')      // 상품 설명
-const hashtags = ref('')         // 해시태그 입력
+const selectedAlbum = ref(null) // 앨범
+const itemName = ref('') // 상품명
+const description = ref('') // 상품 설명
+const hashtags = ref('') // 해시태그 입력
 
 // 모달
 const showArtistModal = ref(false)
@@ -24,7 +23,7 @@ const showAlbumModal = ref(false)
 
 // 로딩/에러
 const loadingInitial = ref(false) // 최초 로딩(카테고리/아티스트)
-const loadingAlbums = ref(false)  // 앨범 로딩
+const loadingAlbums = ref(false) // 앨범 로딩
 const error = ref(null)
 
 // fetchers : 카테고리/아티스트 조회
@@ -32,7 +31,7 @@ async function fetchCategoriesAndArtists() {
   const [catRes, artRes] = await Promise.all([getGoodsCategories(), getArtists()])
   return {
     categories: catRes.data ?? [], // null이나 undefined면 []
-    artists: artRes.data ?? []
+    artists: artRes.data ?? [],
   }
 }
 
@@ -96,7 +95,7 @@ const previewText = computed(() => {
 // UI 상태 편의
 const isCategoryDisabled = computed(() => loadingInitial.value)
 const isArtistDisabled = computed(() => loadingInitial.value)
-const isAlbumDisabled  = computed(() => !selectedArtist.value || loadingAlbums.value)
+const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.value)
 </script>
 <template>
   <main class="bg-light py-5 inspection">
@@ -136,11 +135,7 @@ const isAlbumDisabled  = computed(() => !selectedArtist.value || loadingAlbums.v
                   :disabled="isCategoryDisabled"
                 >
                   <option value="" disabled>선택하세요</option>
-                  <option
-                    v-for="c in categories"
-                    :key="c.goodsCategoryId"
-                    :value="c.code"
-                  >
+                  <option v-for="c in categories" :key="c.goodsCategoryId" :value="c.code">
                     {{ c.name }}
                   </option>
                 </select>
@@ -153,7 +148,9 @@ const isAlbumDisabled  = computed(() => !selectedArtist.value || loadingAlbums.v
                   <input
                     type="text"
                     class="form-control"
-                    :value=" selectedArtist ? `${selectedArtist.nameKo} (${selectedArtist.nameEn})` : ''"
+                    :value="
+                      selectedArtist ? `${selectedArtist.nameKo} (${selectedArtist.nameEn})` : ''
+                    "
                     readonly
                     placeholder="아티스트 선택"
                     :disabled="isArtistDisabled"
@@ -196,7 +193,9 @@ const isAlbumDisabled  = computed(() => !selectedArtist.value || loadingAlbums.v
                     </button>
                   </div>
                 </div>
-                <small v-if="loadingAlbums" class="text-muted">앨범 목록을 불러오는 중입니다…</small>
+                <small v-if="loadingAlbums" class="text-muted"
+                  >앨범 목록을 불러오는 중입니다…</small
+                >
               </div>
 
               <!-- 상품명 -->
@@ -223,7 +222,7 @@ const isAlbumDisabled  = computed(() => !selectedArtist.value || loadingAlbums.v
                   class="form-control"
                   placeholder="상품에 대한 설명을 입력해주세요."
                   v-model="description"
-                >
+                />
               </div>
 
               <!-- 해시태그 -->
@@ -254,7 +253,6 @@ const isAlbumDisabled  = computed(() => !selectedArtist.value || loadingAlbums.v
             <div class="card-body d-flex flex-column">
               <h5 class="font-weight-bold mb-2">상품 상태</h5>
               <p class="text-muted small mb-3">상품의 상태를 꼼꼼히 확인하고 체크해주세요.</p>
-
 
               <div class="flex-fill" style="max-height: 320px; overflow-y: auto">
                 <!-- TODO: 체크리스트 API 연동 -->
@@ -319,11 +317,7 @@ const isAlbumDisabled  = computed(() => !selectedArtist.value || loadingAlbums.v
   </main>
 
   <!-- 아티스트 선택 모달 -->
-  <SelectedArtistModal
-    v-model:show="showArtistModal"
-    :artists="artists"
-    @select="onSelectArtist"
-  />
+  <SelectedArtistModal v-model:show="showArtistModal" :artists="artists" @select="onSelectArtist" />
 
   <!-- TODO: 앨범 선택 모달
   <SelectedAlbumModal
@@ -333,3 +327,70 @@ const isAlbumDisabled  = computed(() => !selectedArtist.value || loadingAlbums.v
   />
   -->
 </template>
+
+<style lang="scss" scoped>
+$primary-color: #0066ff;
+$primary-hover: #0052cc;
+
+// 제목/라벨 스타일
+h2,
+h5,
+label {
+  color: #222 !important;
+  font-weight: 600;
+}
+
+// 파란 강조 색상
+.text-primary {
+  color: $primary-color !important;
+}
+
+.progress-bar {
+  background-color: $primary-color !important;
+}
+
+// 기본 버튼 (중첩 문법 사용)
+.btn-primary {
+  background-color: $primary-color !important;
+  border-color: $primary-color !important;
+  color: #fff !important;
+
+  &:hover,
+  &:focus {
+    background-color: $primary-hover !important;
+    border-color: $primary-hover !important;
+    color: #fff !important;
+  }
+}
+
+// 아웃라인 버튼
+.btn-outline-primary {
+  color: $primary-color !important;
+  border-color: $primary-color !important;
+
+  &:hover {
+    background-color: $primary-color !important;
+    color: #fff !important;
+  }
+}
+
+// 돋보기 버튼
+.input-group-append {
+  .btn {
+    background-color: #f8f9fa !important;
+    border: 1px solid #ddd !important;
+
+    i.fa-search {
+      color: $primary-color !important;
+    }
+
+    &:hover {
+      background-color: $primary-color !important;
+
+      i.fa-search {
+        color: #fff !important;
+      }
+    }
+  }
+}
+</style>

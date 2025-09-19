@@ -73,8 +73,56 @@ const selectedArtist = (artist) => {
     </div>
   </div>
 </template>
+<style scoped lang="scss">
+.inspection-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+}
 
+.inspection-modal-dialog {
+  width: 100%;
+  max-width: 500px;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
 
+.inspection-modal-header {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+  font-weight: bold;
+}
 
+.inspection-modal-body {
+  padding: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
 
+.inspection-list {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
 
+  &-item { // &-item은 .inspection-list-item을 의미
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+
+    &:hover {
+      background: #f5f5f5;
+    }
+  }
+}
+
+.inspection-modal-footer {
+  padding: 1rem;
+  border-top: 1px solid #eee;
+}
+</style>
