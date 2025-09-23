@@ -1,0 +1,26 @@
+/**
+ * 사용자(User) 테마 전용 변수
+ * - Bootstrap 컴파일 이전에 import 되며 사용자 팔레트를 정의합니다.
+ */
+$primary: #D19C97;
+$secondary: #EDF1FF;
+$light: #FFFFFF;
+$dark: #1C1C1C;
+$body-color: #6F6F6F;
+$headings-color: $dark;
+$border-color: $secondary;
+$input-border-color: $secondary;
+$font-family-sans-serif: 'Poppins', sans-serif;
+$enable-responsive-font-sizes: true;
+$enable-rounded: false;
+$btn-focus-box-shadow: none;
+$btn-active-box-shadow: none;
+$input-btn-focus-box-shadow: none;
+$input-placeholder-color: #999999;
+
+$theme-colors: (
+  "primary": $primary,
+  "secondary": $secondary,
+  "light": $light,
+  "dark": $dark,
+);

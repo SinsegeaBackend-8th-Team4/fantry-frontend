@@ -17,6 +17,7 @@ const MainDashboardPage = () => import('@/pages/admin/dashboard/MainDashboardPag
 // 정산 관리
 const SettlementDashboardPage = () => import('@/pages/admin/settlement/SettlementDashboardPage.vue');
 const SettlementListPage = () => import('@/pages/admin/settlement/SettlementListPage.vue');
+const SettlementListSamplePage = () => import('@/pages/admin/settlement/SettlementListSamplePage.vue');
 
 // 반품 관리
 const ReturnDashboardPage = () => import('@/pages/admin/return/ReturnDashboardPage.vue');
@@ -58,7 +59,7 @@ const adminRoutes = {
           path: '',
           name: 'AdminDashboard',
           component: MainDashboardPage,
-          meta: { title: '메인 대시보드', icon: 'fas fa-fw fa-tachometer-alt' }
+          meta: { title: 'Dashboard', icon: 'fas fa-fw fa-tachometer-alt', menu: true } // ⭐️ menu: true 추가
         },
         // --- 정산 관리 ---
         {

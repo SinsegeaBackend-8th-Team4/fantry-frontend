@@ -1,7 +1,7 @@
 <script setup>
 /**
- * SettlementListPage.vue
- * - 정산 목록 (실사용) : ServerDataTable + BaseChart 통합
+ * SettlementListSamplePage.vue
+ * - 정산 목록 샘플: ServerDataTable + BaseChart 데모
  */
 import { ref, computed } from 'vue';
 import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
@@ -19,9 +19,9 @@ function badgeClass(status) {
 
 const keyword = ref('');
 
-// fetcher: 실제 API 연동 시 axios 호출로 교체
+// 더미 fetcher (실제 API 연동 시 axios 호출로 교체)
 async function fetchSettlements({ page, size, sort, keyword }) {
-  await new Promise(r => setTimeout(r, 300)); // mock delay
+  await new Promise(r => setTimeout(r, 300));
   const total = 57;
   const start = (page - 1) * size;
   const rows = Array.from({ length: size }).map((_, i) => {
@@ -44,20 +44,20 @@ const columns = [
   { data: 'status', title: '상태', sortable: true }
 ];
 
-// Chart 데이터
+// Chart 샘플 데이터
 const palette = useChartPalette();
 const chartData = computed(() => {
   const labels = Array.from({ length: 7 }).map((_, i) => `${i+1}일`);
   const dataset = makeLineDataset('일별 정산액', labels.map(() => Math.round(Math.random()*500)+200), palette.primary);
   return { labels, datasets: [dataset] };
 });
+
 const chartOptions = { scales: { y: { beginAtZero: true } } };
 </script>
 
 <template>
   <div class="settlement-list-page">
-    <h1 class="h3 mb-2 text-gray-800">정산 목록</h1>
-    <p class="mb-4">정산 관련 데이터를 테이블 형태로 조회하는 페이지입니다.</p>
+    <h1 class="h4 mb-4">정산 목록 (샘플)</h1>
 
     <div class="row g-4 mb-4">
       <div class="col-lg-6">
@@ -74,7 +74,7 @@ const chartOptions = { scales: { y: { beginAtZero: true } } };
       v-model:keyword="keyword"
       :columns="columns"
       :fetcher="fetchSettlements"
-      :page-size="10"
+      page-size="10"
       @loaded="info => console.log('loaded', info)"
     >
       <template #empty>정산 데이터가 없습니다.</template>
@@ -85,6 +85,7 @@ const chartOptions = { scales: { y: { beginAtZero: true } } };
   </div>
 </template>
 
+
 <style scoped lang="scss">
 .settlement-list-page {
   .badge { font-weight: 500; }
@@ -93,3 +94,4 @@ const chartOptions = { scales: { y: { beginAtZero: true } } };
   .badge.보류 { background:#e74a3b; }
 }
 </style>
+

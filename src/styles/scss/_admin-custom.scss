@@ -1,0 +1,11 @@
+/**
+ * 관리자 전용 커스텀 확장
+ * - 전역 충돌 방지를 위해 body.admin-layout-active 네임스페이스 사용
+ * - SB Admin 2 기본 구조 위에서 소규모 커스터마이징만 수행
+ */
+body.admin-layout-active {
+  // placeholder rule to avoid empty block lint error
+  .admin-scope-initialized { display: none; }
+  // 예시: 사이드바 커스터마이징 필요 시 아래 추가
+  //.sidebar { font-size: 0.95rem; }
+}

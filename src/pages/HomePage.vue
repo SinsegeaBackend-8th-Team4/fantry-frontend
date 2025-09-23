@@ -19,8 +19,11 @@ import MainBannerCarousel from '@/components/common/molecules/MainBannerCarousel
             <h4 class="text-light text-uppercase font-weight-medium mb-3">
               10% Off Your First Order
             </h4>
-            <h3 class="display-4 text-white font-weight-semi-bold mb-4">Fashionable Dress</h3>
-            <a href="" class="btn btn-light py-2 px-3">Shop Now</a>
+            <h3 class="display-4 text-white font-weight-semi-bold mb-4">Fantry Project</h3>
+            <p class="mx-md-5 px-5">
+              Welcome to our collaborative Fantry project space.
+            </p>
+            <a href="" class="btn btn-light py-2 px-3">Explore Now</a>
           </div>
         </div>
       </CarouselItemHolder>
@@ -36,7 +39,10 @@ import MainBannerCarousel from '@/components/common/molecules/MainBannerCarousel
             <h4 class="text-light text-uppercase font-weight-medium mb-3">
               10% Off Your First Order
             </h4>
-            <h3 class="display-4 text-white font-weight-semi-bold mb-4">Fashionable Dress</h3>
+            <h3 class="display-4 text-white font-weight-semi-bold mb-4">High-Quality Products</h3>
+            <p class="mx-md-5 px-5">
+              Discover a wide range of amazing products.
+            </p>
             <a href="" class="btn btn-light py-2 px-3">Shop Now</a>
           </div>
         </div>
@@ -53,8 +59,11 @@ import MainBannerCarousel from '@/components/common/molecules/MainBannerCarousel
             <h4 class="text-light text-uppercase font-weight-medium mb-3">
               10% Off Your First Order
             </h4>
-            <h3 class="display-4 text-white font-weight-semi-bold mb-4">Reasonable Price</h3>
-            <a href="" class="btn btn-light py-2 px-3">Shop Now</a>
+            <h3 class="display-4 text-white font-weight-semi-bold mb-4">Join Our Community</h3>
+            <p class="mx-md-5 px-5">
+              Be a part of the Fantry community.
+            </p>
+            <a href="" class="btn btn-light py-2 px-3">Learn More</a>
           </div>
         </div>
       </CarouselItemHolder>

@@ -1,0 +1,106 @@
+/**
+ * 사용자 레이아웃 커스텀 스타일 (Bootstrap 이후)
+ * - 전역 오염 방지를 위해 body.user-layout-active 네임스페이스 사용
+ */
+body.user-layout-active {
+  /* 헤더 상단 정보 바 */
+  .top-bar {
+    background: #ffffff;
+    border-bottom: 1px solid #e4e7ec;
+  }
+
+  /* 네비게이션 바 컨테이너 */
+  .main-nav-bar {
+    background: #ffffff;
+    border-top: 1px solid #f0f2f5; /* 기존 border-top 흐릿한 느낌 대체 */
+    border-bottom: 1px solid #f5f6f7;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  /* 네비게이션 내부 링크 hover 대비 향상 */
+  .main-nav-bar .navbar-light .navbar-nav .nav-link:hover,
+  .main-nav-bar .navbar-light .navbar-nav .nav-link.active {
+    color: $primary;
+  }
+
+  /* ================= Footer ================= */
+  .app-footer {
+    background:#ffffff;
+    border-top:1px solid #e5e7ea;
+  }
+  .app-footer p { color: $dark; }
+  .app-footer a { color: $dark; }
+  .app-footer a:hover { color: $primary; }
+
+  .footer-bottom-bar {
+    border-top:1px solid #eceff2;
+    margin-top:2rem;
+  }
+
+  .font-weight-medium { font-weight: 500; }
+  .font-weight-semi-bold { font-weight: 600; }
+
+  [class^=flaticon-]:before,
+  [class*=" flaticon-"]:before,
+  [class^=flaticon-]:after,
+  [class*=" flaticon-"]:after {
+    font-size: inherit;
+    margin-left: 0;
+  }
+
+  .navbar-light .navbar-nav .nav-link {
+    padding: 20px 10px;
+    color: $dark;
+    outline: none;
+  }
+  .navbar-light .navbar-nav .nav-link:hover,
+  .navbar-light .navbar-nav .nav-link.active { color: $primary; }
+
+  @media (max-width: 991.98px) {
+    .navbar-light .navbar-nav .nav-link  { padding: 5px 0px; }
+  }
+
+  .navbar-vertical.navbar-light .navbar-nav .nav-link {
+    padding: 8px 30px;
+    border-bottom: 1px solid $secondary;
+  }
+
+  #header-carousel img { width: 100%; height: 100%; object-fit: cover; }
+
+  .carousel-caption {
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,.3);
+    z-index: 1;
+  }
+
+  .section-title {
+    position: relative; display: inline-block; letter-spacing: 1px;
+    font-weight: bold; color: $dark;
+  }
+  .section-title span { position: relative; background: #ffffff; z-index: 1; }
+  .section-title::before {
+    position: absolute; content: ""; top: 50%; left: 0; width: 100%; height: 2px;
+    margin-top: -1px; background: $dark;
+  }
+
+  .offer img { position: absolute; max-width: 50%; max-height: 90%; bottom: 0; }
+  .offer .text-md-right img { left: 0; }
+  .offer .text-md-left img { right: 0; }
+
+  .cat-item .cat-img img,
+  .product-item .product-img img { transition: .5s; }
+  .cat-item:hover .cat-img img,
+  .product-item:hover .product-img img { transform: scale(1.2); }
+
+  .product-item .btn:hover { color: $primary !important; }
+
+  .contact-form .help-block ul { margin: 0; padding: 0; list-style-type: none; }
+
+  .back-to-top {
+    position: fixed; display: none; right: 30px; bottom: 30px; z-index: 11;
+    -webkit-animation: action 1s infinite alternate; animation: action 1s infinite alternate;
+  }
+}
+
+@-webkit-keyframes action { 0% { transform: translateY(0); } 100% { transform: translateY(-15px); } }
+@keyframes action { 0% { transform: translateY(0); } 100% { transform: translateY(-15px); } }

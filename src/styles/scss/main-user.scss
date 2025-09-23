@@ -1,18 +1,6 @@
-/*
-  사용자 페이지 레이아웃(UserLayout)이 활성화되었을 때 적용될 스타일 묶음입니다.
-  UserLayout.vue에서 body에 'user-layout-active' 클래스를 추가/제거하는 방식으로
-  스타일 적용을 제어하여, 다른 레이아웃(Admin)과의 스타일 충돌을 방지합니다.
-*/
+// User theme entry: variables -> bootstrap -> custom -> extension
 
-// body에 'user-layout-active' 클래스가 있을 때만 하위 스타일이 적용됩니다.
-body.user-layout-active {
-  // --- 라이브러리 및 템플릿 스타일 (node_modules에서 직접 로드) ---
-  @import "bootstrap/scss/bootstrap.scss";
-
-  // --- 프로젝트 커스텀 스타일 ---
-  @import "./style.scss";
-  @import "../css/style.extension.css";
-
-  // --- 사용자 페이지 커스텀 스타일 ---
-  // TODO: 사용자 페이지 전반에 적용될 공통 스타일은 이 아래에 작성하세요.
-}
+@import './variables-user';      // 사용자 테마 변수
+@import 'bootstrap/scss/bootstrap.scss';
+@import './user-custom';         // 네임스페이스 적용된 사용자 커스텀
+@import '../css/style.extension.css'; // (필요 시 SCSS로 마이그레이션 예정)
