@@ -1,13 +1,17 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+
 import { getGoodsCategories, getArtists, getAlbumsByArtist } from '@/api/catalog.js'
+import { getChecklistsByCategory } from '@/api/checklist.js'
+
 import SelectedArtistModal from '@/pages/user/inspection/SelectedArtistModal.vue'
 import SelectedAlbumModal from '@/pages/user/inspection/SelectedAlbumModal.vue'
 
 const router = useRouter()
 
-// 상태
+// == 상태 == 
+// 상품 정보
 const categories = ref([]) // 굿즈 카테고리
 const artists = ref([]) // 아티스트
 const albums = ref([]) // 앨범
@@ -18,6 +22,30 @@ const itemName = ref('') // 상품명
 const description = ref('') // 상품 설명
 const hashtags = ref('') // 해시태그 입력
 
+// 체크리스트
+const checklists = ref([]) // 서버 응답 체크리스트
+const answers = ref({}) // 체크리스트 답변
+
+// 체크리스트 필드(옵션 파싱)
+const fields = computed(()=>{
+  const out = [];
+
+  for(const c of checklists.value) {
+    const opts = parseOptions(c.options);
+    out.push({
+      checklistItemId: c.checklistItemId,
+      itemKey: c.itemKey,
+      label: c.label,
+      type: c.type,
+      options: parseOptions(c.options),
+      required: !!c.required,
+      orderIndex: c.orderIndex,
+    });
+  }
+
+  return out;
+})
+
 // 모달
 const showArtistModal = ref(false)
 const showAlbumModal = ref(false)
@@ -25,6 +53,7 @@ const showAlbumModal = ref(false)
 // 로딩/에러
 const loadingInitial = ref(false) // 최초 로딩(카테고리/아티스트)
 const loadingAlbums = ref(false) // 앨범 로딩
+const loadingChecklists = ref(false) // 체크리스트 로딩
 const error = ref(null)
 
 // fetchers : 카테고리/아티스트 조회
@@ -42,6 +71,12 @@ async function fetchAlbumsByArtistId(artistId) {
   return res.data ?? []
 }
 
+// fetchers : 체크리스트 조회
+async function fetchChecklistsByCategoryId(categoryId) {
+  const res = await getChecklistsByCategory(categoryId)
+  return res.data ?? []
+}
+
 onMounted(async () => {
   loadingInitial.value = true
   error.value = null
@@ -55,6 +90,28 @@ onMounted(async () => {
     loadingInitial.value = false
   }
 })
+
+// 카테고리 선택 후 체크리스트 조회
+const onSelectCategory = async () => {
+  loadingChecklists.value = true
+  checklists.value = []
+  answers.value = {}
+  
+  error.value = null
+
+  try {
+    checklists.value = await fetchChecklistsByCategoryId(selectedCategory.value)
+    // 체크리스트 답변 초기화
+    for(const c of checklists.value) {
+      if(c.type === 'BOOL') answers.value[c.itemKey] = null;
+      else answers.value[c.itemKey] = '';
+    }
+  } catch (err) {
+    error.value = err?.message || '체크리스트 조회 중 오류가 발생했습니다.'
+  } finally {
+    loadingChecklists.value = false
+  }
+}
 
 // 아티스트 선택 후 앨범 조회
 const onSelectArtist = async (artist) => {
@@ -97,6 +154,14 @@ const previewText = computed(() => {
 const isCategoryDisabled = computed(() => loadingInitial.value)
 const isArtistDisabled = computed(() => loadingInitial.value)
 const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.value)
+
+// 체크리스트 옵션 파싱
+function parseOptions(raw) {
+  if(raw == null) return [];
+  if(Array.isArray(raw)) return raw;
+  try { return JSON.parse(raw); }
+  catch(e) { return []; }
+}
 </script>
 <template>
   <main class="bg-light py-5 inspection">
@@ -134,9 +199,10 @@ const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.va
                   class="form-control"
                   v-model="selectedCategory"
                   :disabled="isCategoryDisabled"
+                  @change="onSelectCategory"
                 >
                   <option value="" disabled>선택하세요</option>
-                  <option v-for="c in categories" :key="c.goodsCategoryId" :value="c.code">
+                  <option v-for="c in categories" :key="c.GoodsCategoryId" :value="c.GoodsCategoryId">
                     {{ c.name }}
                   </option>
                 </select>
@@ -250,43 +316,61 @@ const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.va
 
         <!-- 우측: 상태/가격 -->
         <div class="col-lg-5 d-flex flex-column">
+          <!-- 체크리스트 -->
           <div class="card shadow-sm mb-4 flex-fill">
             <div class="card-body d-flex flex-column">
               <h5 class="font-weight-bold mb-2">상품 상태</h5>
               <p class="text-muted small mb-3">상품의 상태를 꼼꼼히 확인하고 체크해주세요.</p>
+              <div v-if="checklists.length === 0 && !loadingChecklists" 
+                class="d-flex flex-column justify-content-center align-items-center py-4"
+                style="border: 2px dashed #ddd; border-radius: 8px; background: #fafafa;">
+              <i class="fa fa-clipboard-list text-secondary mb-2" style="font-size: 1.5rem;"></i>
+              <p class="mb-0 text-muted">체크리스트가 여기 표시됩니다.<br>카테고리를 먼저 선택하세요.</p>
+            </div>
 
               <div class="flex-fill" style="max-height: 320px; overflow-y: auto">
-                <!-- TODO: 체크리스트 API 연동 -->
-                <div class="form-group">
-                  <label class="font-weight-medium">정품 스티커가 있나요?</label>
-                  <select class="form-control">
-                    <option>예</option>
-                    <option>아니오</option>
-                  </select>
-                </div>
+                <div class="form-group" v-for="f in fields" :key="f.checklistItemId">
+                  <label class="font-weight-medium">
+                    {{ f.label }}
+                    <span v-if="f.required" class="text-danger">*</span>
+                  </label>
 
-                <div class="form-group">
-                  <label class="font-weight-medium">박스 상태</label>
-                  <select class="form-control">
-                    <option>없음</option>
-                    <option>미세</option>
-                    <option>중</option>
-                    <option>심각</option>
-                  </select>
-                </div>
+                  <!-- BOOL -->
+                  <template v-if="f.type === 'BOOL'">
+                    <div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" 
+                          :name="f.itemKey" 
+                          v-model="answers[f.itemKey]" 
+                          :value="true"
+                        >
+                        <label class="form-check-label">예</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" :name="f.itemKey" v-model="answers[f.itemKey]" :value="false">
+                        <label class="form-check-label">아니오</label>
+                      </div>
+                    </div>
+                  </template>
 
-                <div class="form-group">
-                  <label class="font-weight-medium">구성품 누락</label>
-                  <select class="form-control">
-                    <option>없음</option>
-                    <option>일부 누락</option>
-                    <option>많이 누락</option>
-                  </select>
+                  <!-- SELECT -->
+                  <template v-else-if="f.type === 'SELECT'">
+                    <select class="form-control" v-model="answers[f.itemKey]">
+                      <option value="" disabled selected>선택하세요</option>
+                      <option v-for="opt in f.options" :key="opt" :value="opt">{{ opt }}</option>
+                    </select>
+                  </template>
+
+                  <!-- TEXT -->
+                  <template v-else-if="f.type === 'TEXT'">
+                    <textarea class="form-control" rows="2" v-model="answers[f.itemKey]" />
+                  </template>
                 </div>
               </div>
             </div>
           </div>
 
+          <!-- 가격 -->
           <div class="card shadow-sm">
             <div class="card-body">
               <h5 class="font-weight-bold mb-4">가격</h5>
@@ -330,7 +414,7 @@ $primary-hover: #0052cc;
 // 제목/라벨 스타일
 h2,
 h5,
-label {
+label.font-weight-medium{
   color: #222 !important;
   font-weight: 600;
 }
@@ -387,5 +471,21 @@ label {
       }
     }
   }
+}
+
+.form-check-label {
+  font-weight: normal;
+}
+
+// checklist 스크롤 영역
+.checklist-container {
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.custom-select {
+  height: auto;
+  line-height: 1.5;
 }
 </style>
