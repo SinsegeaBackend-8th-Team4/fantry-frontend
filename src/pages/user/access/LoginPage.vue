@@ -4,7 +4,11 @@
   const router = useRouter();
 
   const goToSignup=()=>{
-    router.push('/signup/terms')
+    router.push('/signup/terms');
+  }
+
+  const goToFind=()=>{
+    router.push('/login/find');
   }
 
 </script>
@@ -24,7 +28,7 @@
 
       <button type="button" class="login-btn" name="login">LOGIN</button>
       <div class="forgot-wrap">
-        <a href="#">Forgot your password?</a>
+        <span @click="goToFind">Forgot your password?</span>
       </div>
     </div>
     <!--Login contenxt End-->
@@ -119,10 +123,15 @@
     margin-top: 6px;
   }
 
-  .forgot-wrap a {
+  .forgot-wrap span {
     font-size: 12px;
     color: #5C7BFF;
     text-decoration: none;
+  }
+
+  .forgot-wrap span:hover {
+    color: #3C4DFF;
+    cursor: pointer;
   }
 
   /* 회원가입 */

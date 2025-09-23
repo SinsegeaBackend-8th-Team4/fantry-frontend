@@ -5,21 +5,24 @@ import { useUserStore } from '@/stores/userStore' // '@' 경로 사용
 import CommonHeader from '@/components/common/organisms/CommonHeader.vue' // '@' 경로 사용
 import CommonFooter from '@/components/common/organisms/CommonFooter.vue' // '@' 경로 사용
 import SearchBar from '@/components/common/molecules/SearchBar.vue' // '@' 경로 사용
-
+import { useRoute } from 'vue-router'
 // 1. 사용자 레이아웃 전용 스타일 파일을 임포트합니다.
 import '@/styles/scss/main-user.scss';
 
 const userStore = useUserStore()
 
 //현재 화면 라웉터 값
-const route = ref('/')
-// 로그인 화면에서 공통헤더 보일지정하는 부분
+// const route = ref('/')
+const route = useRoute()
+
+const hiddenLayouts = ['/login', '/signup']
+// 공통헤더 보일지정하는 부분
 const isShowHeader = computed(() => {
-  return route.value !== '/login'
+  return !hiddenLayouts.some(path => route.path.startsWith(path))
 })
-// 로그인 화면에서 공통풋터 보일지정하는 부분
+// 공통풋터 보일지정하는 부분
 const isShowFooter = computed(() => {
-  return route.value !== '/login'
+  return !hiddenLayouts.some(path => route.path.startsWith(path))
 })
 
 //화면 전환시 해당 화면이 로그인이 필요한 화면인지 로그인이 되었는지 확인하여 로그인 화면으로 이동시킴
@@ -27,9 +30,9 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiredLogin && !userStore.getIsLogined) {
     alert('로그인이 필요한 서비스입니다.')
     next('/login')
-    route.value = '/login'
+    // route.value = '/login'
   } else {
-    route.value = to.path
+    // route.value = to.path
     next()
   }
 })

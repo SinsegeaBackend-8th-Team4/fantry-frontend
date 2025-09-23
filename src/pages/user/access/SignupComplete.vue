@@ -1,4 +1,16 @@
-<script setup></script>
+<script setup>
+  import { useRouter } from 'vue-router'
+
+    const router = useRouter()
+
+    const goMain = () => {
+        router.push('/')
+    }
+
+    const goLogin = () => {
+        router.push('/login')
+    }
+</script>
 <template>
   <div class="content-page">
     <!--Banner Start-->
@@ -37,8 +49,8 @@
             <h4>FANTRY 포털사이트에 회원가입이 정상적으로 처리되었습니다.</h4>
         </div>
         <div class="group-btn">
-            <button type="button">메인으로 이동하기</button>
-            <button type="button">로그인하기</button>
+            <button type="button" @click="goMain">메인으로 이동하기</button>
+            <button type="button" @click="goLogin">로그인하기</button>
         </div>
     </div>
     <!--Content End-->
