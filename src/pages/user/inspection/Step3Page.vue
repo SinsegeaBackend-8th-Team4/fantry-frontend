@@ -1,5 +1,4 @@
 <script setup>
-import '@/styles/css/inspection.css'
 import { useRouter } from 'vue-router'
 
 
