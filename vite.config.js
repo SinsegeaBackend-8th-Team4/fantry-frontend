@@ -15,6 +15,11 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
+  define: {
+   global: 'window'
+   // sockjs-client 발생 오류 해결
+   //Vite에게 'global' 변수가 'window' 객체를 참조하도록 알려줌
+  },
   css: {
     preprocessorOptions: {
       scss: {

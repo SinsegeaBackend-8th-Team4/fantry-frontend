@@ -13,6 +13,7 @@ const HomePage = () => import('@/pages/HomePage.vue');
 const LoginPage = () => import('@/pages/LoginPage.vue');
 const ProductListPage = () => import('@/pages/product/ProductListPage.vue');
 const ProductDetailPage = () => import('@/pages/product/ProductDetailPage.vue');
+const ProductAuctionPage = () => import('@/pages/product/ProductAuctionPage.vue');
 
 const userRoutes = {
   path: '/',
@@ -39,8 +40,14 @@ const userRoutes = {
       path: 'product/detail/:id',
       name: 'ProductDetail',
       component: ProductDetailPage,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: false },
     },
+        {
+      path: 'product/auction',
+      name: 'ProducAuction',
+      component: ProductAuctionPage,
+      meta: { requiresAuth: false },
+    }
   ],
 };
 
