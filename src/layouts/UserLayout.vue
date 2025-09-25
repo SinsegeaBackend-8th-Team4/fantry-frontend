@@ -10,9 +10,9 @@ const route = useRoute();
 const searchInput = ref('');
 const onSearch = (v) => {};
 
-// 로그인 페이지에서는 헤더/푸터 숨김
+// 로그인, 회원가입 페이지에서는 헤더/푸터 숨김
 const isShowChrome = computed(() => {
-  const hiddenPaths = ['/login', '/signup'];
+  const hiddenPaths = ['/login', '/signup'];  //헤더/푸터 숨길 페이지('/login/**, /signup/**')
   return !hiddenPaths.some(path => route.path.startsWith(path));
 });
 
