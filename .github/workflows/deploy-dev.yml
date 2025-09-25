@@ -9,5 +9,10 @@ jobs:
   deploy:
     runs-on: self-hosted
     steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.19.0' # 또는 22.12.0 이상
+
       - name: Execute frontend deployment script
         run: ~/scripts/deploy-frontend-dev.sh
