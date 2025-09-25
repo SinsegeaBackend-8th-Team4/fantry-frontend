@@ -10,7 +10,15 @@ import UserLayout from '@/layouts/UserLayout.vue';
 
 // --- 페이지 컴포넌트 (Lazy Loading) ---
 const HomePage = () => import('@/pages/HomePage.vue');
-const LoginPage = () => import('@/pages/LoginPage.vue');
+const LoginPage = () => import('@/pages/user/access/LoginPage.vue');
+const LoginFind = () => import('@/pages/user/access/LoginFind.vue');
+const LoginFindSuccess = () => import('@/pages/user/access/LoginFindSuccess.vue');
+const LoginResetPwd = () => import('@/pages/user/access/LoginResetPwd.vue');
+const LoginFail = () => import('@/pages/user/access/LoginFail.vue');
+const SignupTerms = () => import('@/pages/user/access/SignupTerms.vue');
+const SignupForm = () => import('@/pages/user/access/SignupForm.vue');
+const SignupComplete = () => import('@/pages/user/access/SignupComplete.vue');
+const SignupFail = () => import('@/pages/user/access/SignupFail.vue');
 const ProductListPage = () => import('@/pages/product/ProductListPage.vue');
 const ProductDetailPage = () => import('@/pages/product/ProductDetailPage.vue');
 const ProductAuctionPage = () => import('@/pages/product/ProductAuctionPage.vue');
@@ -26,9 +34,67 @@ const userRoutes = {
     },
     {
       path: 'login',
-      name: 'Login',
-      component: LoginPage,
-      meta: { requiredLogin: false },
+      children:[
+        {
+          path: '',
+          name: 'Login',
+          component: LoginPage,
+          meta: { requiredLogin: false }
+        },
+        {
+          path: 'find',
+          name: 'LoginFind',
+          component: LoginFind,
+          meta: { requiredLogin: false }
+        },
+        {
+          path: 'findSuccess/:foundEmail',
+          name: 'LoginFindSuccess',
+          component: LoginFindSuccess,
+          meta: { requiredLogin: false }
+        },
+        {
+          path: 'resetPwd',
+          name: 'LoginResetPwd',
+          component: LoginResetPwd,
+          meta: { requiredLogin: false }
+        },
+        {
+          path: 'fail',
+          name: 'LoginFail',
+          component: LoginFail,
+          meta: { requiredLogin: false }
+        }
+      ]
+    },
+    {
+      path: 'signup',
+      children: [
+        {
+          path: 'terms',
+          name: 'SignupTerms',
+          component: SignupTerms,
+          meta: { requiredLogin: false }
+        },
+        {
+          path: 'form',
+          name: 'SignupForm',
+          component: SignupForm,
+          meta: { requiredLogin: false }
+        },
+        {
+          path: 'complete',
+          name: "SignupComplete",
+          component: SignupComplete,
+          meta: { requiredLogin: false }
+        },
+        {
+          path: 'fail',
+          name: "SignupFail",
+          component: SignupFail,
+          meta: { requiredLogin: false }
+        }
+      ]
     },
     {
       path: 'product',
