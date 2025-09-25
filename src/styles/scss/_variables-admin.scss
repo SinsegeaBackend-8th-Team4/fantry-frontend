@@ -1,0 +1,25 @@
+/**
+ * 관리자(Admin) 테마 변수
+ * - SB Admin 2 기본 파란색 팔레트를 유지하거나 필요시 커스터마이징.
+ * - 필요 최소 변수만 정의(중복 정의 방지). 추가 테마 변경은 여기서만.
+ */
+$primary: #4e73df;
+$secondary: #858796;
+$success: #1cc88a;
+$info: #36b9cc;
+$warning: #f6c23e;
+$danger: #e74a3b;
+$light: #f8f9fc;
+$dark: #5a5c69;
+$font-family-sans-serif: 'Nunito', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+$theme-colors: (
+  "primary": $primary,
+  "secondary": $secondary,
+  "success": $success,
+  "info": $info,
+  "warning": $warning,
+  "danger": $danger,
+  "light": $light,
+  "dark": $dark,
+);

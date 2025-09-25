@@ -6,7 +6,8 @@ import BrandLogo from '../atoms/BrandLogo.vue'
 </script>
 <template>
   <div class="container-fluid">
-    <div class="row bg-secondary py-2 px-xl-5">
+    <!-- 상단 얇은 정보 바: 기존 bg-secondary 대신 커스텀 .top-bar 적용 -->
+    <div class="row top-bar py-2 px-xl-5">
       <div class="col-lg-6 d-none d-lg-block">
         <div class="d-inline-flex align-items-center">
           <a class="text-dark" href="">FAQs</a>
@@ -34,8 +35,8 @@ import BrandLogo from '../atoms/BrandLogo.vue'
       </div>
     </div>
   </div>
-  <div class="container-fluid mb-5">
-    <div class="row border-top px-xl-5">
+  <div class="container-fluid mb-5 main-nav-wrapper">
+    <div class="row main-nav-bar px-xl-5">
       <div class="col-lg-12">
         <NavigationBar />
       </div>

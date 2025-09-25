@@ -1,0 +1,13 @@
+name: Deploy Frontend to Prod Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Execute frontend deployment script
+        run: ~/scripts/deploy-frontend-prod.sh
