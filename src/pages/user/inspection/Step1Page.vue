@@ -3,15 +3,14 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { getGoodsCategories, getArtists, getAlbumsByArtist } from '@/api/catalog.js'
-import { getChecklistsByCategory } from '@/api/checklist.js'
+import { getChecklistsByCategory, getPriceBaselineByCategory } from '@/api/checklist.js'
 
 import SelectedArtistModal from '@/pages/user/inspection/SelectedArtistModal.vue'
 import SelectedAlbumModal from '@/pages/user/inspection/SelectedAlbumModal.vue'
 
 const router = useRouter()
 
-// == 상태 == 
-// 상품 정보
+// 상품 정보 상태
 const categories = ref([]) // 굿즈 카테고리
 const artists = ref([]) // 아티스트
 const albums = ref([]) // 앨범
@@ -21,10 +20,13 @@ const selectedAlbum = ref(null) // 앨범
 const itemName = ref('') // 상품명
 const description = ref('') // 상품 설명
 const hashtags = ref('') // 해시태그 입력
-
-// 체크리스트
+// 체크리스트 상태
 const checklists = ref([]) // 서버 응답 체크리스트
 const answers = ref({}) // 체크리스트 답변
+// 가격 정보 상태
+const expectedPrice = ref(null) // 시스템 예상가
+const marketAveragePrice  = ref(null) // 평균 시세
+const hopePrice = ref(0) // 판매 희망가
 
 // 체크리스트 필드(옵션 파싱)
 const fields = computed(()=>{
@@ -54,6 +56,7 @@ const showAlbumModal = ref(false)
 const loadingInitial = ref(false) // 최초 로딩(카테고리/아티스트)
 const loadingAlbums = ref(false) // 앨범 로딩
 const loadingChecklists = ref(false) // 체크리스트 로딩
+const loadingBaseline = ref(false) // 기준가 로딩
 const error = ref(null)
 
 // fetchers : 카테고리/아티스트 조회
@@ -77,6 +80,13 @@ async function fetchChecklistsByCategoryId(categoryId) {
   return res.data ?? []
 }
 
+// fetchers : 가격 기준가 조회
+async function fetchBaselinePriceByCategoryId(categoryId) {
+  const res = await getPriceBaselineByCategory(categoryId)
+  console.log(res.data);
+  return res.data ?? null
+}
+
 onMounted(async () => {
   loadingInitial.value = true
   error.value = null
@@ -91,25 +101,33 @@ onMounted(async () => {
   }
 })
 
-// 카테고리 선택 후 체크리스트 조회
+// 카테고리 선택 후 체크리스트/기준가 조회
 const onSelectCategory = async () => {
   loadingChecklists.value = true
+  loadingBaseline.value = true
   checklists.value = []
   answers.value = {}
   
   error.value = null
 
   try {
-    checklists.value = await fetchChecklistsByCategoryId(selectedCategory.value)
-    // 체크리스트 답변 초기화
+    const [checklistRes, baselineRes] = await Promise.all([
+      fetchChecklistsByCategoryId(selectedCategory.value),
+      fetchBaselinePriceByCategoryId(selectedCategory.value)
+    ])
+
+    expectedPrice.value = baselineRes
+    checklists.value = checklistRes
+
     for(const c of checklists.value) {
       if(c.type === 'BOOL') answers.value[c.itemKey] = null;
       else answers.value[c.itemKey] = '';
     }
   } catch (err) {
-    error.value = err?.message || '체크리스트 조회 중 오류가 발생했습니다.'
+    error.value = err?.message || '체크리스트/가격 조회 중 오류가 발생했습니다.'
   } finally {
     loadingChecklists.value = false
+    loadingBaseline.value = false
   }
 }
 
@@ -376,15 +394,15 @@ function parseOptions(raw) {
               <h5 class="font-weight-bold mb-4">가격</h5>
               <div class="d-flex justify-content-between mb-2">
                 <span class="text-muted">시스템 예상가</span>
-                <strong class="text-primary">15,000원</strong>
+                <strong class="text-primary">{{ expectedPrice ? expectedPrice.toLocaleString()+'원' : '데이터 없음' }}</strong>
               </div>
               <div class="d-flex justify-content-between mb-3">
                 <span class="text-muted">평균 시세</span>
-                <span>데이터 없음</span>
+                <span>{{ marketAveragePrice ? marketAveragePrice.toLocaleString() + '원' : '데이터 없음' }}</span>
               </div>
               <div class="form-group">
                 <label class="font-weight-medium">판매 희망가</label>
-                <input type="number" class="form-control" placeholder="0" />
+                <input type="number" class="form-control" v-model="hopePrice" />
                 <small class="form-text text-muted">
                   희망가와 예상가가 다를 수 있으며, 최종 가격은 검수 후 확정됩니다.
                 </small>

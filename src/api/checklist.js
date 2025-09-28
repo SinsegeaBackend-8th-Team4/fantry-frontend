@@ -6,3 +6,10 @@ export const getChecklistsByCategory = (goodsCategoryId) => {
         params: {goodsCategoryId}
     });
 }
+
+// 카테고리별 가격 기준가 조회
+export const getPriceBaselineByCategory = (goodsCategoryId) => {
+    return apiClient.get('/pricing/baseline', {
+        params: {goodsCategoryId}
+    });
+}
