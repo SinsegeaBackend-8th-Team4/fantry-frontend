@@ -6,7 +6,10 @@
  */
 
 // --- 레이아웃 ---
-import UserLayout from '@/layouts/UserLayout.vue';
+import UserLayout from '@/layouts/UserLayout.vue'
+import CheckoutPage from '@/pages/payment/CheckoutPage.vue'
+import UserInfoPage from '@/pages/payment/UserInfoPage.vue'
+import PaymentCompletePage from '@/pages/payment/PaymentCompletePage.vue'
 
 // --- 페이지 컴포넌트 (Lazy Loading) ---
 const HomePage = () => import('@/pages/HomePage.vue');
@@ -39,38 +42,38 @@ const userRoutes = {
     },
     {
       path: 'login',
-      children:[
+      children: [
         {
           path: '',
           name: 'Login',
           component: LoginPage,
-          meta: { requiredLogin: false }
+          meta: { requiredLogin: false },
         },
         {
           path: 'find',
           name: 'LoginFind',
           component: LoginFind,
-          meta: { requiredLogin: false }
+          meta: { requiredLogin: false },
         },
         {
           path: 'findSuccess/:foundEmail',
           name: 'LoginFindSuccess',
           component: LoginFindSuccess,
-          meta: { requiredLogin: false }
+          meta: { requiredLogin: false },
         },
         {
           path: 'resetPwd',
           name: 'LoginResetPwd',
           component: LoginResetPwd,
-          meta: { requiredLogin: false }
+          meta: { requiredLogin: false },
         },
         {
           path: 'fail',
           name: 'LoginFail',
           component: LoginFail,
-          meta: { requiredLogin: false }
-        }
-      ]
+          meta: { requiredLogin: false },
+        },
+      ],
     },
     {
       path: 'signup',
@@ -79,27 +82,27 @@ const userRoutes = {
           path: 'terms',
           name: 'SignupTerms',
           component: SignupTerms,
-          meta: { requiredLogin: false }
+          meta: { requiredLogin: false },
         },
         {
           path: 'form',
           name: 'SignupForm',
           component: SignupForm,
-          meta: { requiredLogin: false }
+          meta: { requiredLogin: false },
         },
         {
           path: 'complete',
-          name: "SignupComplete",
+          name: 'SignupComplete',
           component: SignupComplete,
-          meta: { requiredLogin: false }
+          meta: { requiredLogin: false },
         },
         {
           path: 'fail',
-          name: "SignupFail",
+          name: 'SignupFail',
           component: SignupFail,
-          meta: { requiredLogin: false }
-        }
-      ]
+          meta: { requiredLogin: false },
+        },
+      ],
     },
     {
       path: 'product',
@@ -140,6 +143,6 @@ const userRoutes = {
       meta: { requiresAuth: true },
     },
   ],
-};
+}
 
-export default userRoutes;
+export default userRoutes
