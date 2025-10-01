@@ -4,6 +4,7 @@ import { ref } from 'vue'
 export const useInspectionStore = defineStore('inspection', () => {
   // Step1 데이터
   const selectedCategory = ref('')
+  const selectedCategoryValue = ref(null)
   const selectedArtist = ref(null)
   const selectedAlbum = ref(null)
   const itemName = ref('')
@@ -11,6 +12,7 @@ export const useInspectionStore = defineStore('inspection', () => {
   const hashtags = ref('')
 
   const checklists = ref([])
+  const fields = ref([])
   const answers = ref({})
 
   const expectedPrice = ref(null)
@@ -26,12 +28,14 @@ export const useInspectionStore = defineStore('inspection', () => {
 
   function reset() {
     selectedCategory.value = ''
+    selectedCategoryValue.value = null
     selectedArtist.value = null
     selectedAlbum.value = null
     itemName.value = ''
     description.value = ''
     hashtags.value = ''
     checklists.value = []
+    fields.value = []
     answers.value = {}
     expectedPrice.value = null
     marketAveragePrice.value = null
@@ -45,12 +49,14 @@ export const useInspectionStore = defineStore('inspection', () => {
 
   return {
     selectedCategory,
+    selectedCategoryValue,
     selectedArtist,
     selectedAlbum,
     itemName,
     description,
     hashtags,
     checklists,
+    fields,
     answers,
     expectedPrice,
     marketAveragePrice,

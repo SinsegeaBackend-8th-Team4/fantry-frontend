@@ -18,17 +18,16 @@ const router = useRouter()
 const inspectionStore = useInspectionStore()
 
 // Store 값
-const { selectedCategory, selectedArtist, selectedAlbum, itemName, description, hashtags } = storeToRefs(inspectionStore)
+const { 
+  selectedCategory, selectedCategoryValue, selectedArtist, selectedAlbum,
+  itemName, description, hashtags, checklists, answers, expectedPrice,
+  marketAveragePrice, hopePrice 
+} = storeToRefs(inspectionStore)
 
 // 로컬 상태
 const categories = ref([])          // 카테고리 목록
 const artists = ref([])             // 아티스트 목록
 const albums = ref([])              // 앨범 목록
-const checklists = ref([])          // 체크리스트 목록
-const answers = ref({})             // 체크리스트 답변
-const expectedPrice = ref(null)     // 예상가
-const marketAveragePrice = ref(null)// 평균 시세
-const hopePrice = ref(0)            // 희망가
 
 // 모달 상태
 const showArtistModal = ref(false)
@@ -146,6 +145,8 @@ const onSelectAlbum = (album) => {
 
 // 카테고리 선택 후 체크리스트/기준가 조회
 const onSelectCategory = async () => {
+  selectedCategoryValue.value = categories.value.find(c => c.GoodsCategoryId === selectedCategory.value) || null
+  console.log('selectedCategoryValue', selectedCategoryValue.value)
   loadingChecklists.value = true
   loadingBaseline.value = true
   checklists.value = []
