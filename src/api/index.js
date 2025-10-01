@@ -23,7 +23,24 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+
+  // 쿠키(Http를 사용하는 인증이 필요
+  withCredentials: true,
 });
+
+// 토큰 갱신이 완료되면 대기열 요청들을 처리
+let isRefreshing = false;
+let failedQueue = [];
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);  // 새로운 토큰으로 요청 재시도
+    }
+  });
+  failedQueue = [];
+};
 
 /*
  * 요청 인터셉터 (Request Interceptor)
@@ -32,11 +49,10 @@ const apiClient = axios.create({
  */
 apiClient.interceptors.request.use(
   config => {
-    // TODO: Pinia 스토어 등에서 로그인 토큰을 가져와 헤더에 추가하는 로직 구현
-    // const token = userStore.token;
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    const token = localStorage.getItem('accessToken'); // 로컬 스토리지에서 토큰 가져오기
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   error => {
@@ -52,16 +68,86 @@ apiClient.interceptors.request.use(
  */
 apiClient.interceptors.response.use(
   response => {
-    // 서버로부터 받은 응답 데이터를 그대로 반환합니다.
-    return response;
+    return response;  // 정상 응답은 그대로 반환
   },
-  error => {
-    // TODO: 응답 상태 코드에 따른 공통 에러 처리 로직 구현
-    // if (error.response && error.response.status === 401) {
-    //   // 로그아웃 처리 또는 토큰 갱신 로직
+  // 400번대 이상 오류 발생 시 처리
+  async error => {
+    const originalRequest = error.config;
+
+    // 로그아웃 요청이 401 에러를 반환하는 경우, 토큰 갱신 로직을 실행하지 않고 즉시 로그아웃 처리합니다.
+    // if (originalRequest.url.includes('/logout')) {
+    //   localStorage.removeItem('accessToken');
+    //   // 이 부분에서 로그인 페이지로 리디렉션하거나 앱 상태를 초기화할 수 있습니다.
+    //   // 예: window.location.href = '/login';
+    //   return Promise.reject(error);
     // }
+
+    // 1. 401 Unauthorized 에러이고, 토큰 갱신 시도가 아직 없는 경우
+    if(error.response && error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      // accessToken 재발급
+      if (!isRefreshing) {
+        isRefreshing = true;
+        try{
+          // 재발급 API 호출
+          const serverPath = import.meta.env.VITE_API_SERVER_URL;
+          const res = await axios.post(serverPath+'/api/reissue', null, {
+            withCredentials: true
+          });
+          
+          console.log("새로운 AccessToken : "+res);
+          const newAccessToken = res.data.accessToken;
+
+          // 로컬 스토리지에 새로운 토큰 저장 + 큐 처리
+          localStorage.setItem('accessToken', newAccessToken);
+          isRefreshing = false;
+
+          // 대기열 요청들에 새로운 토큰으로 재시도 명령
+          processQueue(null, newAccessToken);
+
+          // 실패했던 원래 요청에 새로운 토큰으로 재시도
+          originalRequest.headers.Authorization = 'Bearer ' + newAccessToken;
+          return apiClient(originalRequest);
+        }catch(err){
+          // Refresh 토큰도 만료된 경우
+          isRefreshing = false;
+          processQueue(err, null);
+          // 재발급 실패 시 로그아웃 처리
+          const isLoggingOut = window.location.pathname === '/' || window.location.pathname === '/logout';
+          localStorage.removeItem('accessToken');
+          if(!isLoggingOut){
+            window.location.href = '/login';
+          }
+          return Promise.reject(err);
+        }
+      }
+
+      // 토큰 재발급이 진행 중인 경우, 요청을 대기열에 추가
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject });
+      })
+      .then(token => {
+        // 토큰 재발급이 완료되면 대기열 요청을 새로운 토큰으로 재시도
+        originalRequest.headers.Authorization = 'Bearer ' + token;
+        return apiClient(originalRequest);
+      })
+      .catch(err => {
+        return Promise.reject(err);
+      });
+    }
     return Promise.reject(error);
   }
 );
 
-export default apiClient;
+// 로그인이 필요없는 API 요청을 위한 별도 Axios 인스턴스
+const publicApiClient = axios.create({
+  baseURL: '/api',
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true,
+});
+
+export {apiClient, publicApiClient};
