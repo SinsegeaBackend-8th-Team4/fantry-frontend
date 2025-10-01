@@ -76,9 +76,9 @@ const goPrev = () => {
               <div class="d-flex gap-2">
                 <img v-for="f in uploadedFiles"
                 :key="f.filemetaId" 
-                :src="f.storedFilePath"
+                :src="f.fileUrl"
                 class="img-thumbnail"
-                :alt="f.storedFileName" />
+                :alt="f.originalFileName" />
               </div>
             </div>
           </div>
@@ -134,3 +134,18 @@ const goPrev = () => {
     </div>
   </main>
 </template>
+<style lang="scss" scoped>
+.img-thumbnail {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  cursor: pointer;
+  position: relative;
+}
+
+.img-thumbnail:hover {
+  transform: scale(1.8);
+  z-index: 10;
+  transition: transform 0.3s ease;
+}
+</style>
