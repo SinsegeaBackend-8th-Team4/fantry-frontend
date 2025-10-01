@@ -1,38 +1,52 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import { ref } from 'vue'
-import { uploadFiles } from '@/api/inspections'
+
+// bootstrap js 가져오기
+import * as bootstrap from 'bootstrap'
+
+// 상태 관리 (Pinia)
+import { useInspectionStore } from '@/stores/inspectionStore'
+import { storeToRefs } from 'pinia'
 
 const router = useRouter()
-const uploadedFiles = ref([])
+const inspectionStore = useInspectionStore()
+const selectedImage = ref(null)
 
-const onFileChange = async (event) => {
+// Store 값
+const { uploadedFiles, address, addressDetail, bank, accountNumber } = storeToRefs(inspectionStore)
+
+const onFileChange = (event) => {
   const files = Array.from(event.target.files)
   if(files.length === 0) return;
 
-  try {
-    const res = await uploadFiles(files)
-    console.log('업로드 성공:', res.data)
-    uploadedFiles.value = res.data // 업로드된 파일 정보 저장
-    console.log(uploadedFiles.value)
-  } catch (error) {
-    console.error('파일 업로드 실패:', error)
-    alert('파일 업로드에 실패했습니다. 다시 시도해주세요.')
-  }
+  uploadedFiles.value = files.map(file=>({
+    file,
+    previewUrl: URL.createObjectURL(file),
+    name: file.name
+  }))
 }
 
-const goNext = () => {
-  router.push('/inspection/step3')
+const openModal = (url) => {
+  selectedImage.value = url
+  const modal = new bootstrap.Modal(document.getElementById("imageModal"))
+  modal.show()
 }
 
-const goPrev = () => {
-  router.push('/inspection/step1')
+const removeFile = (index) => {
+  if(index < 0 || index >= uploadedFiles.value.length) return;
+  URL.revokeObjectURL(uploadedFiles.value[index].previewUrl)
+  uploadedFiles.value.splice(index, 1)
 }
+
+const goNext = () => router.push('/inspection/step3')
+const goPrev = () => router.push('/inspection/step1')
 </script>
+
 <template>
   <main class="bg-light py-5 inspection">
     <div class="container">
-      <!-- 페이지 제목 -->
+      <!-- 제목 -->
       <div class="mb-4 text-center">
         <h2 class="font-weight-bold">온라인 1차 검수 신청</h2>
       </div>
@@ -57,9 +71,7 @@ const goPrev = () => {
               >
                 <i class="fa fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
                 <p class="text-muted mb-1">드래그 앤 드롭 또는</p>
-                <label for="file-upload" class="text-primary font-weight-bold cursor-pointer"
-                  >파일 선택</label
-                >
+                <label for="file-upload" class="text-primary font-weight-bold cursor-pointer">파일 선택</label>
                 <input id="file-upload" type="file" multiple hidden @change="onFileChange" />
               </div>
 
@@ -72,13 +84,17 @@ const goPrev = () => {
                 <li>- 최대 10MB</li>
               </ul>
 
-              <!-- 업로드된 이미지 썸네일 예시 -->
-              <div class="d-flex gap-2">
-                <img v-for="f in uploadedFiles"
-                :key="f.filemetaId" 
-                :src="f.fileUrl"
-                class="img-thumbnail"
-                :alt="f.originalFileName" />
+              <!-- 썸네일 -->
+              <div class="d-flex gap-3 flex-wrap">
+                <div v-for="(f, idx) in uploadedFiles" :key="f.name" class="thumbnail-wrapper">
+                  <img 
+                    :src="f.previewUrl" 
+                    class="img-thumbnail rounded" 
+                    :alt="f.name"
+                    @click="openModal(f.previewUrl)"
+                  />
+                  <button type="button" class="delete-btn" @click="removeFile(idx)">×</button>
+                </div>
               </div>
             </div>
           </div>
@@ -86,40 +102,30 @@ const goPrev = () => {
 
         <!-- 배송지 + 계좌 정보 -->
         <div class="col-lg-5 d-flex flex-column">
-          <!-- 배송지 정보 -->
           <div class="card shadow-sm mb-4 flex-fill">
             <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="font-weight-bold">배송지 정보</h5>
-                <a href="#" class="small text-primary">내 정보 불러오기</a>
-              </div>
-
+              <h5 class="font-weight-bold">배송지 정보</h5>
               <div class="form-group">
-                <label class="font-weight-medium">주소</label>
-                <input type="text" class="form-control" placeholder="도로명 주소" />
+                <label>주소</label>
+                <input type="text" class="form-control" v-model="address" placeholder="도로명 주소"/>
               </div>
               <div class="form-group">
-                <label class="font-weight-medium">상세주소</label>
-                <input type="text" class="form-control" placeholder="상세 주소" />
+                <label>상세주소</label>
+                <input type="text" class="form-control" v-model="addressDetail" placeholder="상세 주소"/>
               </div>
             </div>
           </div>
 
-          <!-- 계좌 정보 -->
           <div class="card shadow-sm flex-fill">
             <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="font-weight-bold">계좌 정보</h5>
-                <a href="#" class="small text-primary">내 정보 불러오기</a>
-              </div>
-
+              <h5 class="font-weight-bold">계좌 정보</h5>
               <div class="form-group">
-                <label class="font-weight-medium">은행명</label>
-                <input type="text" class="form-control" placeholder="은행 선택" />
+                <label>은행명</label>
+                <input type="text" class="form-control" v-model="bank" placeholder="은행 선택"/>
               </div>
               <div class="form-group">
-                <label class="font-weight-medium">계좌번호</label>
-                <input type="text" class="form-control" placeholder="'-' 없이 숫자만 입력" />
+                <label>계좌번호</label>
+                <input type="text" class="form-control" v-model="accountNumber" placeholder="'-' 없이 숫자만 입력"/>
               </div>
             </div>
           </div>
@@ -133,19 +139,45 @@ const goPrev = () => {
       </div>
     </div>
   </main>
-</template>
-<style lang="scss" scoped>
-.img-thumbnail {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  cursor: pointer;
-  position: relative;
-}
 
-.img-thumbnail:hover {
-  transform: scale(1.8);
-  z-index: 10;
-  transition: transform 0.3s ease;
+  <!-- 모달 -->
+  <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body text-center">
+          <img :src="selectedImage" class="img-fluid rounded" alt="preview" />
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style lang="scss" scoped>
+.thumbnail-wrapper {
+  position: relative;
+  display: inline-block;
+
+  img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .delete-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+    line-height: 18px;
+    cursor: pointer;
+  }
 }
 </style>

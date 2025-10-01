@@ -2,37 +2,48 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
+// API 모듈
 import { getGoodsCategories, getArtists, getAlbumsByArtist } from '@/api/catalog.js'
-import {
-  getChecklistsByCategory,
-  getPriceBaselineByCategory,
-  estimatePrice,
-} from '@/api/checklist.js'
+import { getChecklistsByCategory, getPriceBaselineByCategory, estimatePrice } from '@/api/checklist.js'
 
+// Modal 컴포넌트
 import SelectedArtistModal from '@/pages/user/inspection/SelectedArtistModal.vue'
 import SelectedAlbumModal from '@/pages/user/inspection/SelectedAlbumModal.vue'
 
+// 상태 관리 (Pinia)
+import { useInspectionStore } from '@/stores/inspectionStore'
+import { storeToRefs } from 'pinia'
+
 const router = useRouter()
+const inspectionStore = useInspectionStore()
 
-// 상품 정보 상태
-const categories = ref([]) // 굿즈 카테고리
-const artists = ref([]) // 아티스트
-const albums = ref([]) // 앨범
-const selectedCategory = ref('') // 카테고리 코드
-const selectedArtist = ref(null) // 아티스트
-const selectedAlbum = ref(null) // 앨범
-const itemName = ref('') // 상품명
-const description = ref('') // 상품 설명
-const hashtags = ref('') // 해시태그 입력
-// 체크리스트 상태
-const checklists = ref([]) // 서버 응답 체크리스트
-const answers = ref({}) // 체크리스트 답변
-// 가격 정보 상태
-const expectedPrice = ref(null) // 시스템 예상가
-const marketAveragePrice = ref(null) // 평균 시세
-const hopePrice = ref(0) // 판매 희망가
+// Store 값
+const { selectedCategory, selectedArtist, selectedAlbum, itemName, description, hashtags } = storeToRefs(inspectionStore)
 
-// 체크리스트 필드(옵션 파싱)
+// 로컬 상태
+const categories = ref([])          // 카테고리 목록
+const artists = ref([])             // 아티스트 목록
+const albums = ref([])              // 앨범 목록
+const checklists = ref([])          // 체크리스트 목록
+const answers = ref({})             // 체크리스트 답변
+const expectedPrice = ref(null)     // 예상가
+const marketAveragePrice = ref(null)// 평균 시세
+const hopePrice = ref(0)            // 희망가
+
+// 모달 상태
+const showArtistModal = ref(false)
+const showAlbumModal = ref(false)
+
+// 로딩/에러 상태
+const loadingInitial = ref(false)     // 최초 로딩(카테고리/아티스트)
+const loadingAlbums = ref(false)      // 앨범 로딩
+const loadingChecklists = ref(false)  // 체크리스트 로딩
+const loadingBaseline = ref(false)    // 기준가 로딩
+const loadingEstimate = ref(false)    // 예상가 로딩
+const loadingMarketAvg = ref(false)   // 마켓 평균가 로딩
+const error = ref(null)             // 에러 메시지
+
+// 체크리스트 필드 파싱
 const fields = computed(() => {
   const out = []
 
@@ -50,19 +61,6 @@ const fields = computed(() => {
 
   return out
 })
-
-// 모달
-const showArtistModal = ref(false)
-const showAlbumModal = ref(false)
-
-// 로딩/에러
-const loadingInitial = ref(false) // 최초 로딩(카테고리/아티스트)
-const loadingAlbums = ref(false) // 앨범 로딩
-const loadingChecklists = ref(false) // 체크리스트 로딩
-const loadingBaseline = ref(false) // 기준가 로딩
-const loadingEstimate = ref(false) // 예상가 로딩
-const loadingMarketAvg = ref(false) // 마켓 평균가 로딩
-const error = ref(null)
 
 // fetchers : 카테고리/아티스트 조회
 async function fetchCategoriesAndArtists() {
@@ -119,6 +117,24 @@ const onSelectArtist = async (artist) => {
     error.value = err?.message || '앨범 데이터 조회 중 오류가 발생했습니다.'
   } finally {
     loadingAlbums.value = false
+  }
+}
+
+// 예상가 계산
+const onEstimate = async () => {
+  if (!selectedCategory.value) return alert('카테고리를 먼저 선택해주세요.')
+  if (!validateRequired()) return
+
+  loadingEstimate.value = true
+  error.value = null
+  try {
+    const selections = buildSelections()
+    const { data } = await estimatePrice(selectedCategory.value, selections)
+    expectedPrice.value = data ?? null
+  } catch (err) {
+    error.value = err?.message || '예상가 계산 중 오류가 발생했습니다.'
+  } finally {
+    loadingEstimate.value = false
   }
 }
 
@@ -188,24 +204,6 @@ const buildSelections = () => {
   }
 
   return sel
-}
-
-// [예상가 계산] 버튼 핸들러
-const onEstimate = async () => {
-  if (!selectedCategory.value) return alert('카테고리를 먼저 선택해주세요.')
-  if (!validateRequired()) return
-
-  loadingEstimate.value = true
-  error.value = null
-  try {
-    const selections = buildSelections()
-    const { data } = await estimatePrice(selectedCategory.value, selections)
-    expectedPrice.value = data ?? null
-  } catch (err) {
-    error.value = err?.message || '예상가 계산 중 오류가 발생했습니다.'
-  } finally {
-    loadingEstimate.value = false
-  }
 }
 
 // 다음 단계 이동

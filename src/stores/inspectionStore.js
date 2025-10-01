@@ -18,7 +18,7 @@ export const useInspectionStore = defineStore('inspection', () => {
   const hopePrice = ref(0)
 
   // Step2 데이터
-  const images = ref([])
+  const uploadedFiles = ref([])
   const address = ref('')
   const addressDetail = ref('')
   const bank = ref('')
@@ -36,7 +36,7 @@ export const useInspectionStore = defineStore('inspection', () => {
     expectedPrice.value = null
     marketAveragePrice.value = null
     hopePrice.value = 0
-    images.value = []
+    uploadedFiles.value = []
     address.value = ''
     addressDetail.value = ''
     bank.value = ''
@@ -55,7 +55,7 @@ export const useInspectionStore = defineStore('inspection', () => {
     expectedPrice,
     marketAveragePrice,
     hopePrice,
-    images,
+    uploadedFiles,
     address,
     addressDetail,
     bank,
