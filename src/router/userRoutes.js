@@ -21,6 +21,10 @@ const SignupComplete = () => import('@/pages/user/access/SignupComplete.vue');
 const SignupFail = () => import('@/pages/user/access/SignupFail.vue');
 const ProductListPage = () => import('@/pages/product/ProductListPage.vue');
 const ProductDetailPage = () => import('@/pages/product/ProductDetailPage.vue');
+// 검수 페이지 컴포넌트
+const InspectionStep1Page = () => import('@/pages/user/inspection/Step1Page.vue');
+const InspectionStep2Page = () => import('@/pages/user/inspection/Step2Page.vue');
+const InspectionStep3Page = () => import('@/pages/user/inspection/Step3Page.vue');
 
 const userRoutes = {
   path: '/',
@@ -106,6 +110,25 @@ const userRoutes = {
       name: 'ProductDetail',
       component: ProductDetailPage,
       meta: { requiresAuth: true },
+    },
+    // 검수
+    {
+      path: 'inspection/step1',
+      name: 'InspectionStep1',
+      component: InspectionStep1Page,
+      meta: {requiredLogin: true },
+    },
+    {
+      path: 'inspection/step2',
+      name: 'InspectionStep2',
+      component: InspectionStep2Page,
+      meta: {requiredLogin: true },
+    },
+    {
+      path: 'inspection/step3',
+      name: 'InspectionStep3',
+      component: InspectionStep3Page,
+      meta: {requiredLogin: true },
     },
   ],
 };
