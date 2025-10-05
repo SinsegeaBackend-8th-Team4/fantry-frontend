@@ -18,7 +18,7 @@ const menuItems = computed(() => {
       const hasSubMenus = route.children && route.children.length > 0;
 
       const subMenus = hasSubMenus ? route.children
-        .filter(child => !(child.meta && child.meta.hidden))
+        .filter(child => !(child.meta && (child.meta.hidden || child.meta.menu === false)))
         .map(child => {
           let title = '대시보드';
             if (child.path === 'list') title = '목록 조회';

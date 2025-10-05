@@ -39,6 +39,8 @@ const InventoryListPage = () => import('@/pages/admin/inventory/InventoryListPag
 // 회원 관리
 const MemberDashboardPage = () => import('@/pages/admin/member/MemberDashboardPage.vue');
 const MemberListPage = () => import('@/pages/admin/member/MemberListPage.vue');
+const MemberDetailPage = () => import('@/pages/admin/member/MemberDetailPage.vue');
+const MemberEditPage = () => import('@/pages/admin/member/MemberEditPage.vue');
 
 // 경매 관리
 const AuctionDashboardPage = () => import('@/pages/admin/auction/AuctionDashboardPage.vue');
@@ -120,6 +122,8 @@ const adminRoutes = {
           children: [
             { path: 'dashboard', name: 'AdminMemberDashboard', component: MemberDashboardPage },
             { path: 'list', name: 'AdminMemberList', component: MemberListPage },
+            { path: 'detail/:memberId', name: 'AdminMemberDetail', component: MemberDetailPage, props: true,  meta: {menu: false} },
+            { path: 'edit/:memberId', name: 'AdminMemberEdit', component: MemberEditPage, props: true, meta: {menu: false} },
           ]
         },
         // --- 경매 관리 ---
