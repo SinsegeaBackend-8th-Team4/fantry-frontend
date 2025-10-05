@@ -4,7 +4,7 @@ import { ref, computed } from 'vue'
 import * as bootstrap from 'bootstrap'
 
 // API 모듈
-import { submitInspection } from '@/api/inspection.js'
+import { submitInspection } from '@/api/userInspection.js'
 
 // 상태 관리 (Pinia)
 import { useInspectionStore } from '@/stores/inspectionStore'
@@ -211,22 +211,13 @@ const finish = async () => {
         <input class="form-check-input" type="checkbox" id="agree" v-model="isAgreed" />
         <label class="form-check-label" for="agree">
           검수 및 판매 대행 정책에 모두 동의합니다.
-          <a href="#" @click.prevent="openPolicyModal" class="text-primary font-weight-bold ml-2"
-            >(내용 보기)</a
-          >
+          <a href="#" @click.prevent="openPolicyModal" class="text-primary font-weight-bold ml-2">(내용 보기)</a>
         </label>
       </div>
       <div class="d-flex justify-content-between">
-        <button class="btn btn-secondary px-5" @click="goPrev" :disabled="isLoading">
-          이전 단계
-        </button>
+        <button class="btn btn-secondary px-5" @click="goPrev" :disabled="isLoading">이전 단계</button>
         <button class="btn btn-primary px-5" @click="finish" :disabled="!isAgreed || isLoading">
-          <span
-            v-if="isLoading"
-            class="spinner-border spinner-border-sm"
-            role="status"
-            aria-hidden="true"
-          ></span>
+          <span v-if="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
           {{ isLoading ? '신청 처리 중...' : '신청 완료' }}
         </button>
       </div>
@@ -238,57 +229,34 @@ const finish = async () => {
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title font-weight-bold">검수 및 판매 대행 정책</h5>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <p>검수 신청 전, 아래의 판매 대행 정책을 반드시 확인하고 동의해주세요.</p>
 
           <h6><strong>제 1조: 판매 가격 결정 정책</strong></h6>
           <p>1. 판매자는 '판매 희망가'를 제안할 수 있습니다.</p>
-          <p>
-            2. 판매자의 '판매 희망가'가 당사가 산정한 '시스템 예상가'의 150%를 초과할 경우, 해당
-            상품은 우선적으로 <strong>경매 방식</strong>으로 판매가 진행됩니다.
-          </p>
+          <p>2. 판매자의 '판매 희망가'가 당사가 산정한 '시스템 예상가'의 150%를 초과할 경우, 해당 상품은 우선적으로 <strong>경매 방식</strong>으로 판매가 진행됩니다.</p>
           <ul>
             <li>경매 시작가는 판매자의 '판매 희망가'로 설정됩니다.</li>
             <li>경매는 48시간 동안 진행되며, 최고가에 낙찰됩니다.</li>
           </ul>
           <p>
-            3. 경매가 유찰되거나(48시간 내에 입찰자가 없는 경우), 판매자의 '판매 희망가'가 예상가의
-            150% 이하인 경우, 상품은 당사의 내부 가격 정책에 따라 최종 판매가가 결정되어 일반 판매로
-            전환됩니다. 최종 판매가는 '시스템 예상가'와 '평균 시세' 등을 종합적으로 고려하여
-            산정됩니다.
+            3. 경매가 유찰되거나(48시간 내에 입찰자가 없는 경우), 판매자의 '판매 희망가'가 예상가의 150% 이하인 경우, 상품은 당사의 내부 가격 정책에 따라 최종 판매가가 결정되어 일반 판매로 전환됩니다.
+            최종 판매가는 '시스템 예상가'와 '평균 시세' 등을 종합적으로 고려하여 산정됩니다.
           </p>
 
           <h6><strong>제 2조: 검수 및 등급 판정</strong></h6>
-          <p>
-            1. 온라인 1차 검수 신청 내용과 실제 상품의 상태가 현저히 다를 경우, 검수가 반려되거나
-            판매 가격이 조정될 수 있습니다.
-          </p>
+          <p>1. 온라인 1차 검수 신청 내용과 실제 상품의 상태가 현저히 다를 경우, 검수가 반려되거나 판매 가격이 조정될 수 있습니다.</p>
 
           <h6><strong>제 3조: 정산</strong></h6>
-          <p>
-            판매 대금은 상품 판매 완료일로부터 5영업일 이내에 등록된 계좌로 정산됩니다. (판매 수수료
-            5% 차감)
-          </p>
+          <p>판매 대금은 상품 판매 완료일로부터 5영업일 이내에 등록된 계좌로 정산됩니다. (판매 수수료 5% 차감)</p>
 
           <hr />
           <p class="font-weight-bold">위 정책에 동의하고 검수 신청을 진행하시겠습니까?</p>
         </div>
         <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-primary"
-            data-bs-dismiss="modal"
-            @click="isAgreed = true"
-          >
-            확인 및 동의
-          </button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="isAgreed = true">확인 및 동의</button>
         </div>
       </div>
     </div>
