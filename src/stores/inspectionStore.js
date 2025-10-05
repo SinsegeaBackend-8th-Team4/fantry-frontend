@@ -2,49 +2,50 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useInspectionStore = defineStore('inspection', () => {
-  // Step1 데이터
+  // Step 1: 상품 정보
   const selectedCategory = ref('')
   const selectedCategoryValue = ref(null)
   const selectedArtist = ref(null)
   const selectedAlbum = ref(null)
   const itemName = ref('')
-  const description = ref('')
+  const itemDescription = ref('')
   const hashtags = ref('')
 
+  // Step 1: 체크리스트
   const checklists = ref([])
-  const fields = ref([])
   const answers = ref({})
 
+  // Step 1: 가격 정보
   const expectedPrice = ref(null)
-  const marketAveragePrice = ref(null)
-  const hopePrice = ref(0)
+  const marketAvgPrice = ref(null)
+  const sellerHopePrice = ref(0)
 
-  // Step2 데이터
+  // Step 2: 이미지 및 배송/계좌
   const uploadedFiles = ref([])
-  const address = ref('')
-  const addressDetail = ref('')
-  const bank = ref('')
-  const accountNumber = ref('')
+  const shippingAddress = ref('')
+  const shippingAddressDetail = ref('')
+  const bankName = ref('')
+  const bankAccount = ref('')
 
-  function reset() {
+  // Store의 모든 상태를 초기화하는 함수
+  function $reset() {
     selectedCategory.value = ''
     selectedCategoryValue.value = null
     selectedArtist.value = null
     selectedAlbum.value = null
     itemName.value = ''
-    description.value = ''
+    itemDescription.value = ''
     hashtags.value = ''
     checklists.value = []
-    fields.value = []
     answers.value = {}
     expectedPrice.value = null
-    marketAveragePrice.value = null
-    hopePrice.value = 0
+    marketAvgPrice.value = null
+    sellerHopePrice.value = 0
     uploadedFiles.value = []
-    address.value = ''
-    addressDetail.value = ''
-    bank.value = ''
-    accountNumber.value = ''
+    shippingAddress.value = ''
+    shippingAddressDetail.value = ''
+    bankName.value = ''
+    bankAccount.value = ''
   }
 
   return {
@@ -53,19 +54,18 @@ export const useInspectionStore = defineStore('inspection', () => {
     selectedArtist,
     selectedAlbum,
     itemName,
-    description,
+    itemDescription,
     hashtags,
     checklists,
-    fields,
     answers,
     expectedPrice,
-    marketAveragePrice,
-    hopePrice,
+    marketAvgPrice,
+    sellerHopePrice,
     uploadedFiles,
-    address,
-    addressDetail,
-    bank,
-    accountNumber,
-    reset,
+    shippingAddress,
+    shippingAddressDetail,
+    bankName,
+    bankAccount,
+    $reset,
   }
 })
