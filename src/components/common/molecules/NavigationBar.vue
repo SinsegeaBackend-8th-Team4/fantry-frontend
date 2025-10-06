@@ -3,7 +3,20 @@ import router from '@/router'
 import NavigationItem from '../atoms/NavigationItem.vue'
 import NavigationDropdownButton from '../atoms/NavigationDropdownButton.vue'
 import { useUserStore } from '@/stores/userStore'
+import { logout } from '@/api/login'
 const userStore = useUserStore()
+
+//로그아웃 처리
+const handleLogout = () => {
+  logout().then(response => {
+    console.log('로그아웃 응답 : ', response)
+    userStore.logout();
+    router.push('/');
+  }).catch(error => {
+    console.error('로그아웃 에러 : ', error)
+  });
+}
+
 </script>
 
 <template>
@@ -30,8 +43,8 @@ const userStore = useUserStore()
         <NavigationItem>Contact</NavigationItem>
       </div>
       <div class="navbar-nav ml-auto py-0">
-        <template v-if="userStore.getIsLogined">
-          <NavigationItem>로그아웃</NavigationItem>
+        <template v-if="userStore.isLoggedIn">
+          <NavigationItem @click="handleLogout">로그아웃</NavigationItem>
           <NavigationItem>마이페이지</NavigationItem>
         </template>
         <template v-else>

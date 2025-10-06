@@ -1,12 +1,9 @@
 <script setup>
     import { reactive, watch } from 'vue';
     import { useRouter } from 'vue-router';
-    import axios from 'axios';
+    import { sendAuthCode, signup, checkDuplicateUsername, verifyAuthCode } from '@/api/login';
 
     const router = useRouter();
-
-    // const serverPath = "http://fantry-dev.duckdns.org";
-    const serverPath = "http://localhost:8080";
 
     //이전으로 페이지 이동
     const goToPrev=()=>{
@@ -144,9 +141,7 @@
 
         try{
             //서버에 중복 확인 요청
-            const response = await axios.get(serverPath+'/api/user/checkId',{
-                params: {id: formState.id}
-            });
+            const response = await checkDuplicateUsername(formState.id);
 
             if(response.data){
                 validation.id.isValid = false;
@@ -195,9 +190,7 @@
 
         try{
             //서버에 인증번호 발송 요청
-            const response = await axios.post(serverPath+'/api/send/authCode', {
-                email: formState.emailLocal + '@' + formState.emailDomain
-            });
+            const response = await sendAuthCode(formState.emailLocal + '@' + formState.emailDomain);
 
             //서버 응답에서 TTL(초) 받기
             const ttlSeconds = response.data.ttl;
@@ -216,12 +209,8 @@
     //인증번호 확인
     const verifyCode = async()=>{
         try{
-            const params = new FormData();
-            params.append("email", formState.emailLocal+"@"+formState.emailDomain);
-            params.append("code", formState.verificationCode);
-
             //서버에 인증 번호 확인 요청
-            const response = await axios.post(serverPath+'/api/user/verifyCode', params);
+            const response = await verifyAuthCode(formState.emailLocal+"@"+formState.emailDomain, formState.verificationCode);
             if(response) {
                 validation.verificationCode.isValid = true;
                 validation.verificationCode.message = "인증 성공";
@@ -264,7 +253,7 @@
                 phone: formState.phone
             };
 
-            await axios.post(serverPath+'/api/user/signup', payload);
+            await signup(payload);
             router.push('/signup/complete');
         }catch(error){
             console.log(error);
