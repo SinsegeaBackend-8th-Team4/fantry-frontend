@@ -29,12 +29,7 @@
                     <p id="current-bid-price" :class="['current-bid-price-main', { 'bid-success-effect': isBidSuccess }]">{{ currentBidPrice }}</p>
                 </div>
                 
-                <form @submit.prevent="sendBid">
-                    <div class="input-group">
-                        <input type="number" id="bid-amount" class="form-control form-control-lg" placeholder="입찰 금액 입력" aria-label="입찰 금액" v-model="bidAmount">
-                        <button class="btn btn-danger btn-lg" type="submit" id="submit-bid">입찰하기</button>
-                    </div>
-                </form>
+                <button class="btn btn-danger btn-lg w-100" @click="openBidModal">경매 참여하기</button>
 
             </div>
         </div>
@@ -58,7 +53,7 @@
                         </div>
                         <div class="detail-item">
                             <span><strong>경매 마감</strong></span>
-                            <span id="end-time">2025-09-28 22:00:00</span>
+                            <span id="end-time">2025-09-30 22:00:00</span>
                         </div>
                         <div class="detail-item">
                             <span><strong>경매 시작가</strong></span>
@@ -81,6 +76,43 @@
                 </div>
             </div>
         </div>
+
+        <div v-if="isBidModalVisible" class="modal-overlay" @click.self="closeBidModal">
+            <div class="modal-content">
+                <button class="modal-close-btn" @click="closeBidModal">&times;</button>
+                <h3>경매 참여</h3>
+                <hr class="my-4">
+
+                <div class="bid-history-section">
+                    <button class="btn btn-outline-secondary w-100 mb-3" @click="toggleBidHistory">
+                        지난 입찰 기록 보기 {{ isBidHistoryVisible ? '▼' : '▶' }}
+                    </button>
+                    <div v-if="isBidHistoryVisible" class="bid-history-log">
+                        <p>16,000원 - 2025.09.24 11:30:15</p>
+                        <p>15,000원 - 2025.09.24 10:25:41</p>
+                        <p>...</p>
+                    </div>
+                </div>
+
+                <div class="current-bid-modal mb-3">
+                    <small>현재 입찰가</small>
+                    <span>{{ currentBidPrice }}</span>
+                </div>
+
+                <div class="quick-bid-buttons mb-3">
+                    <button class="btn btn-outline-primary btn-sm" @click="quickBid(1000)">+ 1,000원</button>
+                    <button class="btn btn-outline-primary btn-sm" @click="quickBid(5000)">+ 5,000원</button>
+                    <button class="btn btn-outline-primary btn-sm" @click="quickBid(10000)">+ 10,000원</button>
+                </div>
+                
+                <form @submit.prevent="validateAndConfirmBid()">
+                    <div class="input-group">
+                        <input type="number" class="form-control form-control-lg" placeholder="입찰 금액" v-model="bidAmount">
+                        <button class="btn btn-danger btn-lg" type="submit">입찰하기</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -97,6 +129,7 @@
     const isBidSuccess = ref(false); // 입찰 성공 효과를 위한 상태
     const timeRemaining = ref(''); // 경매 마감까지 남은 시간 표시
     let countdownInterval = null;  // setInterval을 저장할 변수
+    const startPrice = ref("10,000원"); // 시작가
 
     //썸네일 이미지 데이터
     const productImages = ref([
@@ -111,7 +144,82 @@
     //메인 썸네일 이미지 경로
     const mainImageSrc = ref(productImages.value[0].src);
 
+    //경매 참여 모달 관련
+    const isBidModalVisible = ref(false);
+    const isBidHistoryVisible = ref(false);
+    const bidHistory = ref([
+      { amount: 16000, time: '2025.09.24 11:30:15' },
+      { amount: 15000, time: '2025.09.24 10:25:41' }
+    ]);
+
     // --- 함수 영역 ---
+
+    const openBidModal = () => {
+        isBidModalVisible.value = true;
+    };
+
+    const closeBidModal = () => {
+        isBidModalVisible.value = false;
+        isBidHistoryVisible.value = false; // 모달 닫을 때 기록도 닫기
+    };
+
+    const toggleBidHistory = () => {
+        isBidHistoryVisible.value = !isBidHistoryVisible.value;
+    };
+
+
+    const parsePrice = (priceString) => {
+        if (!priceString) return 0;
+        return parseInt(priceString.replace(/[^\d]/g, ''), 10);
+   };
+
+    const quickBid = (amountToAdd) => {
+        const currentNumericPrice = parsePrice(currentBidPrice.value);
+        bidAmount.value = currentNumericPrice + amountToAdd;
+    };
+
+    const validateAndConfirmBid = () => {
+        const newBid = parseInt(bidAmount.value, 10);
+        const numericCurrentPrice = parsePrice(currentBidPrice.value);
+        const numericStartPrice = parsePrice(startPrice.value);
+
+        // 1. 빈 값 확인
+        if (isNaN(newBid) || newBid <= 0) {
+            alert("입찰 금액을 올바르게 입력해주세요.");
+            return;
+        }
+
+
+        // 2. 100원 단위 확인
+        if (newBid % 100 !== 0) {
+            alert("입찰 금액은 100원 단위로 입력해야 합니다.");
+            return;
+        }
+        
+        // 3. 입찰가 비교
+        // 입찰 기록이 없을 때 (첫 입찰)
+        if (bidHistory.value.length === 0) {
+            if (newBid <= numericStartPrice) {
+                alert(`입찰 금액은 시작가(${startPrice.value})보다 높아야 합니다.`);
+                return;
+            }
+        } else { // 입찰 기록이 있을 때
+            if (newBid < numericCurrentPrice + 1000) {
+                alert(`입찰 금액은 현재가(${currentBidPrice.value})보다 1,000원 이상 높아야 합니다.`);
+                return;
+            }
+        }
+
+        // 4. 최종 입찰 확인
+        const isConfirmed = confirm(`${newBid.toLocaleString()}원 입찰하시겠습니까?`);
+        if (isConfirmed) {
+            sendBid();
+        }
+    };
+
+
+
+
 
     //썸네일 이미지 호버 효과
     const changeMainImage = (newSrc) => {
@@ -192,7 +300,6 @@
     // 입찰 금액 전송 함수
     const sendBid = () => {
         if (stompClient.value && stompClient.value.connected && bidAmount.value) {
-
             const bidData = {
                 memberId: 1, // 예시 사용자 ID
                 bidAmount: parseInt(bidAmount.value, 10)
@@ -205,6 +312,7 @@
             });
 
             bidAmount.value = ''; // 입력창 비우기
+            closeBidModal();
         }else{
             console.log("WebSocket이 연결되지 않았거나 입찰 금액이 비어 있습니다.");
         }
@@ -435,6 +543,108 @@
             transform: scale(1);
             color: #dc3545; /* 원래 색상으로 복귀 */
         }
+    }
+
+    /* =============================================
+     6. 경매 참여 모달 창 스타일
+     ============================================= */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 30px 40px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        width: 100%;
+        max-width: 500px;
+        position: relative;
+        animation: slide-down 0.3s ease-out;
+    }
+
+    @keyframes slide-down {
+        from {
+            transform: translateY(-30px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-close-btn {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        background: none;
+        border: none;
+        font-size: 2rem;
+        color: #aaa;
+        cursor: pointer;
+        line-height: 1;
+        &:hover {
+            color: #333;
+        }
+    }
+    
+    .current-bid-modal {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        background-color: #f8f9fa;
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-size: 1.2rem;
+        
+        small {
+            color: #6c757d;
+        }
+        span {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #dc3545;
+        }
+    }
+
+    .bid-history-section {
+        .btn-outline-secondary {
+            text-align: left;
+            padding: 10px 15px;
+        }
+    }
+
+    .bid-history-log {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        max-height: 150px;
+        overflow-y: auto;
+        font-size: 0.95rem;
+        color: #495057;
+
+        p {
+            margin-bottom: 8px;
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
+
+    .quick-bid-buttons {
+        display: flex;
+        gap: 10px; /* 버튼 사이 간격 */
+        justify-content: flex-end; /* 버튼을 오른쪽으로 정렬 */
     }
 
 </style>
