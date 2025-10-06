@@ -44,7 +44,7 @@ export const submitInspection = (inspectionData) => {
   })
 
   // API 호출
-  const requestPromise = apiClient.post('/inspection', formData, {
+  const requestPromise = apiClient.post('/inspections', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
