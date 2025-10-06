@@ -25,6 +25,7 @@ const menuItems = computed(() => {
             else if (child.path === 'write') title = '글쓰기 (샘플)';
             else if (child.path === 'create') title = '등록하기';
             else if (child.path === 'reportList') title = '신고 목록';
+            else if (child.path === 'reportReceiveList') title = '접수된 철회 신청';
           return { to: { name: child.name }, title: title };
         }) : [];
 
