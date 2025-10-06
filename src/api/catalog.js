@@ -1,4 +1,4 @@
-import apiClient from './index';
+import {apiClient} from './index';
 
 // 굿즈 카테고리 전체 목록 조회
 export const getGoodsCategories = () => {

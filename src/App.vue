@@ -1,8 +1,17 @@
 <script setup>
 import { useUiStore } from '@/stores/uiStore';
 import LoadingSpinner from '@/components/common/atoms/LoadingSpinner.vue';
+import { onMounted } from 'vue';
+import { useUserStore } from '@/stores/userStore';
 
 const uiStore = useUiStore();
+
+const userStore = useUserStore();
+onMounted(() => {
+  if(userStore.isLoggedIn){
+    userStore.fetchUser();  //토큰 기반 유저 상태복구
+  }
+});
 </script>
 
 <template>
