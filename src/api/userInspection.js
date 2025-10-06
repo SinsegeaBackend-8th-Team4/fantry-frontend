@@ -1,4 +1,4 @@
-import apiClient from './index'
+import { apiClient } from './index'
 import { unwrap, rethrow } from './InspectionHelper'
 
 // 1차 온라인 검수 파일 업로드

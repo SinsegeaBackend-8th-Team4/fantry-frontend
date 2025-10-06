@@ -1,4 +1,4 @@
-import apiClient from './index'
+import { apiClient } from './index'
 import { unwrap, rethrow } from './InspectionHelper'
 
 // 카테고리별 체크리스트 조회
