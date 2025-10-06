@@ -1,30 +1,30 @@
 <script setup>
-import { computed } from 'vue';
-import { RouterLink, useRouter } from 'vue-router';
+import { computed } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
 
-const router = useRouter();
+const router = useRouter()
 
 const menuItems = computed(() => {
-  const adminRoute = router.options.routes.find(r => r.path === '/admin');
-  if (!adminRoute) return [];
+  const adminRoute = router.options.routes.find((r) => r.path === '/admin')
+  if (!adminRoute) return []
 
-  const contentLayoutRoute = adminRoute.children.find(r => r.component.name === 'AdminContentLayout');
-  if (!contentLayoutRoute || !contentLayoutRoute.children) return [];
+  const contentLayoutRoute = adminRoute.children.find((r) => r.component.name === 'AdminContentLayout')
+  if (!contentLayoutRoute || !contentLayoutRoute.children) return []
 
   return contentLayoutRoute.children
-    .filter(route => route.meta && route.meta.menu)
-    .map(route => {
+    .filter((route) => route.meta && route.meta.menu)
+    .map((route) => {
       // 서브메뉴가 있는지 확인
-      const hasSubMenus = route.children && route.children.length > 0;
+      const hasSubMenus = route.children && route.children.length > 0
 
-      const subMenus = hasSubMenus ? route.children
-        .filter(child => !(child.meta && child.meta.hidden))
-        .map(child => {
-          let title = '대시보드';
-            if (child.path === 'list') title = '목록 조회';
-            else if (child.path === 'write') title = '글쓰기 (샘플)';
-          return { to: { name: child.name }, title: title };
-        }) : [];
+      const subMenus = hasSubMenus
+        ? route.children
+            .filter((child) => !(child.meta && child.meta.hidden))
+            .map((child) => {
+              const title = child.meta?.title ?? (child.path === 'list' ? '목록 조회' : child.path === 'write' ? '글쓰기 (샘플)' : '대시보드')
+              return { to: { name: child.name }, title: title }
+            })
+        : []
 
       return {
         id: route.path || 'dashboard', // 기본 대시보드는 path가 ''이므로 고유 ID 부여
@@ -32,16 +32,15 @@ const menuItems = computed(() => {
         icon: route.meta.icon,
         // ⭐️ 서브메뉴가 없으면 to 속성을 직접 가짐
         to: hasSubMenus ? null : { name: route.name },
-        subMenus: subMenus
-      };
-    });
-});
+        subMenus: subMenus,
+      }
+    })
+})
 </script>
 
 <template>
   <!-- 사이드바 -->
   <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-      
     <!-- 사이드바 로고/브랜드 -->
     <RouterLink to="/admin" class="sidebar-brand d-flex align-items-center justify-content-center">
       <div class="sidebar-brand-icon">
@@ -51,12 +50,10 @@ const menuItems = computed(() => {
     </RouterLink>
 
     <!-- 구분선 -->
-    <hr class="sidebar-divider">
+    <hr class="sidebar-divider" />
 
     <!-- 메뉴 제목 -->
-    <div class="sidebar-heading">
-      관리 메뉴
-    </div>
+    <div class="sidebar-heading">관리 메뉴</div>
 
     <!-- v-for를 사용해서 메뉴 아이템들을 동적으로 렌더링합니다. -->
     <li class="nav-item" v-for="item in menuItems" :key="item.id">
@@ -65,10 +62,9 @@ const menuItems = computed(() => {
         <i :class="item.icon"></i>
         <span>{{ item.name }}</span>
       </RouterLink>
-      
+
       <!-- Case 2: 서브메뉴가 있는 그룹 메뉴 -->
-      <a v-else class="nav-link collapsed" href="#" data-toggle="collapse" :data-target="`#collapse-${item.id}`"
-          aria-expanded="true" :aria-controls="`#collapse-${item.id}`">
+      <a v-else class="nav-link collapsed" href="#" data-toggle="collapse" :data-target="`#collapse-${item.id}`" aria-expanded="true" :aria-controls="`#collapse-${item.id}`">
         <i :class="item.icon"></i>
         <span>{{ item.name }}</span>
       </a>
@@ -83,13 +79,12 @@ const menuItems = computed(() => {
     </li>
 
     <!-- 구분선 -->
-    <hr class="sidebar-divider d-none d-md-block">
+    <hr class="sidebar-divider d-none d-md-block" />
 
     <!-- 사이드바 토글 버튼 -->
     <div class="text-center d-none d-md-inline">
       <button class="rounded-circle border-0" id="sidebarToggle"></button>
     </div>
-
   </ul>
   <!-- End of Sidebar -->
 </template>
