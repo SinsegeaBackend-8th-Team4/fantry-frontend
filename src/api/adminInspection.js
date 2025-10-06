@@ -8,7 +8,7 @@ import { unwrap, rethrow } from './InspectionHelper'
  */
 export const getInspectionsByStatus = (params) => {
   const queryParams = {
-    status: params.status || 'SUBMITTED',
+    statuses: params.statuses,
     page: params.page - 1,
     size: params.size,
     sort: params.sort,
@@ -18,6 +18,21 @@ export const getInspectionsByStatus = (params) => {
     startDate: params.startDate,
     endDate: params.endDate,
   }
-  const requestPromise = apiClient.get('/admin/inspections', { params: queryParams })
+
+  const requestPromise = apiClient.get('/admin/inspections', {
+    params: queryParams,
+    // Axios가 배열을 올바르게 처리하도록 paramsSerializer 옵션 추가
+    paramsSerializer: (params) => {
+      const qs = new URLSearchParams()
+      for (const key in params) {
+        if (Array.isArray(params[key])) {
+          params[key].forEach((value) => qs.append(key, value))
+        } else if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+          qs.append(key, params[key])
+        }
+      }
+      return qs.toString()
+    },
+  })
   return unwrap(requestPromise).catch(rethrow)
 }
