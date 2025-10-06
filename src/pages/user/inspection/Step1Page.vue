@@ -4,11 +4,7 @@ import { useRouter } from 'vue-router'
 
 // API 모듈
 import { getGoodsCategories, getArtists, getAlbumsByArtist } from '@/api/catalog.js'
-import {
-  getChecklistsByCategory,
-  getPriceBaselineByCategory,
-  estimatePrice,
-} from '@/api/checklist.js'
+import { getChecklistsByCategory, getPriceBaselineByCategory, estimatePrice } from '@/api/checklist.js'
 
 // Modal 컴포넌트
 import SelectedArtistModal from '@/pages/user/inspection/SelectedArtistModal.vue'
@@ -110,8 +106,7 @@ watch(
 
 // 카테고리 선택 후 체크리스트/기준가 조회
 const onSelectCategory = async () => {
-  selectedCategoryValue.value =
-    categories.value.find((c) => c.GoodsCategoryId === selectedCategory.value) || null
+  selectedCategoryValue.value = categories.value.find((c) => c.GoodsCategoryId === selectedCategory.value) || null
 
   // 상태 초기화
   loadingChecklists.value = true
@@ -122,10 +117,7 @@ const onSelectCategory = async () => {
   isPriceCalculated.value = false
 
   try {
-    const [checklistRes, baselineRes] = await Promise.all([
-      fetchChecklistsByCategoryId(selectedCategory.value),
-      fetchBaselinePriceByCategoryId(selectedCategory.value),
-    ])
+    const [checklistRes, baselineRes] = await Promise.all([fetchChecklistsByCategoryId(selectedCategory.value), fetchBaselinePriceByCategoryId(selectedCategory.value)])
 
     checklists.value = checklistRes
     expectedPrice.value = baselineRes
@@ -192,8 +184,7 @@ const validateChkRequired = () => {
     if (!f.required) continue
 
     const v = answers.value[f.itemKey]
-    const isMissing =
-      (f.type === 'BOOL' && v === null) || (f.type === 'SELECT' && (v === '' || v === 'null'))
+    const isMissing = (f.type === 'BOOL' && v === null) || (f.type === 'SELECT' && (v === '' || v === 'null'))
 
     if (isMissing) {
       alert(`'${f.label}' 항목을 선택해주세요.`)
@@ -332,21 +323,10 @@ const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.va
 
               <!-- 카테고리 -->
               <div class="form-group">
-                <label class="font-weight-medium">
-                  카테고리 <span class="text-danger">*</span>
-                </label>
-                <select
-                  class="form-control"
-                  v-model="selectedCategory"
-                  :disabled="isCategoryDisabled"
-                  @change="onSelectCategory"
-                >
+                <label class="font-weight-medium"> 카테고리 <span class="text-danger">*</span> </label>
+                <select class="form-control" v-model="selectedCategory" :disabled="isCategoryDisabled" @change="onSelectCategory">
                   <option value="" disabled>선택하세요</option>
-                  <option
-                    v-for="c in categories"
-                    :key="c.GoodsCategoryId"
-                    :value="c.GoodsCategoryId"
-                  >
+                  <option v-for="c in categories" :key="c.GoodsCategoryId" :value="c.GoodsCategoryId">
                     {{ c.name }}
                   </option>
                 </select>
@@ -354,28 +334,19 @@ const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.va
 
               <!-- 아티스트 -->
               <div class="form-group">
-                <label class="font-weight-medium">
-                  아티스트 <span class="text-danger">*</span>
-                </label>
+                <label class="font-weight-medium"> 아티스트 <span class="text-danger">*</span> </label>
                 <div class="input-group">
                   <input
                     type="text"
                     class="form-control"
-                    :value="
-                      selectedArtist ? `${selectedArtist.nameKo} (${selectedArtist.nameEn})` : ''
-                    "
+                    :value="selectedArtist ? `${selectedArtist.nameKo} (${selectedArtist.nameEn})` : ''"
                     readonly
                     placeholder="아티스트 선택"
                     :disabled="isArtistDisabled"
                     @click="!isArtistDisabled && (showArtistModal = true)"
                   />
                   <div class="input-group-append">
-                    <button
-                      class="btn btn-outline-secondary"
-                      type="button"
-                      :disabled="isArtistDisabled"
-                      @click="!isArtistDisabled && (showArtistModal = true)"
-                    >
+                    <button class="btn btn-outline-secondary" type="button" :disabled="isArtistDisabled" @click="!isArtistDisabled && (showArtistModal = true)">
                       <i class="fa fa-search"></i>
                     </button>
                   </div>
@@ -396,32 +367,18 @@ const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.va
                     @click="!isAlbumDisabled && (showAlbumModal = true)"
                   />
                   <div class="input-group-append">
-                    <button
-                      class="btn btn-outline-secondary"
-                      type="button"
-                      :disabled="isAlbumDisabled"
-                      @click="!isAlbumDisabled && (showAlbumModal = true)"
-                    >
+                    <button class="btn btn-outline-secondary" type="button" :disabled="isAlbumDisabled" @click="!isAlbumDisabled && (showAlbumModal = true)">
                       <i class="fa fa-search"></i>
                     </button>
                   </div>
                 </div>
-                <small v-if="loadingAlbums" class="text-muted"
-                  >앨범 목록을 불러오는 중입니다…</small
-                >
+                <small v-if="loadingAlbums" class="text-muted">앨범 목록을 불러오는 중입니다…</small>
               </div>
 
               <!-- 상품명 -->
               <div class="form-group">
-                <label class="font-weight-medium">
-                  상품명 <span class="text-danger">*</span>
-                </label>
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="예: 한정판 포토카드"
-                  v-model="itemName"
-                />
+                <label class="font-weight-medium"> 상품명 <span class="text-danger">*</span> </label>
+                <input type="text" class="form-control" placeholder="예: 한정판 포토카드" v-model="itemName" />
               </div>
 
               <!-- 미리보기 -->
@@ -431,26 +388,14 @@ const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.va
 
               <!-- 설명 -->
               <div class="form-group">
-                <label class="font-weight-medium">
-                  상품 설명 <span class="text-danger">*</span>
-                </label>
-                <textarea
-                  rows="3"
-                  class="form-control"
-                  placeholder="상품에 대한 설명을 입력해주세요."
-                  v-model="itemDescription"
-                />
+                <label class="font-weight-medium"> 상품 설명 <span class="text-danger">*</span> </label>
+                <textarea rows="3" class="form-control" placeholder="상품에 대한 설명을 입력해주세요." v-model="itemDescription" />
               </div>
 
               <!-- 해시태그 -->
               <div class="form-group">
                 <label class="font-weight-medium">해시태그</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="#아이브 #포토카드"
-                  v-model="hashtags"
-                />
+                <input type="text" class="form-control" placeholder="#아이브 #포토카드" v-model="hashtags" />
               </div>
             </div>
           </div>
@@ -469,9 +414,7 @@ const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.va
                 style="border: 2px dashed #ddd; border-radius: 8px; background: #fafafa"
               >
                 <i class="fa fa-clipboard-list text-secondary mb-2" style="font-size: 1.5rem"></i>
-                <p class="mb-0 text-muted">
-                  체크리스트가 여기 표시됩니다.<br />카테고리를 먼저 선택하세요.
-                </p>
+                <p class="mb-0 text-muted">체크리스트가 여기 표시됩니다.<br />카테고리를 먼저 선택하세요.</p>
               </div>
 
               <div class="flex-fill" style="max-height: 320px; overflow-y: auto">
@@ -485,23 +428,11 @@ const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.va
                   <template v-if="f.type === 'BOOL'">
                     <div>
                       <div class="form-check form-check-inline">
-                        <input
-                          class="form-check-input"
-                          type="radio"
-                          :name="f.itemKey"
-                          v-model="answers[f.itemKey]"
-                          :value="true"
-                        />
+                        <input class="form-check-input" type="radio" :name="f.itemKey" v-model="answers[f.itemKey]" :value="true" />
                         <label class="form-check-label">예</label>
                       </div>
                       <div class="form-check form-check-inline">
-                        <input
-                          class="form-check-input"
-                          type="radio"
-                          :name="f.itemKey"
-                          v-model="answers[f.itemKey]"
-                          :value="false"
-                        />
+                        <input class="form-check-input" type="radio" :name="f.itemKey" v-model="answers[f.itemKey]" :value="false" />
                         <label class="form-check-label">아니오</label>
                       </div>
                     </div>
@@ -535,12 +466,7 @@ const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.va
                   <strong class="text-primary mr-2">
                     {{ expectedPrice ? expectedPrice.toLocaleString() + '원' : '데이터 없음' }}
                   </strong>
-                  <button
-                    class="btn btn-outline-primary btn-sm"
-                    type="button"
-                    :disabled="!selectedCategory || loadingEstimate"
-                    @click="onEstimate"
-                  >
+                  <button class="btn btn-outline-primary btn-sm" type="button" :disabled="!selectedCategory || loadingEstimate" @click="onEstimate">
                     <span v-if="loadingEstimate">계산 중…</span>
                     <span v-else>예상가 계산</span>
                   </button>
@@ -554,12 +480,7 @@ const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.va
                   <span class="mr-2">
                     {{ marketAvgPrice ? marketAvgPrice.toLocaleString() + '원' : '데이터 없음' }}
                   </span>
-                  <button
-                    class="btn btn-outline-secondary btn-sm"
-                    type="button"
-                    :disabled="!selectedCategory || loadingMarketAvg"
-                    @click="onFetchMarketAvg"
-                  >
+                  <button class="btn btn-outline-secondary btn-sm" type="button" :disabled="!selectedCategory || loadingMarketAvg" @click="onFetchMarketAvg">
                     <span v-if="loadingMarketAvg">계산 중…</span>
                     <span v-else>시세 조회</span>
                   </button>
@@ -567,13 +488,9 @@ const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.va
               </div>
 
               <div class="form-group">
-                <label class="font-weight-medium">
-                  판매 희망가 <span class="text-danger">*</span>
-                </label>
+                <label class="font-weight-medium"> 판매 희망가 <span class="text-danger">*</span> </label>
                 <input type="number" class="form-control" v-model="sellerHopePrice" />
-                <small class="form-text text-muted">
-                  희망가와 예상가가 다를 수 있으며, 최종 가격은 검수 후 확정됩니다.
-                </small>
+                <small class="form-text text-muted"> 희망가와 예상가가 다를 수 있으며, 최종 가격은 검수 후 확정됩니다. </small>
               </div>
             </div>
           </div>

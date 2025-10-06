@@ -1,7 +1,32 @@
 <script setup>
   import { useRouter } from 'vue-router';
+  import { ref } from 'vue';
+  import { login } from '@/api/login';
+  import { useUserStore } from '@/stores/userStore'
+  const userStore = useUserStore();
 
   const router = useRouter();
+
+  const username = ref('');
+  const password = ref('');
+  const isPwdVisible = ref(true);
+  const pushShowPwd = () => {
+    isPwdVisible.value = !isPwdVisible.value;
+  };
+
+  const gotoLogin= async ()=>{
+    const response = await login(username.value, password.value);
+
+    if(response.status === 200){
+      localStorage.setItem("accessToken", response.data.accessToken);
+
+      userStore.setLoginInfo(response.data.memberResponse, response.data.accessToken);
+      router.push('/');
+    } else {
+      console.log(response);
+      router.push('/login/fail');
+    }
+  }
 
   const goToSignup=()=>{
     router.push('/signup/terms');
@@ -23,10 +48,12 @@
 
     <!--Login contenxt Start-->
     <div class="login-form">
-      <input type="text" name="username" placeholder="username">
-      <input type="text" name="password" placeholder="password">
-
-      <button type="button" class="login-btn" name="login">LOGIN</button>
+      <input type="text" name="username" placeholder="username" v-model="username" required>
+      <div class="password-wrapper">
+        <input :type='isPwdVisible?"password":"text"' name="password" placeholder="password" v-model="password" required>
+        <img class="toggle-visibility" :src="isPwdVisible ? '/images/eyeSlash.png' : '/images/eyeView.png'" @click="pushShowPwd" />
+      </div>
+      <button type="button" class="login-btn" name="login" @click="gotoLogin">LOGIN</button>
       <div class="forgot-wrap">
         <span @click="goToFind">Forgot your password?</span>
       </div>
@@ -102,6 +129,31 @@
     border: 1px solid silver;
     border-radius: 6px;
     font-size: 14px;
+  }
+
+  .password-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .password-wrapper input {
+    width: 100%;
+    padding-right: 40px; /* 오른쪽 아이콘 공간 확보 */
+  }
+
+  .password-wrapper .toggle-visibility {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    opacity: 0.6;
+  }
+
+  .password-wrapper .toggle-visibility:hover {
+    opacity: 1;
   }
 
   .login-btn {

@@ -21,7 +21,7 @@ export const useUserStore = defineStore('user', () => {
    * @type {import('vue').Ref<string|null>}
    * @description 서버로부터 발급받은 인증 토큰(JWT).
    */
-  const authToken = ref(null);
+  const authToken = ref(localStorage.getItem('accessToken')||null);
 
 
   // ==========================================================================
@@ -32,7 +32,10 @@ export const useUserStore = defineStore('user', () => {
    * @type {import('vue').ComputedRef<boolean>}
    * @description 사용자의 로그인 여부를 반환합니다.
    */
-  const isLoggedIn = computed(() => !!authToken.value && !!currentUser.value);
+  //const isLoggedIn = computed(() => !!authToken.value && !!currentUser.value);
+  const isLoggedIn = computed(() => {
+    return !!authToken.value;
+  });
 
   /**
    * @type {import('vue').ComputedRef<boolean>}
@@ -53,10 +56,11 @@ export const useUserStore = defineStore('user', () => {
    * @description 로그인 성공 후, 사용자 정보와 토큰을 상태에 저장합니다.
    * @param {{ user: object, token: string }} payload - 로그인 API 응답 데이터
    */
-  function setLoginInfo({ user, token }) {
+  function setLoginInfo(user, token) {
     currentUser.value = user;
     authToken.value = token;
     // TODO: 토큰을 localStorage에 저장하여 페이지 새로고침 시에도 로그인 유지
+    localStorage.setItem('accessToken', token);
   }
 
   /**
@@ -66,7 +70,24 @@ export const useUserStore = defineStore('user', () => {
     currentUser.value = null;
     authToken.value = null;
     // TODO: localStorage에 저장된 토큰도 삭제
+    localStorage.removeItem('accessToken');
   }
+
+  /**
+   * @description 토큰은 존재하나 사용자 정보가 없을 때, 서버에서 정보를 가져와 복구
+   */
+  const fetchUser = async () => {
+    if(!authToken.value) return;
+    try {
+      const response = await apiClient.get('/api/member/me');
+      console.log("사용자 정보 : ", response.data);
+      currentUser.value = response.data.member;    // 수정필
+
+    } catch (error) {
+      console.error('사용자 정보 가져오기 실패, 토큰 만료 혹은 유효하지 않음.', error);
+      logout();
+    }
+  };
 
   // 스토어에서 외부로 노출할 상태, 게터, 액션을 반환합니다.
   return {
@@ -79,5 +100,6 @@ export const useUserStore = defineStore('user', () => {
     // Actions
     setLoginInfo,
     logout,
+    fetchUser,
   };
 });

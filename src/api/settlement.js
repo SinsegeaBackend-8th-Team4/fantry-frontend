@@ -1,5 +1,5 @@
 // src/api/settlement.js
-import apiClient from './index'; // 중앙 설정된 apiClient import
+import {apiClient} from './index'; // 중앙 설정된 apiClient import
 
 /**
  * 정산 목록 데이터를 서버에 요청합니다.

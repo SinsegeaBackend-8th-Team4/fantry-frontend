@@ -15,8 +15,7 @@ const inspectionStore = useInspectionStore()
 // 로컬 상태 변수
 const selectedImage = ref(null) // 모달에서 크게 볼 이미지 URL
 // Store 값
-const { uploadedFiles, shippingAddress, shippingAddressDetail, bankName, bankAccount } =
-  storeToRefs(inspectionStore)
+const { uploadedFiles, shippingAddress, shippingAddressDetail, bankName, bankAccount } = storeToRefs(inspectionStore)
 
 const onFileChange = (event) => {
   const newFiles = Array.from(event.target.files) // FileList -> Array
@@ -130,25 +129,16 @@ const goPrev = () => router.push('/inspection/step1')
           <div class="card shadow-sm flex-fill">
             <div class="card-body">
               <h5 class="font-weight-bold mb-3">이미지 등록 <span class="text-danger">*</span></h5>
-              <div
-                class="border border-dashed p-5 text-center mb-4"
-                style="border: 2px dashed #ddd; border-radius: 8px"
-              >
+              <div class="border border-dashed p-5 text-center mb-4" style="border: 2px dashed #ddd; border-radius: 8px">
                 <i class="fa fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
                 <p class="text-muted mb-1">드래그 앤 드롭 또는</p>
-                <label for="file-upload" class="text-primary font-weight-bold cursor-pointer"
-                  >파일 선택</label
-                >
+                <label for="file-upload" class="text-primary font-weight-bold cursor-pointer">파일 선택</label>
                 <input id="file-upload" type="file" multiple hidden @change="onFileChange" />
               </div>
 
-              <p class="text-muted small mb-2">
-                상품의 상태가 잘 보이도록 촬영된 사진을 등록해주세요.
-              </p>
+              <p class="text-muted small mb-2">상품의 상태가 잘 보이도록 촬영된 사진을 등록해주세요.</p>
               <ul class="text-muted small mb-4">
-                <li>
-                  <strong>최소 2장 이상 (앞면/뒷면 필수)</strong>, 최대 10장까지 등록할 수 있습니다.
-                </li>
+                <li><strong>최소 2장 이상 (앞면/뒷면 필수)</strong>, 최대 10장까지 등록할 수 있습니다.</li>
                 <li><strong>JPG, PNG 형식</strong>의 이미지만 업로드 가능합니다.</li>
                 <li>이미지 한 장당 용량은 <strong>10MB</strong>를 초과할 수 없습니다.</li>
                 <li><strong>가로/세로 1000픽셀 이상의 고화질 이미지</strong>를 권장합니다.</li>
@@ -158,12 +148,7 @@ const goPrev = () => router.push('/inspection/step1')
               <!-- 썸네일 -->
               <div class="d-flex gap-3 flex-wrap">
                 <div v-for="(f, idx) in uploadedFiles" :key="f.name" class="thumbnail-wrapper">
-                  <img
-                    :src="f.previewUrl"
-                    class="img-thumbnail rounded"
-                    :alt="f.name"
-                    @click="openModal(f.previewUrl)"
-                  />
+                  <img :src="f.previewUrl" class="img-thumbnail rounded" :alt="f.name" @click="openModal(f.previewUrl)" />
                   <button type="button" class="delete-btn" @click="removeFile(idx)">×</button>
                 </div>
               </div>
@@ -175,31 +160,17 @@ const goPrev = () => router.push('/inspection/step1')
           <div class="card shadow-sm mb-4 flex-fill">
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5 class="font-weight-bold mb-0">
-                  배송지 정보 <span class="text-danger">*</span>
-                </h5>
+                <h5 class="font-weight-bold mb-0">배송지 정보 <span class="text-danger">*</span></h5>
                 <a href="#" class="small" @click.prevent="loadMyInfo">내 정보 불러오기</a>
               </div>
-              <small class="form-text text-muted mb-3">
-                검수 불합격 시 상품을 반송받으실 주소를 입력해주세요.
-              </small>
+              <small class="form-text text-muted mb-3"> 검수 불합격 시 상품을 반송받으실 주소를 입력해주세요. </small>
               <div class="form-group">
                 <label>주소</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  v-model.trim="shippingAddress"
-                  placeholder="도로명 주소"
-                />
+                <input type="text" class="form-control" v-model.trim="shippingAddress" placeholder="도로명 주소" />
               </div>
               <div class="form-group mb-0">
                 <label>상세주소</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  v-model.trim="shippingAddressDetail"
-                  placeholder="상세 주소"
-                />
+                <input type="text" class="form-control" v-model.trim="shippingAddressDetail" placeholder="상세 주소" />
               </div>
             </div>
           </div>
@@ -210,26 +181,14 @@ const goPrev = () => router.push('/inspection/step1')
                 <h5 class="font-weight-bold mb-0">계좌 정보 <span class="text-danger">*</span></h5>
                 <a href="#" class="small" @click.prevent="loadMyInfo">내 정보 불러오기</a>
               </div>
-              <small class="form-text text-muted mb-3">
-                판매 대금을 정산받으실 계좌 정보를 입력해주세요.
-              </small>
+              <small class="form-text text-muted mb-3"> 판매 대금을 정산받으실 계좌 정보를 입력해주세요. </small>
               <div class="form-group">
                 <label>은행명</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  v-model.trim="bankName"
-                  placeholder="은행 선택"
-                />
+                <input type="text" class="form-control" v-model.trim="bankName" placeholder="은행 선택" />
               </div>
               <div class="form-group mb-0">
                 <label>계좌번호</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  v-model.trim="bankAccount"
-                  placeholder="'-' 없이 숫자만 입력"
-                />
+                <input type="text" class="form-control" v-model.trim="bankAccount" placeholder="'-' 없이 숫자만 입력" />
               </div>
             </div>
           </div>
