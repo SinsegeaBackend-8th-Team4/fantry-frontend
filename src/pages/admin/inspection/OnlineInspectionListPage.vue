@@ -61,7 +61,7 @@ const columns = [
     render: (data) => `<span class="badge status-badge bg-warning text-dark">${adminStore.getStatusLabel(data)}</span>`,
   },
   {
-    data: 'actions',
+    data: null,
     title: '관리',
     sortable: false,
     render: (data, type, row) => `<button class="btn btn-sm btn-outline-primary detail-btn" data-id="${row.productInspectionId}">상세</button>`,
