@@ -23,6 +23,8 @@ const menuItems = computed(() => {
           let title = '대시보드';
             if (child.path === 'list') title = '목록 조회';
             else if (child.path === 'write') title = '글쓰기 (샘플)';
+            else if (child.path === 'create') title = '등록하기';
+            else if (child.path === 'reportList') title = '신고 목록';
           return { to: { name: child.name }, title: title };
         }) : [];
 

@@ -41,6 +41,11 @@ const MemberDashboardPage = () => import('@/pages/admin/member/MemberDashboardPa
 const MemberListPage = () => import('@/pages/admin/member/MemberListPage.vue');
 const MemberDetailPage = () => import('@/pages/admin/member/MemberDetailPage.vue');
 const MemberEditPage = () => import('@/pages/admin/member/MemberEditPage.vue');
+const MemberCreatePage = () => import('@/pages/admin/member/MemberCreatePage.vue');
+// 회원 관리 - 신고 관련
+const ReportListPage = () => import('@/pages/admin/member/ReportListPage.vue');
+const ReportDetailPage = () => import('@/pages/admin/member/ReportDetailPage.vue');
+const ReportCreatePage = () => import('@/pages/admin/member/ReportCreatePage.vue');
 
 // 경매 관리
 const AuctionDashboardPage = () => import('@/pages/admin/auction/AuctionDashboardPage.vue');
@@ -122,8 +127,12 @@ const adminRoutes = {
           children: [
             { path: 'dashboard', name: 'AdminMemberDashboard', component: MemberDashboardPage },
             { path: 'list', name: 'AdminMemberList', component: MemberListPage },
+            { path: 'create', name: 'AdminMemberCreate', component: MemberCreatePage, },
+            { path: 'reportList', name: 'AdminReportList', component: ReportListPage, },
             { path: 'detail/:memberId', name: 'AdminMemberDetail', component: MemberDetailPage, props: true,  meta: {menu: false} },
             { path: 'edit/:memberId', name: 'AdminMemberEdit', component: MemberEditPage, props: true, meta: {menu: false} },
+            { path: 'reportDetail/:reportId', name: 'AdminReportDetail', component: ReportDetailPage, props: true, meta: {menu: false} },
+            { path: 'reportCreate', name: 'AdminReportCreate', component: ReportCreatePage, meta: {menu: false} },
           ]
         },
         // --- 경매 관리 ---
