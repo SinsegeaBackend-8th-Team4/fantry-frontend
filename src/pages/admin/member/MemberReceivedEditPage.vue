@@ -82,6 +82,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { getReportDetail, updateReceiveReport } from '@/api/member';
 
 const router = useRouter();
 
@@ -91,7 +92,6 @@ const newStatus = ref('WITHDRAWN');  // 기본값은 'WITHDRAWN' (신고 철회)
 const rejectedComment = ref('');
 let reportId = null;
 
-const serverPath = "http://localhost:8080";
 
 function formatDate(dateString) {
   if (!dateString) return '';
@@ -124,10 +124,9 @@ onMounted(async () => {
   }
 
   try {
-    const response = await fetch(`${serverPath}/api/report/${reportId}`);
-    if (!response.ok) throw new Error('신고 정보를 불러오는데 실패했습니다.');
-    const json = await response.json();
-    report.value = json.report;    
+    const response = await getReportDetail(reportId);
+    if (!response.status == 200) throw new Error('신고 정보를 불러오는데 실패했습니다.');
+    report.value = response.data.report;    
   } catch (error) {
     console.error(error);
     alert('신고 정보를 불러오는데 실패했습니다.');
@@ -152,13 +151,9 @@ async function updateReportStatus() {
   };
 
   try {
-    const response = await fetch(`${serverPath}/api/report/${reportId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedReport),
-    });
+    const response = await updateReceiveReport(reportId, updatedReport);
 
-    if (!response.ok) {
+    if (!response.status == 200) {
       throw new Error('신고 상태 업데이트 실패');
     }
 

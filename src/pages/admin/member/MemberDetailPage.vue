@@ -78,6 +78,7 @@
 <script setup>
     import { ref, onMounted } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
+    import { getMemberDetail, deactiveateMember } from '@/api/member';
 
     const route = useRoute();
     const router = useRouter();
@@ -85,15 +86,11 @@
     const member = ref(null);
     const loading = ref(true);
 
-    const serverPath = "http://localhost:8080"; // 테스트를 위한 로컬 서버 주소
-
     onMounted(async () => {
         try {
             const memberId = route.params.memberId;
-            const res = await fetch(`${serverPath}/api/member/${memberId}`);
-            const json = await res.json();
-            member.value = json.member;
-            console.log('회원 정보:', member.value);
+            const res = await getMemberDetail(memberId);
+            member.value = res.data.member;
         } catch (error) {
             console.error('회원 정보 조회 실패:', error);
         } finally {
@@ -117,25 +114,22 @@
     }
 
     // 회원 삭제 함수
-    function deleteMember() {
+    async function deleteMember() {
         if (!member.value) return;
         if (confirm('정말로 이 회원을 삭제하시겠습니까?')) {
             // 삭제 API 호출
-            fetch(`${serverPath}/api/member/${member.value.id}`, {
-                method: 'DELETE'
-            })
-            .then(res => {
-                if (res.ok) {
-                    alert('회원이 삭제되었습니다.');
-                    router.push({ name: 'AdminMemberList' });
-                } else {
-                    alert('회원 삭제에 실패했습니다.');
-                }
-            })
-            .catch(err => {
-                console.error('삭제 중 오류 발생:', err);
-                alert('회원 삭제 중 오류가 발생했습니다.');
-            });
+            try{
+              const res = await deactiveateMember(member.value.id);
+              if (res.status === 200) {
+                  alert('회원이 비활성화 되었습니다.');
+                  router.push({ name: 'AdminMemberList' });
+              } else {
+                  alert('회원 삭제에 실패했습니다.');
+              }
+            } catch(error) {
+              console.error('삭제 중 오류 발생:', error.message);
+              alert('회원 삭제 중 오류가 발생했습니다.');
+            }
         }
     }
 </script>

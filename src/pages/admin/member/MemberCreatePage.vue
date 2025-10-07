@@ -148,6 +148,7 @@
 <script setup>
     import { ref, computed } from 'vue';
     import { useRouter } from 'vue-router';
+    import { registMember } from '@/api/member';
 
     const router = useRouter();
 
@@ -163,8 +164,6 @@
 
     const passwordConfirm = ref('');
     const saving = ref(false);
-
-    const serverPath = "http://localhost:8080";
 
     // roleType과 roleId 매핑
     const roleMap = {
@@ -199,29 +198,24 @@
 
         try {
             saving.value = true;
-            
-            const res = await fetch(`${serverPath}/api/member/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    id: form.value.id,
-                    password: form.value.password,
-                    name: form.value.name,
-                    email: form.value.email,
-                    tel: form.value.tel,
-                    sns: form.value.sns || null,
-                    roleId: form.value.roleId
-                })
+
+            const res = await registMember({
+                id: form.value.id,
+                password: form.value.password,
+                name: form.value.name,
+                email: form.value.email,
+                tel: form.value.tel,
+                sns: form.value.sns || null,
+                roleId: form.value.roleId
             });
 
-            if (res.ok) {
+            console.log('회원 추가 응답:', res);
+
+            if (res.status === 200) {
                 alert('회원이 추가되었습니다.');
                 router.push({ name: 'AdminMemberList' });
             } else {
-                const error = await res.json();
-                alert(`등록 실패: ${error.message || '알 수 없는 오류'}`);
+                alert(`등록 실패: ${res.data || '알 수 없는 오류'}`);
             }
         } catch (error) {
             console.error('회원 추가 중 오류 발생:', error);

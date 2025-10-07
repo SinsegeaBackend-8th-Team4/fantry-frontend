@@ -54,14 +54,14 @@
 <script setup>
   import { ref, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
+  import { getReportDetail } from '@/api/member';
+import { get } from 'jquery';
 
   const router = useRouter();
 
   const report = ref(null);
   const loading = ref(true);
 
-  // 서버 경로
-  const serverPath = "http://localhost:8080";
 
   onMounted(async () => {
     const reportId = router.currentRoute.value.params.reportId;
@@ -72,10 +72,9 @@
     }
 
     try {
-      const response = await fetch(`${serverPath}/api/report/${reportId}`);
-      if (!response.ok) throw new Error('신고 정보를 불러오는데 실패했습니다.');
-      const json = await response.json();
-      report.value = json.report;    
+      const response = await getReportDetail(reportId);
+      if (!response.status == 200) throw new Error('신고 정보를 불러오는데 실패했습니다.');
+      report.value = response.data.report;    
     } catch (error) {
       console.error(error);
       alert('신고 정보를 불러오는데 실패했습니다.');

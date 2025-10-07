@@ -132,6 +132,7 @@
 <script setup>
     import { ref, computed, watch, onMounted } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
+    import { updateOneMember, getMemberDetail } from '@/api/member';
 
     const route = useRoute();
     const router = useRouter();
@@ -142,14 +143,11 @@
     const saving = ref(false);
     const leavedAt = ref(null);
 
-    const serverPath = "http://localhost:8080";
-
     onMounted(async () => {
     try {
         const memberId = route.params.memberId;
-        const res = await fetch(`${serverPath}/api/member/${memberId}`);
-        const json = await res.json();
-        originalMember.value = json.member;
+        const res = await getMemberDetail(memberId);
+        originalMember.value = res.data.member;
         
         // 기존 탈퇴일 저장
         leavedAt.value = originalMember.value.leavedAt;
@@ -188,51 +186,46 @@
     }
     });
 
-    // 탈퇴일 표시용 computed
     const leavedAtDisplay = computed(() => {
     return leavedAt.value ? formatDate(leavedAt.value) : '-';
     });
 
     async function updateMember() {
-    if (!form.value) return;
-    
-    if (!confirm('회원 정보를 수정하시겠습니까?')) {
-        return;
-    }
+      if (!form.value) return;
+      
+      if (!confirm('회원 정보를 수정하시겠습니까?')) {
+          return;
+      }
 
-    try {
-        saving.value = true;
-        
-        const res = await fetch(`${serverPath}/api/member/${originalMember.value.id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(form.value)
-        });
+      try {
+          saving.value = true;
+          
 
-        if (res.ok) {
-        alert('회원 정보가 수정되었습니다.');
-        router.push({ 
-            name: 'AdminMemberDetail', 
-            params: { memberId: originalMember.value.id } 
-        });
-        } else {
-        const error = await res.json();
-        alert(`수정 실패: ${error.message || '알 수 없는 오류'}`);
-        }
-    } catch (error) {
-        console.error('수정 중 오류 발생:', error);
-        alert('회원 정보 수정 중 오류가 발생했습니다.');
-    } finally {
-        saving.value = false;
-    }
+          const res = await updateOneMember(originalMember.value.id, {
+              ...form.value
+          });
+
+          if (res.status === 200) {
+          alert('회원 정보가 수정되었습니다.');
+          router.push({ 
+              name: 'AdminMemberDetail', 
+              params: { memberId: originalMember.value.id } 
+          });
+          } else {
+          alert(`수정 실패: ${res.message || '알 수 없는 오류'}`);
+          }
+      } catch (error) {
+          console.error('수정 중 오류 발생:', error);
+          alert('회원 정보 수정 중 오류가 발생했습니다.');
+      } finally {
+          saving.value = false;
+      }
     }
 
     function formatDate(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR');
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('ko-KR');
     }
 </script>
 

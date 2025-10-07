@@ -25,12 +25,10 @@
 import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
 import { ref, nextTick, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { getAllReceiveReports } from '@/api/member';
 
 const router = useRouter();
 const keyword = ref('');
-
-// 서버 경로 설정
-const serverPath = "http://localhost:8080"; 
 
 /**
  * 날짜 포맷 함수
@@ -147,14 +145,13 @@ function attachClickHandlers() {
  */
 async function fetchReceivedReports({ page, size, sort, keyword }) {
   try {
-    const res = await fetch(`${serverPath}/api/report/received`);
-    if (!res.ok) {
+    const res = await getAllReceiveReports();
+    if (!res.status == 200) {
       console.error("Failed to fetch received reports:", res.statusText);
       return { rows: [], total: 0 };
     }
     
-    const json = await res.json();
-    let allReports = json.reportList || [];
+    let allReports = res.data.reportList || [];
 
     // 검색 필터링
     if (keyword) {

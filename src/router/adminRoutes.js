@@ -53,6 +53,9 @@ const ReportReceiveEditPage = () => import('@/pages/admin/member/MemberReceivedE
 const AuctionDashboardPage = () => import('@/pages/admin/auction/AuctionDashboardPage.vue');
 const AuctionListPage = () => import('@/pages/admin/auction/AuctionListPage.vue');
 
+// 로그인
+const AdminLogin = () => import('@/pages/admin/access/AdminLogin.vue');
+const AdminSignUp = () => import('@/pages/admin/access/AdminSignup.vue');
 
 const adminRoutes = {
   path: '/admin',
@@ -63,6 +66,21 @@ const adminRoutes = {
       path: '',
       component: AdminContentLayout, // 모든 관리자 컨텐츠 페이지의 상위 레이아웃
       children: [
+        // --- 로그인 ---
+        {
+          path : 'login',
+          name : 'AdminLogin',
+          component : AdminLogin,
+          meta: { requiredLogin: false, isAdmin: false, menu: false }
+        },
+        // --- 회원가입 ---
+        {
+          path : 'signup',
+          name : 'AdminSignUp',
+          component : AdminSignUp,
+          meta: { requiredLogin: false, isAdmin: false, menu: false } 
+        },
+
         // --- 대시보드 ---
         {
           path: '',

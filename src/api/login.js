@@ -23,8 +23,8 @@ export const checkDuplicateUsername = (username) => {
 }
 
 // 회원 가입
-export const signup = (payload) => {
-    return publicApiClient.post(serverPath + '/api/user/signup', payload);
+export const signup = (payload, type) => {
+    return publicApiClient.post(serverPath + `/api/${type}/signup`, payload);
 }
 
 

@@ -26,11 +26,10 @@
   import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
   import { ref, onMounted, nextTick } from 'vue';
   import { useRouter } from 'vue-router';
+  import { getAllMembers } from '@/api/member';
 
   const router = useRouter();
   const keyword = ref('');
-
-  const serverPath = "http://localhost:8080"; // 테스트를 위한 로컬 서버 주소
 
   //회원 목록 테이블 공통 ServerDataTable 적용
   const columns = [
@@ -81,10 +80,8 @@
   }
 
   async function fetchMembers({page, size, sort, keyword}){
-    const res = await fetch(`${serverPath}/api/member/`);     //이후에 axios 인터셉터로 변경 필요
-    const json = await res.json();
-
-    let allMembers = json.memberList;
+    const res = await getAllMembers();
+    let allMembers = res.data.memberList;
 
     // 검색 필터링
     if (keyword) {
@@ -136,6 +133,14 @@
   :deep(table th),
   :deep(table td) {
     text-align: center;
+  }
+
+  :deep(table td){
+    pointer-events: none;
+  }
+
+  :deep(table td .member-name){
+    pointer-events: auto;
   }
 
   :deep(table tbody tr:hover) {

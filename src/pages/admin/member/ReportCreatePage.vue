@@ -41,9 +41,9 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { registReport } from '@/api/member';
 
 const router = useRouter();
-const serverPath = 'http://localhost:8080';
 
 const form = ref({
   reportReason: '',
@@ -60,15 +60,9 @@ const submitReport = async () => {
   errorMessage.value = '';
 
   try {
-    const response = await fetch(`${serverPath}/api/report/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(form.value),
-    });
+    const response = await registReport(form.value);
 
-    if (!response.ok) throw new Error('신고 등록에 실패했습니다.');
+    if (!response.status == 200) throw new Error('신고 등록에 실패했습니다.');
 
     successMessage.value = '신고가 성공적으로 등록되었습니다.';
     // 입력 초기화

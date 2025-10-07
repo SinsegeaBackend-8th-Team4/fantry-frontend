@@ -24,11 +24,10 @@
 import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
 import { ref, nextTick, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { getAllReports } from '@/api/member';
 
 const router = useRouter();
 const keyword = ref('');
-
-const serverPath = "http://localhost:8080"; 
 
 /**
  * 날짜 포맷 함수
@@ -145,14 +144,12 @@ function attachClickHandlers() {
  */
 async function fetchReports({page, size, sort, keyword}){
   try {
-    const res = await fetch(`${serverPath}/api/report/`);
-    if (!res.ok) {
+    const res = await getAllReports();
+    if (!res.status === 200 ) {
       console.error("Failed to fetch reports:", res.statusText);
       return { rows: [], total: 0 };
     }
-    
-    const json = await res.json();
-    let allReports = json.reportList || [];
+    let allReports = res.data.reportList || [];
 
     // 검색 필터링
     if (keyword) {
@@ -222,6 +219,14 @@ function registReport() {
 :deep(table th),
 :deep(table td) {
   text-align: center;
+}
+
+:deep(table td){
+  pointer-events: none;
+}
+
+:deep(table td .report-link){
+  pointer-events: auto;
 }
 
 :deep(table tbody tr:hover) {
