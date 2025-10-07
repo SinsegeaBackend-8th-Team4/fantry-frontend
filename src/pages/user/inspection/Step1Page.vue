@@ -1,94 +1,85 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
+// API 모듈
 import { getGoodsCategories, getArtists, getAlbumsByArtist } from '@/api/catalog.js'
-import {
-  getChecklistsByCategory,
-  getPriceBaselineByCategory,
-  estimatePrice,
-} from '@/api/checklist.js'
+import { getChecklistsByCategory, getPriceBaselineByCategory, estimatePrice } from '@/api/checklist.js'
 
+// Modal 컴포넌트
 import SelectedArtistModal from '@/pages/user/inspection/SelectedArtistModal.vue'
 import SelectedAlbumModal from '@/pages/user/inspection/SelectedAlbumModal.vue'
 
+// 상태 관리 (Pinia)
+import { useInspectionStore } from '@/stores/inspectionStore'
+import { storeToRefs } from 'pinia'
+
 const router = useRouter()
+const inspectionStore = useInspectionStore()
 
-// 상품 정보 상태
-const categories = ref([]) // 굿즈 카테고리
-const artists = ref([]) // 아티스트
-const albums = ref([]) // 앨범
-const selectedCategory = ref('') // 카테고리 코드
-const selectedArtist = ref(null) // 아티스트
-const selectedAlbum = ref(null) // 앨범
-const itemName = ref('') // 상품명
-const description = ref('') // 상품 설명
-const hashtags = ref('') // 해시태그 입력
-// 체크리스트 상태
-const checklists = ref([]) // 서버 응답 체크리스트
-const answers = ref({}) // 체크리스트 답변
-// 가격 정보 상태
-const expectedPrice = ref(null) // 시스템 예상가
-const marketAveragePrice = ref(null) // 평균 시세
-const hopePrice = ref(0) // 판매 희망가
+// Store 값
+const {
+  selectedCategory,
+  selectedCategoryValue,
+  selectedArtist,
+  selectedAlbum,
+  itemName,
+  itemDescription,
+  hashtags,
 
-// 체크리스트 필드(옵션 파싱)
-const fields = computed(() => {
-  const out = []
+  checklists,
+  answers,
 
-  for (const c of checklists.value) {
-    out.push({
-      checklistItemId: c.checklistItemId,
-      itemKey: c.itemKey,
-      label: c.label,
-      type: c.type,
-      options: parseOptions(c.options),
-      required: !!c.required,
-      orderIndex: c.orderIndex,
-    })
-  }
+  expectedPrice,
+  marketAvgPrice,
+  sellerHopePrice,
+} = storeToRefs(inspectionStore)
 
-  return out
-})
+// 로컬 상태 변수
+const categories = ref([]) // 카테고리 목록
+const artists = ref([]) // 아티스트 목록
+const albums = ref([]) // 앨범 목록
 
-// 모달
+// 모달 상태
 const showArtistModal = ref(false)
 const showAlbumModal = ref(false)
 
-// 로딩/에러
+// 로딩/에러 상태
 const loadingInitial = ref(false) // 최초 로딩(카테고리/아티스트)
 const loadingAlbums = ref(false) // 앨범 로딩
 const loadingChecklists = ref(false) // 체크리스트 로딩
 const loadingBaseline = ref(false) // 기준가 로딩
 const loadingEstimate = ref(false) // 예상가 로딩
 const loadingMarketAvg = ref(false) // 마켓 평균가 로딩
-const error = ref(null)
+const error = ref(null) // 에러 메시지
+
+const isPriceCalculated = ref(false) // 예상가 계산 완료 여부
 
 // fetchers : 카테고리/아티스트 조회
 async function fetchCategoriesAndArtists() {
-  const [catRes, artRes] = await Promise.all([getGoodsCategories(), getArtists()])
+  const [categories, artists] = await Promise.all([getGoodsCategories(), getArtists()])
   return {
-    categories: catRes.data ?? [], // null이나 undefined면 []
-    artists: artRes.data ?? [],
+    categories: categories ?? [],
+    artists: artists ?? [],
   }
 }
 
 // fetchers : 앨범 조회
 async function fetchAlbumsByArtistId(artistId) {
-  const res = await getAlbumsByArtist(artistId)
-  return res.data ?? []
+  const albums = await getAlbumsByArtist(artistId)
+  return albums ?? []
 }
 
 // fetchers : 체크리스트 조회
 async function fetchChecklistsByCategoryId(categoryId) {
-  const res = await getChecklistsByCategory(categoryId)
-  return res.data ?? []
+  const checklists = await getChecklistsByCategory(categoryId)
+  return checklists ?? []
 }
 
 // fetchers : 가격 기준가 조회
 async function fetchBaselinePriceByCategoryId(categoryId) {
-  const res = await getPriceBaselineByCategory(categoryId)
-  return res.data ?? null
+  const baseline = await getPriceBaselineByCategory(categoryId)
+  return baseline ?? null
 }
 
 onMounted(async () => {
@@ -105,46 +96,31 @@ onMounted(async () => {
   }
 })
 
-// 아티스트 선택 후 앨범 조회
-const onSelectArtist = async (artist) => {
-  selectedArtist.value = artist
-  selectedAlbum.value = null // 아티스트 바뀌면 앨범 초기화
-  showArtistModal.value = false
-
-  error.value = null
-
-  try {
-    albums.value = await fetchAlbumsByArtistId(artist.artistId)
-  } catch (err) {
-    error.value = err?.message || '앨범 데이터 조회 중 오류가 발생했습니다.'
-  } finally {
-    loadingAlbums.value = false
-  }
-}
-
-// 앨범 선택
-const onSelectAlbum = (album) => {
-  selectedAlbum.value = album
-  showAlbumModal.value = false
-}
+watch(
+  answers,
+  () => {
+    isPriceCalculated.value = false
+  },
+  { deep: true },
+)
 
 // 카테고리 선택 후 체크리스트/기준가 조회
 const onSelectCategory = async () => {
+  selectedCategoryValue.value = categories.value.find((c) => c.GoodsCategoryId === selectedCategory.value) || null
+
+  // 상태 초기화
   loadingChecklists.value = true
   loadingBaseline.value = true
   checklists.value = []
   answers.value = {}
-
   error.value = null
+  isPriceCalculated.value = false
 
   try {
-    const [checklistRes, baselineRes] = await Promise.all([
-      fetchChecklistsByCategoryId(selectedCategory.value),
-      fetchBaselinePriceByCategoryId(selectedCategory.value),
-    ])
+    const [checklistRes, baselineRes] = await Promise.all([fetchChecklistsByCategoryId(selectedCategory.value), fetchBaselinePriceByCategoryId(selectedCategory.value)])
 
-    expectedPrice.value = baselineRes
     checklists.value = checklistRes
+    expectedPrice.value = baselineRes
 
     // answers 초기화
     for (const c of checklists.value) {
@@ -159,48 +135,42 @@ const onSelectCategory = async () => {
   }
 }
 
-// 체크리스트 필수 검증
-const validateRequired = () => {
-  for (const f of fields.value) {
-    if (!f.required) continue
+// 아티스트 선택 후 앨범 조회
+const onSelectArtist = async (artist) => {
+  selectedArtist.value = artist
+  selectedAlbum.value = null
+  showArtistModal.value = false
+  error.value = null
 
-    const v = answers.value[f.itemKey]
-    const missing =
-      (f.type === 'BOOL' && v === null) || (f.type === 'SELECT' && (v === '' || v === 'null'))
-
-    if (missing) {
-      alert('필수 체크리스트를 선택해주세요.')
-      return false
-    }
+  try {
+    loadingAlbums.value = true
+    albums.value = await fetchAlbumsByArtistId(artist.artistId)
+  } catch (err) {
+    error.value = err?.message || '앨범 데이터 조회 중 오류가 발생했습니다.'
+  } finally {
+    loadingAlbums.value = false
   }
-
-  return true
 }
 
-// answers -> 서버 전송용 selections
-const buildSelections = () => {
-  const sel = {}
-  for (const [k, v] of Object.entries(answers.value)) {
-    if (v === null || v === '' || v === undefined) continue
-    if (v === true) sel[k] = 'Y'
-    else if (v === false) sel[k] = 'N'
-    else sel[k] = v
-  }
-
-  return sel
+// 앨범 선택
+const onSelectAlbum = (album) => {
+  selectedAlbum.value = album
+  showAlbumModal.value = false
 }
 
-// [예상가 계산] 버튼 핸들러
+// 예상가 계산
 const onEstimate = async () => {
+  // 검증
   if (!selectedCategory.value) return alert('카테고리를 먼저 선택해주세요.')
-  if (!validateRequired()) return
+  if (!validateChkRequired()) return
 
   loadingEstimate.value = true
   error.value = null
   try {
-    const selections = buildSelections()
-    const { data } = await estimatePrice(selectedCategory.value, selections)
-    expectedPrice.value = data ?? null
+    const selections = buildSelections() // 서버 전송용 포맷으로 변환
+    const estimated = await estimatePrice(selectedCategory.value, selections)
+    expectedPrice.value = estimated ?? null
+    isPriceCalculated.value = true
   } catch (err) {
     error.value = err?.message || '예상가 계산 중 오류가 발생했습니다.'
   } finally {
@@ -208,13 +178,108 @@ const onEstimate = async () => {
   }
 }
 
+// 체크리스트 필수 항목 검증
+const validateChkRequired = () => {
+  for (const f of fields.value) {
+    if (!f.required) continue
+
+    const v = answers.value[f.itemKey]
+    const isMissing = (f.type === 'BOOL' && v === null) || (f.type === 'SELECT' && (v === '' || v === 'null'))
+
+    if (isMissing) {
+      alert(`'${f.label}' 항목을 선택해주세요.`)
+      return false
+    }
+  }
+  return true
+}
+
+const validateStep1 = () => {
+  // 상품 정보 검증
+  if (!selectedCategory.value) {
+    alert('카테고리를 선택해주세요.')
+    return false
+  }
+  if (!selectedArtist.value) {
+    alert('아티스트를 선택해주세요.')
+    return false
+  }
+  if (!itemName.value || !itemName.value.trim()) {
+    alert('상품명을 입력해주세요.')
+    return false
+  }
+  if (!itemDescription.value || !itemDescription.value.trim()) {
+    alert('상품 설명을 입력해주세요.')
+    return false
+  }
+
+  // 체크리스트 검증
+  if (!validateChkRequired()) return false
+
+  // 3. 가격 정보 검증
+  if (!isPriceCalculated.value) {
+    alert('시스템 예상가를 다시 계산해주세요.')
+    return false
+  }
+  // if (marketAvgPrice.value === null) {
+  //   alert('평균 시세를 조회해주세요.')
+  //   return false
+  // }
+  if (sellerHopePrice.value === null || sellerHopePrice.value <= 0) {
+    alert('판매 희망가를 0보다 큰 값으로 입력해주세요.')
+    return false
+  }
+
+  // 모든 검증 통과
+  return true
+}
+
+// answers -> 서버 전송용 selections
+const buildSelections = () => {
+  const selections = {}
+  for (const [k, v] of Object.entries(answers.value)) {
+    if (v === null || v === '' || v === undefined) continue
+    if (v === true) selections[k] = 'Y'
+    else if (v === false) selections[k] = 'N'
+    else selections[k] = v
+  }
+
+  return selections
+}
+
+// 체크리스트 옵션 파싱
+const parseOptions = (raw) => {
+  if (raw == null) return []
+  if (Array.isArray(raw)) return raw
+  try {
+    return JSON.parse(raw)
+  } catch (e) {
+    console.log('JSON 파싱 실패: ', raw, e)
+    return []
+  }
+}
+
 // 다음 단계 이동
 const goNext = () => {
-  // TODO: validate
+  if (!validateStep1()) return
+
   router.push('/inspection/step2')
 }
 
-// 제목 미리보기
+// 체크리스트 필드 파싱
+const fields = computed(() => {
+  return checklists.value.map((c) => ({
+    checklistItemId: c.checklistItemId,
+    itemKey: c.itemKey,
+    label: c.label,
+    type: c.type,
+    options: parseOptions(c.options), // 옵션을 파싱하여 사용
+    required: !!c.required, // boolean 형태로 변환
+    orderIndex: c.orderIndex,
+  }))
+})
+
+// 상품명 입력란 아래에 표시될 미리보기 텍스트
 const previewText = computed(() => {
   const ak = selectedArtist.value?.nameKo || '[아티스트]'
   const at = selectedAlbum.value?.title || '[앨범]'
@@ -226,17 +291,6 @@ const previewText = computed(() => {
 const isCategoryDisabled = computed(() => loadingInitial.value)
 const isArtistDisabled = computed(() => loadingInitial.value)
 const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.value)
-
-// 체크리스트 옵션 파싱
-const parseOptions = (raw) => {
-  if (raw == null) return []
-  if (Array.isArray(raw)) return raw
-  try {
-    return JSON.parse(raw)
-  } catch (e) {
-    return []
-  }
-}
 </script>
 <template>
   <main class="bg-light py-5 inspection">
@@ -269,19 +323,10 @@ const parseOptions = (raw) => {
 
               <!-- 카테고리 -->
               <div class="form-group">
-                <label class="font-weight-medium">카테고리</label>
-                <select
-                  class="form-control"
-                  v-model="selectedCategory"
-                  :disabled="isCategoryDisabled"
-                  @change="onSelectCategory"
-                >
+                <label class="font-weight-medium"> 카테고리 <span class="text-danger">*</span> </label>
+                <select class="form-control" v-model="selectedCategory" :disabled="isCategoryDisabled" @change="onSelectCategory">
                   <option value="" disabled>선택하세요</option>
-                  <option
-                    v-for="c in categories"
-                    :key="c.GoodsCategoryId"
-                    :value="c.GoodsCategoryId"
-                  >
+                  <option v-for="c in categories" :key="c.GoodsCategoryId" :value="c.GoodsCategoryId">
                     {{ c.name }}
                   </option>
                 </select>
@@ -289,26 +334,19 @@ const parseOptions = (raw) => {
 
               <!-- 아티스트 -->
               <div class="form-group">
-                <label class="font-weight-medium">아티스트</label>
+                <label class="font-weight-medium"> 아티스트 <span class="text-danger">*</span> </label>
                 <div class="input-group">
                   <input
                     type="text"
                     class="form-control"
-                    :value="
-                      selectedArtist ? `${selectedArtist.nameKo} (${selectedArtist.nameEn})` : ''
-                    "
+                    :value="selectedArtist ? `${selectedArtist.nameKo} (${selectedArtist.nameEn})` : ''"
                     readonly
                     placeholder="아티스트 선택"
                     :disabled="isArtistDisabled"
                     @click="!isArtistDisabled && (showArtistModal = true)"
                   />
                   <div class="input-group-append">
-                    <button
-                      class="btn btn-outline-secondary"
-                      type="button"
-                      :disabled="isArtistDisabled"
-                      @click="!isArtistDisabled && (showArtistModal = true)"
-                    >
+                    <button class="btn btn-outline-secondary" type="button" :disabled="isArtistDisabled" @click="!isArtistDisabled && (showArtistModal = true)">
                       <i class="fa fa-search"></i>
                     </button>
                   </div>
@@ -329,30 +367,18 @@ const parseOptions = (raw) => {
                     @click="!isAlbumDisabled && (showAlbumModal = true)"
                   />
                   <div class="input-group-append">
-                    <button
-                      class="btn btn-outline-secondary"
-                      type="button"
-                      :disabled="isAlbumDisabled"
-                      @click="!isAlbumDisabled && (showAlbumModal = true)"
-                    >
+                    <button class="btn btn-outline-secondary" type="button" :disabled="isAlbumDisabled" @click="!isAlbumDisabled && (showAlbumModal = true)">
                       <i class="fa fa-search"></i>
                     </button>
                   </div>
                 </div>
-                <small v-if="loadingAlbums" class="text-muted"
-                  >앨범 목록을 불러오는 중입니다…</small
-                >
+                <small v-if="loadingAlbums" class="text-muted">앨범 목록을 불러오는 중입니다…</small>
               </div>
 
               <!-- 상품명 -->
               <div class="form-group">
-                <label class="font-weight-medium">상품명</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="예: 한정판 포토카드"
-                  v-model="itemName"
-                />
+                <label class="font-weight-medium"> 상품명 <span class="text-danger">*</span> </label>
+                <input type="text" class="form-control" placeholder="예: 한정판 포토카드" v-model="itemName" />
               </div>
 
               <!-- 미리보기 -->
@@ -362,24 +388,14 @@ const parseOptions = (raw) => {
 
               <!-- 설명 -->
               <div class="form-group">
-                <label class="font-weight-medium">상품 설명</label>
-                <textarea
-                  rows="3"
-                  class="form-control"
-                  placeholder="상품에 대한 설명을 입력해주세요."
-                  v-model="description"
-                />
+                <label class="font-weight-medium"> 상품 설명 <span class="text-danger">*</span> </label>
+                <textarea rows="3" class="form-control" placeholder="상품에 대한 설명을 입력해주세요." v-model="itemDescription" />
               </div>
 
               <!-- 해시태그 -->
               <div class="form-group">
                 <label class="font-weight-medium">해시태그</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="#아이브 #포토카드"
-                  v-model="hashtags"
-                />
+                <input type="text" class="form-control" placeholder="#아이브 #포토카드" v-model="hashtags" />
               </div>
             </div>
           </div>
@@ -398,9 +414,7 @@ const parseOptions = (raw) => {
                 style="border: 2px dashed #ddd; border-radius: 8px; background: #fafafa"
               >
                 <i class="fa fa-clipboard-list text-secondary mb-2" style="font-size: 1.5rem"></i>
-                <p class="mb-0 text-muted">
-                  체크리스트가 여기 표시됩니다.<br />카테고리를 먼저 선택하세요.
-                </p>
+                <p class="mb-0 text-muted">체크리스트가 여기 표시됩니다.<br />카테고리를 먼저 선택하세요.</p>
               </div>
 
               <div class="flex-fill" style="max-height: 320px; overflow-y: auto">
@@ -414,23 +428,11 @@ const parseOptions = (raw) => {
                   <template v-if="f.type === 'BOOL'">
                     <div>
                       <div class="form-check form-check-inline">
-                        <input
-                          class="form-check-input"
-                          type="radio"
-                          :name="f.itemKey"
-                          v-model="answers[f.itemKey]"
-                          :value="true"
-                        />
+                        <input class="form-check-input" type="radio" :name="f.itemKey" v-model="answers[f.itemKey]" :value="true" />
                         <label class="form-check-label">예</label>
                       </div>
                       <div class="form-check form-check-inline">
-                        <input
-                          class="form-check-input"
-                          type="radio"
-                          :name="f.itemKey"
-                          v-model="answers[f.itemKey]"
-                          :value="false"
-                        />
+                        <input class="form-check-input" type="radio" :name="f.itemKey" v-model="answers[f.itemKey]" :value="false" />
                         <label class="form-check-label">아니오</label>
                       </div>
                     </div>
@@ -464,12 +466,7 @@ const parseOptions = (raw) => {
                   <strong class="text-primary mr-2">
                     {{ expectedPrice ? expectedPrice.toLocaleString() + '원' : '데이터 없음' }}
                   </strong>
-                  <button
-                    class="btn btn-outline-primary btn-sm"
-                    type="button"
-                    :disabled="!selectedCategory || loadingEstimate"
-                    @click="onEstimate"
-                  >
+                  <button class="btn btn-outline-primary btn-sm" type="button" :disabled="!selectedCategory || loadingEstimate" @click="onEstimate">
                     <span v-if="loadingEstimate">계산 중…</span>
                     <span v-else>예상가 계산</span>
                   </button>
@@ -481,18 +478,9 @@ const parseOptions = (raw) => {
                 <span class="text-muted">평균 시세</span>
                 <div class="d-flex align-items-center">
                   <span class="mr-2">
-                    {{
-                      marketAveragePrice
-                        ? marketAveragePrice.toLocaleString() + '원'
-                        : '데이터 없음'
-                    }}
+                    {{ marketAvgPrice ? marketAvgPrice.toLocaleString() + '원' : '데이터 없음' }}
                   </span>
-                  <button
-                    class="btn btn-outline-secondary btn-sm"
-                    type="button"
-                    :disabled="!selectedCategory || loadingMarketAvg"
-                    @click="onFetchMarketAvg"
-                  >
+                  <button class="btn btn-outline-secondary btn-sm" type="button" :disabled="!selectedCategory || loadingMarketAvg" @click="onFetchMarketAvg">
                     <span v-if="loadingMarketAvg">계산 중…</span>
                     <span v-else>시세 조회</span>
                   </button>
@@ -500,11 +488,9 @@ const parseOptions = (raw) => {
               </div>
 
               <div class="form-group">
-                <label class="font-weight-medium">판매 희망가</label>
-                <input type="number" class="form-control" v-model="hopePrice" />
-                <small class="form-text text-muted">
-                  희망가와 예상가가 다를 수 있으며, 최종 가격은 검수 후 확정됩니다.
-                </small>
+                <label class="font-weight-medium"> 판매 희망가 <span class="text-danger">*</span> </label>
+                <input type="number" class="form-control" v-model="sellerHopePrice" />
+                <small class="form-text text-muted"> 희망가와 예상가가 다를 수 있으며, 최종 가격은 검수 후 확정됩니다. </small>
               </div>
             </div>
           </div>
