@@ -1,12 +1,8 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-
-// bootstrap modal
-import * as bootstrap from 'bootstrap'
-
-// 상태 관리 (Pinia)
 import { useInspectionStore } from '@/stores/inspectionStore'
+import { useModal } from '@/composables/useModal'
 import { storeToRefs } from 'pinia'
 
 const router = useRouter()
@@ -15,7 +11,11 @@ const inspectionStore = useInspectionStore()
 // 로컬 상태 변수
 const selectedImage = ref(null) // 모달에서 크게 볼 이미지 URL
 // Store 값
-const { uploadedFiles, shippingAddress, shippingAddressDetail, bankName, bankAccount } = storeToRefs(inspectionStore)
+const { uploadedFiles, shippingAddress, shippingAddressDetail, bankName, bankAccount, completedStep } = storeToRefs(inspectionStore)
+// 모달 composable 초기화
+const { initModal, show: showImageModal } = useModal('#imageModal')
+
+// TODO : 현재 로그인된 사용자 정보 가져오기
 
 const onFileChange = (event) => {
   const newFiles = Array.from(event.target.files) // FileList -> Array
@@ -28,7 +28,8 @@ const onFileChange = (event) => {
       break
     }
 
-    const allowedTypes = ['image/jpg', 'image/png']
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png']
+
     if (!allowedTypes.includes(f.type)) {
       alert(`'${f.name}' 파일은 지원하지 않는 형식입니다. (JPG, PNG만 가능)`)
       continue
@@ -54,8 +55,7 @@ const onFileChange = (event) => {
 // 썸네일 이미지 클릭 시 큰 이미지 모달
 const openModal = (url) => {
   selectedImage.value = url
-  const modal = new bootstrap.Modal(document.getElementById('imageModal'))
-  modal.show()
+  showImageModal()
 }
 
 const removeFile = (index) => {
@@ -68,7 +68,7 @@ const loadMyInfo = () => {
   // TODO : 현재 로그인된 사용의 주소와 계좌 정보 가져오는 API
 }
 
-const validateStep2 = () => {
+const validateAll = () => {
   // 이미지 검증
   if (uploadedFiles.value.length < 2) {
     alert('이미지를 최소 2장(앞/뒤) 이상 등록해주세요.')
@@ -99,12 +99,25 @@ const validateStep2 = () => {
 
 // 다음 단계 클릭 시
 const goNext = () => {
-  if (!validateStep2()) return
+  if (!validateAll()) return
+  completedStep.value = 2
   router.push('/inspection/step3')
 }
 
 // 이전 단계 클릭 시
 const goPrev = () => router.push('/inspection/step1')
+
+onMounted(() => {
+  initModal()
+  if (completedStep.value < 1) {
+    alert('잘못된 접근입니다. 이전 단계를 먼저 완료해주세요.')
+    router.replace('/inspection/step1')
+  }
+})
+
+onUnmounted(() => {
+  uploadedFiles.value.forEach((f) => URL.revokeObjectURL(f.previewUrl))
+})
 </script>
 
 <template>
@@ -133,7 +146,7 @@ const goPrev = () => router.push('/inspection/step1')
                 <i class="fa fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
                 <p class="text-muted mb-1">드래그 앤 드롭 또는</p>
                 <label for="file-upload" class="text-primary font-weight-bold cursor-pointer">파일 선택</label>
-                <input id="file-upload" type="file" multiple hidden @change="onFileChange" />
+                <input id="file-upload" type="file" multiple hidden accept="image/jpeg,image/png" @change="onFileChange" />
               </div>
 
               <p class="text-muted small mb-2">상품의 상태가 잘 보이도록 촬영된 사진을 등록해주세요.</p>
@@ -147,9 +160,9 @@ const goPrev = () => router.push('/inspection/step1')
 
               <!-- 썸네일 -->
               <div class="d-flex gap-3 flex-wrap">
-                <div v-for="(f, idx) in uploadedFiles" :key="f.name" class="thumbnail-wrapper">
-                  <img :src="f.previewUrl" class="img-thumbnail rounded" :alt="f.name" @click="openModal(f.previewUrl)" />
-                  <button type="button" class="delete-btn" @click="removeFile(idx)">×</button>
+                <div v-for="(f, idx) in uploadedFiles" :key="f.previewUrl" class="thumbnail-wrapper">
+                  <img :src="f.previewUrl" class="img-thumbnail rounded" :alt="f.name" @click="openModal(f.previewUrl)" aria-label="이미지 크게 보기" />
+                  <button type="button" class="delete-btn" @click="removeFile(idx)" aria-label="썸네일 삭제">×</button>
                 </div>
               </div>
             </div>

@@ -27,6 +27,9 @@ export const useInspectionStore = defineStore('inspection', () => {
   const bankName = ref('')
   const bankAccount = ref('')
 
+  // 접근 제어를 위한 완료 단계
+  const completedStep = ref(0) // 0: 시작 전, 1: 1단계 완료, 2: 2단계 완료
+
   // Store의 모든 상태를 초기화하는 함수
   function $reset() {
     selectedCategory.value = ''
@@ -46,6 +49,7 @@ export const useInspectionStore = defineStore('inspection', () => {
     shippingAddressDetail.value = ''
     bankName.value = ''
     bankAccount.value = ''
+    completedStep.value = 0
   }
 
   return {
@@ -66,6 +70,7 @@ export const useInspectionStore = defineStore('inspection', () => {
     shippingAddressDetail,
     bankName,
     bankAccount,
+    completedStep,
     $reset,
   }
 })

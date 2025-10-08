@@ -1,13 +1,9 @@
 <script setup>
 import { useRouter } from 'vue-router'
-import { ref, computed } from 'vue'
-import * as bootstrap from 'bootstrap'
-
-// API 모듈
+import { ref, onMounted } from 'vue'
 import { submitInspection } from '@/api/userInspection.js'
-
-// 상태 관리 (Pinia)
 import { useInspectionStore } from '@/stores/inspectionStore'
+import { useModal } from '@/composables/useModal'
 import { storeToRefs } from 'pinia'
 
 const router = useRouter()
@@ -20,33 +16,34 @@ const error = ref(null) // API 에러 메시지
 
 // Store 값 가져오기
 const {
-  selectedCategory, // id
-  selectedCategoryValue, // 객체
+  selectedCategory,
+  selectedCategoryValue,
   selectedArtist,
   selectedAlbum,
   itemName,
   itemDescription,
   hashtags,
-
   checklists,
   answers,
-
   expectedPrice,
   marketAvgPrice,
   sellerHopePrice,
-
   uploadedFiles,
   shippingAddress,
   shippingAddressDetail,
   bankName,
   bankAccount,
+  completedStep,
 } = storeToRefs(inspectionStore)
+
+// Modal 초기화
+const { initModal, show: openPolicyModal, hide: closePolicyModal } = useModal('#policyModal')
 
 // 체크리스트 답변 -> 화면 표시 텍스트
 const formatAnswer = (answer) => {
   if (answer === true) return '예'
   if (answer === false) return '아니오'
-  if (answer === null || answer === '') '-'
+  if (answer === null || answer === '') return '-'
 
   return answer
 }
@@ -57,10 +54,10 @@ const formatPrice = (price) => {
   return price.toLocaleString() + '원'
 }
 
-// 정책 동의 모달
-const openPolicyModal = () => {
-  const modal = new bootstrap.Modal(document.getElementById('policyModal'))
-  modal.show()
+// 정책 동의
+const agreeToPolicy = () => {
+  isAgreed.value = true
+  closePolicyModal()
 }
 
 // 이전 단계
@@ -69,10 +66,12 @@ const goPrev = () => {
 }
 
 // 신청 완료 버튼 클릭 시
-const finish = async () => {
-  // 최종 유효성 검사 (정책 동의 여부)
+const submit = async () => {
+  if (isLoading.value) return
+
   if (!isAgreed.value) {
     alert('검수 및 판매 정책에 동의해주세요.')
+    openPolicyModal()
     return
   }
 
@@ -88,27 +87,21 @@ const finish = async () => {
       itemDescription: itemDescription.value,
       hashtags: hashtags.value,
       answers: answers.value,
-
       expectedPrice: expectedPrice.value,
       marketAvgPrice: marketAvgPrice.value,
       sellerHopePrice: sellerHopePrice.value,
-
       uploadedFiles: uploadedFiles.value,
-
       shippingAddress: shippingAddress.value,
       shippingAddressDetail: shippingAddressDetail.value,
       bankName: bankName.value,
       bankAccount: bankAccount.value,
     }
 
-    // API 함수를 호출하여 서버에 데이터를 전송합니다.
     await submitInspection(inspectionData)
-
     alert('검수 신청이 성공적으로 완료되었습니다!')
-
-    // TODO: 신청 완료 후에는 Store를 초기화하고 메인 페이지나 마이페이지로 이동시킵니다.
-    // inspectionStore.$reset();
-    // router.push('/mypage/inspections');
+    inspectionStore.$reset()
+    // TODO: 신청 완료 후에는 마이페이지로 이동시킵니다.
+    router.push('/')
   } catch (err) {
     error.value = err?.message || '신청 처리 중 오류가 발생했습니다.'
     alert(error.value)
@@ -116,9 +109,25 @@ const finish = async () => {
     isLoading.value = false
   }
 }
+
+onMounted(() => {
+  if (completedStep.value < 2) {
+    alert('잘못된 접근입니다. 이전 단계를 먼저 완료해주세요.')
+    router.replace('/inspection/step1')
+  }
+
+  initModal()
+})
 </script>
 
 <template>
+  <div v-if="isLoading" class="loading-overlay">
+    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+    <p class="mt-3 text-white">신청 정보를 제출 중입니다...</p>
+  </div>
+
   <main class="bg-light py-5 inspection">
     <div class="container">
       <div class="mb-4 text-center">
@@ -200,7 +209,7 @@ const finish = async () => {
             <h6 class="font-weight-bold">업로드된 사진</h6>
             <div class="d-flex gap-2 mt-3 flex-wrap">
               <div v-for="f in uploadedFiles" :key="f.previewUrl" class="thumbnail-wrapper">
-                <img :src="f.previewUrl" class="img-thumbnail rounded" :alt="f.name" />
+                <img :src="f.previewUrl" class="img-thumbnail rounded" :alt="f.file?.name || 'uploaded-image'" />
               </div>
             </div>
           </div>
@@ -208,15 +217,16 @@ const finish = async () => {
       </div>
 
       <div class="mb-3 form-check">
-        <input class="form-check-input" type="checkbox" id="agree" v-model="isAgreed" />
-        <label class="form-check-label" for="agree">
+        <input class="form-check-input" type="checkbox" id="agree" :checked="isAgreed" disabled />
+        <label class="form-check-label" for="agree" @click.prevent="openPolicyModal" style="cursor: pointer">
           검수 및 판매 대행 정책에 모두 동의합니다.
-          <a href="#" @click.prevent="openPolicyModal" class="text-primary font-weight-bold ml-2">(내용 보기)</a>
+          <span class="text-primary font-weight-bold ml-2">(내용 보기)</span>
         </label>
       </div>
-      <div class="d-flex justify-content-between">
+
+      <div class="d-flex justify-content-between mt-4">
         <button class="btn btn-secondary px-5" @click="goPrev" :disabled="isLoading">이전 단계</button>
-        <button class="btn btn-primary px-5" @click="finish" :disabled="!isAgreed || isLoading">
+        <button class="btn btn-primary px-5" @click="submit" :disabled="!isAgreed || isLoading">
           <span v-if="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
           {{ isLoading ? '신청 처리 중...' : '신청 완료' }}
         </button>
@@ -224,12 +234,12 @@ const finish = async () => {
     </div>
   </main>
 
-  <div class="modal fade" id="policyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal fade" id="policyModal" role="dialog" aria-modal="true" aria-labelledby="policyModalTitle" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title font-weight-bold">검수 및 판매 대행 정책</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h5 id="policyModalTitle" class="modal-title font-weight-bold">검수 및 판매 대행 정책</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         </div>
         <div class="modal-body">
           <p>검수 신청 전, 아래의 판매 대행 정책을 반드시 확인하고 동의해주세요.</p>
@@ -256,7 +266,8 @@ const finish = async () => {
           <p class="font-weight-bold">위 정책에 동의하고 검수 신청을 진행하시겠습니까?</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="isAgreed = true">확인 및 동의</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+          <button type="button" class="btn btn-primary" @click="agreeToPolicy">확인 및 동의</button>
         </div>
       </div>
     </div>
@@ -283,5 +294,19 @@ dt {
 dd {
   font-weight: 500;
   color: #333;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1040;
 }
 </style>
