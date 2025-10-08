@@ -8,7 +8,7 @@ const uiStore = useUiStore();
 
 const userStore = useUserStore();
 onMounted(() => {
-  if(userStore.isLoggedIn){
+  if(userStore.isLoggedIn || userStore.currentUser == null) {
     userStore.fetchUser();  //토큰 기반 유저 상태복구
   }
 });

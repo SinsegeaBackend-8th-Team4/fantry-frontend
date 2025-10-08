@@ -35,6 +35,18 @@ export const deactiveateMember = (memberId) => {
     return apiClient.put(serverPath + `/api/member/${memberId}/delete`);
 }
 
+// 회원 복구(토큰으로 회원 조회)
+export const getMemberByToken = () => {
+    return apiClient.get(serverPath + '/api/member/me');
+}
+
+// 비밀번호로 회원 인증
+export const verifyMemberPassword = (id, password) => {
+    return apiClient.get(serverPath + `/api/member/${id}/verifyPassword`, {
+        params: { password }
+    });
+}
+
 /* -------------------------------------------------------------
     회원 신고
 ---------------------------------------------------------------*/

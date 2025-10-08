@@ -19,8 +19,7 @@
 
     if(response.status === 200){
       localStorage.setItem("accessToken", response.data.accessToken);
-
-      userStore.setLoginInfo(response.data.memberResponse, response.data.accessToken);
+      userStore.setLoginInfo(response.data.tokenMemberResponse, response.data.accessToken);
       router.push('/');
     } else {
       console.log(response);

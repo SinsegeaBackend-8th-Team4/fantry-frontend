@@ -17,6 +17,11 @@ const handleLogout = () => {
   });
 }
 
+//마이페이지
+const goToMyPage = () => {
+  router.push('/mypage');
+}
+
 </script>
 
 <template>
@@ -45,7 +50,7 @@ const handleLogout = () => {
       <div class="navbar-nav ml-auto py-0">
         <template v-if="userStore.isLoggedIn">
           <NavigationItem @click="handleLogout">로그아웃</NavigationItem>
-          <NavigationItem>마이페이지</NavigationItem>
+          <NavigationItem @click="goToMyPage">마이페이지</NavigationItem>
         </template>
         <template v-else>
           <NavigationItem @click="router.push('login')">로그인 </NavigationItem>
