@@ -71,6 +71,11 @@
       <div class="forgot-wrap">
         <span @click="goToFind">비밀번호를 잊으셨나요?</span>
       </div>
+
+      <!-- 회원 가입 -->
+      <div class="signup-wrap" style="text-align: center; margin-top: 20px;">
+        <span><router-link to="/admin/signup">관리자 계정이 없으신가요?</router-link></span>
+      </div>
     </div>
     <!-- Login contenxt End -->
     
@@ -174,6 +179,12 @@
   .forgot-wrap span {
     font-size: 12px;
     color: #5C7BFF;
+    text-decoration: none;
+  }
+
+  .signup-wrap span {
+    font-size: 13px;
+    color: #1e3264;
     text-decoration: none;
   }
 
