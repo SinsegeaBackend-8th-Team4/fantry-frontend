@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+import { apiClient } from '@/api/index.js';
 
 /**
  * 사용자 관련 전역 상태를 관리하는 Pinia 스토어입니다.
@@ -79,13 +80,14 @@ export const useUserStore = defineStore('user', () => {
   const fetchUser = async () => {
     if(!authToken.value) return;
     try {
-      const response = await apiClient.get('/api/member/me');
-      console.log("사용자 정보 : ", response.data);
-      currentUser.value = response.data.member;    // 수정필
+      const response = await apiClient.get('/member/me');
+      currentUser.value = response.data.member;
 
     } catch (error) {
-      console.error('사용자 정보 가져오기 실패, 토큰 만료 혹은 유효하지 않음.', error);
-      logout();
+      if( error.response.status !== 401 ){
+        console.error('사용자 정보 가져오기 실패, 토큰 만료 혹은 유효하지 않음.', error);
+        logout();
+      }
     }
   };
 
