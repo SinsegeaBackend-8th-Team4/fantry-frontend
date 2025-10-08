@@ -1,5 +1,17 @@
 <template>
-    <div class="container">
+    <!-- 1. 데이터 로딩 상태 표시 -->
+    <div v-if="isLoading" class="loading-container">
+        <h2>경매 정보를 불러오는 중...</h2>
+    </div>
+
+    <!-- 2. 에러 발생 시 에러 메시지 표시 -->
+    <div v-else-if="error" class="error-container">
+        <h2>오류가 발생했습니다.</h2>
+        <p>{{ error }}</p>
+    </div>
+
+    <!-- 3. 데이터 로드 완료 후 전체 화면 렌더링 -->
+    <div v-else-if="auction" class="container">
         <div class="row g-6">
             <div class="col-md-6">
                 <img :src="mainImageSrc" alt="상품 이미지" class="product-image mb-3">
@@ -17,20 +29,44 @@
 
             <div class="col-md-6 d-flex flex-column bordered-section">
                 
-                <h2 class="product-title-main mb-5"><strong>[상품명] 아이돌 포토카드 세트</strong></h2>
+                <h2 class="product-title-main mb-5"><strong>{{ auction.itemName }}</strong></h2>
 
-                <div class="countdown-timer mb-5">
-                    <span class="countdown-label">경매 마감까지 남은 시간</span>
-                    <span class="countdown-time">{{ timeRemaining }}</span>
-                </div>
+                <!-- saleType에 따른 조건부 렌더링 -->
+                <!-- Case 1: 경매 상품일 경우 ('AUCTION') -->
+                <template v-if="isAuction">
+                    <div class="countdown-timer mb-5">
+                        <span class="countdown-label">경매 마감까지 남은 시간</span>
+                        <span class="countdown-time">{{ timeRemaining }}</span>
+                    </div>
+                    <div class="bid-section-main text-center mb-5">
+                        <h5 class="mb-3">현재 입찰가</h5>
+                        <!-- 현재 입찰가 데이터 바인딩 -->
+                        <p id="current-bid-price" :class="['current-bid-price-main', { 'bid-success-effect': isBidSuccess }]">{{ formattedCurrentPrice }}</p>
+                    </div>
+                    <!-- 로그인 상태에 따라 버튼 활성화/비활성화 -->
+                    <button class="btn btn-danger btn-lg w-100" @click="openBidModal" :disabled="!userStore.isLoggedIn"
+                        :title="!userStore.isLoggedIn ? '로그인이 필요합니다.' : '입찰에 참여하세요'">
+                        {{ userStore.isLoggedIn ? '경매 참여하기' : '로그인 후 참여 가능' }}
+                    </button>
+                </template>
 
-                <div class="bid-section-main text-center mb-5">
-                    <h5 class="mb-3">현재 입찰가</h5>
-                    <p id="current-bid-price" :class="['current-bid-price-main', { 'bid-success-effect': isBidSuccess }]">{{ currentBidPrice }}</p>
-                </div>
-                
-                <button class="btn btn-danger btn-lg w-100" @click="openBidModal">경매 참여하기</button>
-
+                <!-- Case 2: 즉시 구매 상품일 경우 ('INSTANT_BUY') -->
+                <template v-else-if="isInstantBuy">
+                    <div class="countdown-timer mb-5">
+                        <span class="countdown-label">판매 마감까지 남은 시간</span>
+                        <span class="countdown-time">{{ timeRemaining }}</span>
+                    </div>
+                    <div class="bid-section-main text-center mb-5">
+                        <h5 class="mb-3">즉시 구매가</h5>
+                        <!-- 판매가 데이터 바인딩 -->
+                        <p class="current-bid-price-main">{{ formattedStartPrice }}</p>
+                    </div>
+                    <!-- 로그인 상태에 따라 버튼 활성화/비활성화 -->
+                    <button class="btn btn-primary btn-lg w-100" @click="purchaseNow" :disabled="!userStore.isLoggedIn"
+                        :title="!userStore.isLoggedIn ? '로그인이 필요합니다.' : '즉시 구매하세요'">
+                        {{ userStore.isLoggedIn ? '즉시 구매하기' : '로그인 후 구매 가능' }}
+                    </button>
+                </template>
             </div>
         </div>
 
@@ -39,25 +75,18 @@
                 <div class="details-section">
                     <h3 class="details-title">상품 상세 정보</h3>
                     <div class="details-grid">
+                        <div class="detail-item"><span><strong>카테고리</strong></span><span>{{ auction.categoryName }}</span></div>
+                        <div class="detail-item"><span><strong>아티스트</strong></span><span>{{ auction.artistName }}</span></div>
+                        <!-- albumTitle이 null이 아닐 경우에만 렌더링 -->
+                        <div class="detail-item" v-if="auction.albumTitle"><span><strong>앨범</strong></span><span>{{ auction.albumTitle }}</span></div>
                         <div class="detail-item">
-                            <span><strong>카테고리</strong></span>
-                            <span id="category">굿즈</span>
+                            <span><strong>{{ isAuction ? '경매 시작' : '판매 시작' }}</strong></span><span>{{ formattedStartTime }}</span>
                         </div>
                         <div class="detail-item">
-                            <span><strong>아티스트</strong></span>
-                            <span id="artist_name">아이브</span>
+                            <span><strong>{{ isAuction ? '경매 마감' : '판매 마감' }}</strong></span><span>{{ formattedEndTime }}</span>
                         </div>
                         <div class="detail-item">
-                            <span><strong>경매 시작</strong></span>
-                            <span id="start-time">2025-09-15 10:00:00</span>
-                        </div>
-                        <div class="detail-item">
-                            <span><strong>경매 마감</strong></span>
-                            <span id="end-time">2025-09-30 22:00:00</span>
-                        </div>
-                        <div class="detail-item">
-                            <span><strong>경매 시작가</strong></span>
-                            <span id="start_price">10,000원</span>
+                            <span><strong>{{ isAuction ? '경매 시작가' : '판매가' }}</strong></span><span>{{ formattedStartPrice }}</span>
                         </div>
                     </div>
                 </div>
@@ -69,15 +98,12 @@
             <div class="col-12">
                 <div class="product-description">
                     <h5><strong>상품 설명</strong></h5>
-                    <p id="product_description">
-                        After LIKE 앨범의 미개봉 포토카드 세트입니다. <br>
-                        모든 멤버가 포함되어 있으며, 상태는 최상입니다.
-                    </p>
+                    <p>{{ auction.itemDescription }}</p>
                 </div>
             </div>
         </div>
 
-        <div v-if="isBidModalVisible" class="modal-overlay" @click.self="closeBidModal">
+        <div v-if="isAuction && isBidModalVisible" class="modal-overlay" @click.self="closeBidModal">
             <div class="modal-content">
                 <button class="modal-close-btn" @click="closeBidModal">&times;</button>
                 <h3>경매 참여</h3>
@@ -96,7 +122,7 @@
 
                 <div class="current-bid-modal mb-3">
                     <small>현재 입찰가</small>
-                    <span>{{ currentBidPrice }}</span>
+                    <span>{{ formattedCurrentPrice }}</span>
                 </div>
 
                 <div class="quick-bid-buttons mb-3">
@@ -117,19 +143,43 @@
 </template>
 
 <script setup>
-    import { ref, onMounted, onUnmounted } from 'vue';
-    import { Client } from '@stomp/stompjs';
-    import SockJS from 'sockjs-client';
 
-    // --- 데이터 영역 ---
-    const currentBidPrice = ref("15,000원"); // 초기값
+/* =============================================
+ * 1. 임포트 (Import) & 초기 설정
+ * ============================================= */
+    import { ref, onMounted, onUnmounted, computed } from 'vue';
+    import { useRoute } from 'vue-router';
+    import { publicApiClient } from '@/api';
+    import { useUserStore } from '@/stores/userStore';
+    import { subscribe, unsubscribe, publish } from '@/services/websocketService';
+    const route = useRoute();
+    const userStore = useUserStore();
+    const auctionId = route.params.id;
+
+
+    /* =============================================
+    * 2. 상태 (State)
+    * - API 데이터, 실시간 데이터, UI 제어용 데이터를 명확히 분리
+    * ============================================= */
+    // --- API 데이터 상태 ---
+    const auction = ref(null);
+    const isLoading = ref(true);
+    const error = ref(null);
+    const bidHistory = ref([
+      { amount: 16000, time: '2025.09.24 11:30:15' },
+      { amount: 15000, time: '2025.09.24 10:25:41' }
+    ]);
+
+    // --- 실시간 데이터 상태 ---
+    const currentBidPrice = ref(0);
+    const timeRemaining = ref('');
+    let countdownInterval = null;
+
+    // --- UI 제어 상태 ---
+    const isBidModalVisible = ref(false);
     const bidAmount = ref('');
-    const auctionId = 1; // 예시 ID
-    const stompClient = ref(null);
-    const isBidSuccess = ref(false); // 입찰 성공 효과를 위한 상태
-    const timeRemaining = ref(''); // 경매 마감까지 남은 시간 표시
-    let countdownInterval = null;  // setInterval을 저장할 변수
-    const startPrice = ref("10,000원"); // 시작가
+    const isBidSuccess = ref(false);
+    const isBidHistoryVisible = ref(false);
 
     //썸네일 이미지 데이터
     const productImages = ref([
@@ -141,19 +191,186 @@
         { id: 6, src: '/images/sy.png' },
         { id: 7, src: '/images/wt.png' } 
     ]);
+    
     //메인 썸네일 이미지 경로
     const mainImageSrc = ref(productImages.value[0].src);
 
-    //경매 참여 모달 관련
-    const isBidModalVisible = ref(false);
-    const isBidHistoryVisible = ref(false);
-    const bidHistory = ref([
-      { amount: 16000, time: '2025.09.24 11:30:15' },
-      { amount: 15000, time: '2025.09.24 10:25:41' }
-    ]);
+    /* =============================================
+    * 3. 계산된 속성 (Computed)
+    * - 상태를 기반으로 동적인 값을 계산
+    * ============================================= */
+    const isAuction = computed(() => auction.value?.saleType === 'AUCTION');
+    const isInstantBuy = computed(() => auction.value?.saleType === 'INSTANT_BUY');
 
-    // --- 함수 영역 ---
+    const formatPrice = (price) => price != null ? price.toLocaleString() + '원' : '가격 정보 없음';
+    const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleString('ko-KR') : '';
 
+    const formattedCurrentPrice = computed(() => formatPrice(currentBidPrice.value));
+    const formattedStartPrice = computed(() => formatPrice(auction.value?.price));
+    const formattedStartTime = computed(() => formatDate(auction.value?.startTime));
+    const formattedEndTime = computed(() => formatDate(auction.value?.endTime));
+
+
+    /* =============================================
+    * 4. 메서드 (Methods) 영역
+    * ============================================= */
+
+    /**
+     *  API를 호출하여 경매/판매 상세 정보를 가져오고, 후속 작업을 시작
+     */
+    const fetchAuctionData = async () => {
+        try {
+            isLoading.value = true;
+            const response = await publicApiClient.get(`/api/auctions/${auctionId}`);
+            auction.value = response.data;
+            
+            // 경매 상품일 경우에만 WebSocket 구독 및 초기 가격 설정
+            if (isAuction.value) {
+                currentBidPrice.value = auction.value.price; 
+                setupWebSocketSubscription();
+                fetchBidHistory();
+            }
+            startCountdown(); // 경매/판매 모두 카운트다운 시작
+        } catch (err) {
+            error.value = "상품 정보를 불러오는 데 실패했습니다. 페이지를 새로고침해주세요.";
+            console.error("Fetch auction data failed:", err);
+        } finally {
+            isLoading.value = false;
+        }
+    };
+    
+    
+    // WebSocket을 통해 현재 경매의 실시간 입찰 토픽을 구독
+    const setupWebSocketSubscription = () => {
+        subscribe(`/topic/auctions/${auctionId}`, (message) => {
+            const broadcast = JSON.parse(message.body);
+            currentBidPrice.value = broadcast.newPrice;
+            //새로운 입찰이 생기면 입찰 기록 갱신
+        const newHistoryEntry = {
+            amount: broadcast.newPrice,
+            time: new Date().toLocaleString('ko-KR'),
+        };
+        bidHistory.value.unshift(newHistoryEntry);
+
+            isBidSuccess.value = true;
+            setTimeout(() => { isBidSuccess.value = false; }, 500);
+        });
+    };
+
+    /**
+     * 현재 경매의 지난 입찰 기록을 API로 조회
+     */
+    const fetchBidHistory = async () => {
+        try {
+            const response = await publicApiClient.get(`/api/bids/${auctionId}`);
+            bidHistory.value = response.data; // 실제 API 응답 구조에 맞춰야 함
+        } catch (err) {
+            console.error("Failed to fetch bid history:", err);
+        }
+    };
+
+    // 입찰 금액 서버로 전송 (로그인 상태 확인 포함)
+    const sendBid = () => {
+        if (!userStore.isLoggedIn) {
+            alert("로그인이 필요한 기능입니다.");
+            return;
+        }
+        
+        const bidData = {
+            bidAmount: parseInt(bidAmount.value, 10)
+        };
+        
+        // 중앙 websocketService의 발행 함수를 사용.
+        publish({
+            destination: `/app/auctions/${auctionId}/bids`,
+            body: JSON.stringify(bidData)
+        });
+
+        bidAmount.value = '';
+        closeBidModal();
+    };
+
+    /**
+     *  즉시 구매 버튼 클릭 시 동작할 메서드
+     */
+    const purchaseNow = () => {
+        if (!userStore.isLoggedIn) {
+            alert("로그인이 필요한 기능입니다.");
+            return;
+        }
+        // TODO: 즉시 구매 로직 구현 (결제 페이지로 이동)
+        console.log("즉시 구매 시도");
+    };
+
+
+    const validateAndConfirmBid = () => {
+        const newBid = parseInt(bidAmount.value, 10);
+        const numericCurrentPrice = currentBidPrice.value;
+        const numericStartPrice = auction.value.price;
+
+        // 1. 빈 값 및 100원단위 확인
+        if (isNaN(newBid) || newBid <= 0 || newBid % 100 !== 0) {
+            alert("입찰 금액을 100원 단위의 올바른 숫자로 입력해주세요.");
+            return;
+        }
+        
+        // 2. 입찰가 비교
+        // 입찰 기록이 없을 때 (첫 입찰)
+        if (numericCurrentPrice === numericStartPrice) {
+            if (newBid <= numericStartPrice) {
+                alert(`입찰 금액은 시작가(${formattedStartPrice.value})보다 높아야 합니다.`);
+                return;
+            }
+        } else { // 입찰 기록이 있을 때
+            if (newBid < numericCurrentPrice + 1000) {
+                alert(`입찰 금액은 현재가(${formattedCurrentPrice.value})보다 1,000원 이상 높아야 합니다.`);
+                return;
+            }
+        }
+
+        // 4. 최종 입찰 확인
+        const isConfirmed = confirm(`${newBid.toLocaleString()}원 입찰하시겠습니까?`);
+
+        if (isConfirmed) {
+            sendBid();
+        }
+    };
+
+
+    //썸네일 이미지 호버 효과
+    const changeMainImage = (newSrc) => {
+        mainImageSrc.value = newSrc;
+    };
+
+    // 경매 마감까지 남은 시간 계산 및 표시
+    const startCountdown = () => {
+        if (!auction.value?.endTime) return;
+        const endTime = new Date(auction.value.endTime).getTime();
+
+        countdownInterval = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = endTime - now;
+
+            if (distance < 0) {
+                clearInterval(countdownInterval);
+                timeRemaining.value = isAuction.value ? "경매 종료" : "판매 종료";
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            let remainingString = "";
+            if (days > 0) remainingString += `${days}일 `;
+            remainingString += `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            timeRemaining.value = remainingString;
+        }, 1000);
+    };
+
+
+    //모달 ui 영역
     const openBidModal = () => {
         isBidModalVisible.value = true;
     };
@@ -167,168 +384,22 @@
         isBidHistoryVisible.value = !isBidHistoryVisible.value;
     };
 
-
-    const parsePrice = (priceString) => {
-        if (!priceString) return 0;
-        return parseInt(priceString.replace(/[^\d]/g, ''), 10);
-   };
-
     const quickBid = (amountToAdd) => {
-        const currentNumericPrice = parsePrice(currentBidPrice.value);
-        bidAmount.value = currentNumericPrice + amountToAdd;
+        bidAmount.value = currentNumericPrice.value + amountToAdd;
     };
 
-    const validateAndConfirmBid = () => {
-        const newBid = parseInt(bidAmount.value, 10);
-        const numericCurrentPrice = parsePrice(currentBidPrice.value);
-        const numericStartPrice = parsePrice(startPrice.value);
-
-        // 1. 빈 값 확인
-        if (isNaN(newBid) || newBid <= 0) {
-            alert("입찰 금액을 올바르게 입력해주세요.");
-            return;
-        }
-
-
-        // 2. 100원 단위 확인
-        if (newBid % 100 !== 0) {
-            alert("입찰 금액은 100원 단위로 입력해야 합니다.");
-            return;
-        }
-        
-        // 3. 입찰가 비교
-        // 입찰 기록이 없을 때 (첫 입찰)
-        if (bidHistory.value.length === 0) {
-            if (newBid <= numericStartPrice) {
-                alert(`입찰 금액은 시작가(${startPrice.value})보다 높아야 합니다.`);
-                return;
-            }
-        } else { // 입찰 기록이 있을 때
-            if (newBid < numericCurrentPrice + 1000) {
-                alert(`입찰 금액은 현재가(${currentBidPrice.value})보다 1,000원 이상 높아야 합니다.`);
-                return;
-            }
-        }
-
-        // 4. 최종 입찰 확인
-        const isConfirmed = confirm(`${newBid.toLocaleString()}원 입찰하시겠습니까?`);
-        if (isConfirmed) {
-            sendBid();
-        }
-    };
-
-
-
-
-
-    //썸네일 이미지 호버 효과
-    const changeMainImage = (newSrc) => {
-        mainImageSrc.value = newSrc;
-    };
-
-    // 경매 마감까지 남은 시간 계산 및 표시
-    const startCountdown = () => {
-        // 경매 마감 시간 설정 (HTML에 있는 값을 가져오거나 직접 입력)
-        const endTimeString = document.getElementById('end-time').innerText;
-        const endTime = new Date(endTimeString).getTime();
-
-        countdownInterval = setInterval(() => {
-            const now = new Date().getTime();
-            const distance = endTime - now;
-
-            if (distance < 0) {
-                clearInterval(countdownInterval);
-                timeRemaining.value = "경매 종료";
-                return;
-            }
-
-            // 시간 계산
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            // 표시할 문자열 생성
-            let remainingString = "";
-            if (days > 0) remainingString += `${days}일 `;
-            remainingString += `${hours}시간 ${minutes}분 ${seconds}초`;
-
-            timeRemaining.value = remainingString;
-
-        }, 1000); // 1초마다 실행
-    };
-
-    // WebSocket 연결 및 구독 설정
-    const connect = () => {
-        stompClient.value = new Client({
-            webSocketFactory: () => {
-                return new SockJS('http://localhost:8080/ws-auction'); //서버 Endpoint 연결
-            },
-            
-            onConnect: (frame) =>{
-                console.log('연결 성공' + frame);
-
-                //특정 경매 상품 토픽 구독
-                stompClient.value.subscribe(`/topic/auctions/${auctionId}`, (message) => {
-                    const broadcast = JSON.parse(message.body);
-                    console.log("새로운 입찰 수신:", broadcast);
-
-                    // 화면의 현재 입찰가 업데이트
-                    currentBidPrice.value = broadcast.newPrice.toLocaleString()+'원';
-
-                    // 입찰 성공 효과 트리거
-                    isBidSuccess.value = true;
-                    setTimeout(() => {
-                        isBidSuccess.value = false;
-                    }, 500); // 0.5초 후 효과 제거
-                });
-            },
-
-            //연결 오류 시
-            onStompError: (frame) => {
-                console.error('STOMP 오류: header ' + frame.headers['message']);
-                console.error('STOMP 오류: body ' + frame.body);
-            },
-
-            
-        });
-
-        //stomep 클라이언트 활성화 (연결 시작)
-        stompClient.value.activate();
-    }
-
-    // 입찰 금액 전송 함수
-    const sendBid = () => {
-        if (stompClient.value && stompClient.value.connected && bidAmount.value) {
-            const bidData = {
-                memberId: 1, // 예시 사용자 ID
-                bidAmount: parseInt(bidAmount.value, 10)
-            };
-
-            // 서버로 입찰 메시지 전송
-            stompClient.value.publish({
-                destination: `/app/auctions/${auctionId}/bids`,
-                body: JSON.stringify(bidData)
-            });
-
-            bidAmount.value = ''; // 입력창 비우기
-            closeBidModal();
-        }else{
-            console.log("WebSocket이 연결되지 않았거나 입찰 금액이 비어 있습니다.");
-        }
-    };
-
-    // 컴포넌트가 마운트되면 WebSocket 연결 시작
+    /* =============================================
+    * 5. 라이프사이클 훅 (Lifecycle Hooks)
+    * ============================================= */
     onMounted(() => {
-        connect();
-        startCountdown();
+        fetchAuctionData();
     });
 
     // 컴포넌트가 언마운트되면 WebSocket 및 카운트다운 타이머 연결 해제
     onUnmounted(() => {
-        if (stompClient.value) {
-            stompClient.value.deactivate();
-        }
+        // 컴포넌트를 떠날 때, 해당 페이지의 구독만 안전하게 취소합니다.
+        unsubscribe(`/topic/auctions/${auctionId}`);
+        // 메모리 누수를 방지하기 위해 인터벌을 반드시 정리합니다.
         if (countdownInterval) {
             clearInterval(countdownInterval);
         }
