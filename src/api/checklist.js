@@ -1,22 +1,16 @@
-import {apiClient} from './index'
+import { apiClient } from './index'
+import { unwrap, rethrow } from './InspectionHelper'
 
 // 카테고리별 체크리스트 조회
-export const getChecklistsByCategory = (goodsCategoryId) => {
-  return apiClient.get('/checklists', {
-    params: { goodsCategoryId },
-  })
-}
+export const getChecklistsByCategory = (goodsCategoryId) => unwrap(apiClient.get('/checklists', { params: { goodsCategoryId } })).catch(rethrow)
 
 // 카테고리별 가격 기준가 조회
-export const getPriceBaselineByCategory = (goodsCategoryId) => {
-  return apiClient.get('/checklists/pricing/baseline', {
-    params: { goodsCategoryId },
-  })
-}
+export const getPriceBaselineByCategory = (goodsCategoryId) => unwrap(apiClient.get('/checklists/pricing/baseline', { params: { goodsCategoryId } })).catch(rethrow)
 
 // 예상가 계산
-export const estimatePrice = (goodsCategoryId, selections) => {
-  return apiClient.post('/checklists/pricing/estimate', selections ?? {}, {
-    params: { goodsCategoryId },
-  })
-}
+export const estimatePrice = (goodsCategoryId, selections) =>
+  unwrap(
+    apiClient.post('/checklists/pricing/estimate', selections ?? {}, {
+      params: { goodsCategoryId },
+    }),
+  ).catch(rethrow)
