@@ -36,3 +36,26 @@ export const getInspectionsByStatus = (params) => {
   })
   return unwrap(requestPromise).catch(rethrow)
 }
+
+/**
+ * 검수 상세 조회
+ * @param {number} productInspectionId
+ * @returns
+ */
+export const getInspectionDetail = (productInspectionId) => unwrap(apiClient.get(`/admin/inspections/${productInspectionId}`)).catch(rethrow)
+
+/**
+ * 1차 검수 승인
+ * @param {number} productInspectionId
+ */
+export const approveInspection = (productInspectionId) => unwrap(apiClient.post(`/admin/inspections/${productInspectionId}/firstApprove`)).catch(rethrow)
+
+/**
+ * 1차 검수 반려
+ * @param {number} productInspectionId
+ * @param {string} rejectionReason 반려 사유
+ */
+export const rejectInspection = (productInspectionId, rejectionReason) => {
+  const requestBody = { rejectionReason }
+  return unwrap(apiClient.post(`/admin/inspections/${productInspectionId}/firstReject`, requestBody)).catch(rethrow)
+}

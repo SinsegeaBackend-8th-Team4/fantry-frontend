@@ -31,7 +31,9 @@ const CsWritePage = () => import('@/pages/admin/cs/CsWritePage.vue') // 글쓰�
 // 검수 관리
 const InspectionDashboardPage = () => import('@/pages/admin/inspection/InspectionDashboardPage.vue')
 const OnlineInspectionListPage = () => import('@/pages/admin/inspection/OnlineInspectionListPage.vue')
+const OnlineInspectionDetailPage = () => import('@/pages/admin/inspection/OnlineInspectionDetailPage.vue')
 const OfflineInspectionListPage = () => import('@/pages/admin/inspection/OfflineInspectionListPage.vue')
+const OfflineInspectionDetailPage = () => import('@/pages/admin/inspection/OfflineInspectionDetailPage.vue')
 const InspectionHistoryPage = () => import('@/pages/admin/inspection/InspectionHistoryPage.vue')
 
 // 재고 관리
@@ -100,9 +102,11 @@ const adminRoutes = {
           meta: { title: '검수관리', icon: 'fas fa-fw fa-check-circle', menu: true },
           children: [
             { path: 'dashboard', name: 'AdminInspectionDashboard', component: InspectionDashboardPage },
-            { path: 'onlineList', name: 'OnlineInspectionListPage', component: OnlineInspectionListPage, meta: { title: '온라인 1차 검수' } },
-            { path: 'offlineList', name: 'OfflineInspectionListPage', component: OfflineInspectionListPage, meta: { title: '오프라인 2차 검수' } },
-            { path: 'history', name: 'InspectionHistoryPage', component: InspectionHistoryPage, meta: { title: '검수 이력' } },
+            { path: 'online', name: 'AdminOnlineInspectionList', component: OnlineInspectionListPage, meta: { title: '온라인 1차 검수' } },
+            { path: 'online/:id', name: 'AdminOnlineInspectionDetail', component: OnlineInspectionDetailPage, meta: { title: '온라인 1차 상세', hidden: true } },
+            { path: 'offline', name: 'AdminOfflineInspectionList', component: OfflineInspectionListPage, meta: { title: '오프라인 2차 검수' } },
+            { path: 'offline/:id', name: 'AdminOfflineInspectionDetail', component: OfflineInspectionDetailPage, meta: { title: '오프라인 2차 상세', hidden: true } },
+            { path: 'history', name: 'AdminInspectionHistory', component: InspectionHistoryPage, meta: { title: '검수 이력' } },
           ],
         },
         // --- 재고 관리 ---
