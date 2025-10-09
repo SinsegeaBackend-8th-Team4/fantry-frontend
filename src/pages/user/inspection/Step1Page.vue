@@ -116,7 +116,10 @@ const onSelectCategory = async () => {
 
   try {
     const [checklistRes, baselineRes] = await Promise.all([getChecklistsByCategory(selectedCategory.value), getPriceBaselineByCategory(selectedCategory.value)])
-    checklists.value = checklistRes ?? []
+    checklists.value = checklistRes.items ?? []
+    inspectionStore.templateId = checklistRes.checklistTemplateId
+    inspectionStore.templateVersion = checklistRes.checklistTemplateVersion
+
     expectedPrice.value = baselineRes ?? null
 
     // answers 초기화

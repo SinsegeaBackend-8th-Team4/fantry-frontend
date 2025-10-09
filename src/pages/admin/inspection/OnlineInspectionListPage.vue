@@ -11,14 +11,14 @@ const adminStore = useAdminInspectionStore()
 const loading = ref(false) // 로딩 상태
 const keyword = ref('')
 const tableKey = ref(0) // 필터 변경 시 테이블을 강제로 리로드하기 위한 키
-const currentFilter = ref(['SUBMITTED', 'FIRST_REVIEWED', 'FIRST_REJECTED']) // 필터 상태 관리 (기본값 : 1차 제출)
+const currentFilter = ref(['SUBMITTED', 'ONLINE_APPROVED', 'ONLINE_REJECTED']) // 필터 상태 관리 (기본값 : 1차 제출)
 
 // 필터 목록
 const filters = [
-  { label: '전체', value: ['SUBMITTED', 'FIRST_REVIEWED', 'FIRST_REJECTED'] },
+  { label: '전체', value: ['SUBMITTED', 'ONLINE_APPROVED', 'ONLINE_REJECTED'] },
   { label: '대기', value: ['SUBMITTED'] },
-  { label: '승인', value: ['FIRST_REVIEWED'] },
-  { label: '반려', value: ['FIRST_REJECTED'] },
+  { label: '승인', value: ['ONLINE_APPROVED'] },
+  { label: '반려', value: ['ONLINE_REJECTED'] },
 ]
 
 // fetcher : 1차 검수 신청 목록 조회

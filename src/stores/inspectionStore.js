@@ -14,6 +14,8 @@ export const useInspectionStore = defineStore('inspection', () => {
   // Step 1: 체크리스트
   const checklists = ref([])
   const answers = ref({})
+  const templateId = ref(null)
+  const templateVersion = ref(null)
 
   // Step 1: 가격 정보
   const expectedPrice = ref(null)
@@ -41,6 +43,8 @@ export const useInspectionStore = defineStore('inspection', () => {
     hashtags.value = ''
     checklists.value = []
     answers.value = {}
+    templateId.value = null
+    templateVersion.value = null
     expectedPrice.value = null
     marketAvgPrice.value = null
     sellerHopePrice.value = 0
@@ -62,6 +66,8 @@ export const useInspectionStore = defineStore('inspection', () => {
     hashtags,
     checklists,
     answers,
+    templateId,
+    templateVersion,
     expectedPrice,
     marketAvgPrice,
     sellerHopePrice,

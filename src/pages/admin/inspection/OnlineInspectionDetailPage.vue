@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useModal } from '@/composables/useModal'
-import { getInspectionDetail, approveInspection, rejectInspection } from '@/api/adminInspection'
+import { getOnlineInspectionDetail, approveOnlineInspection, rejectOnlineInspection } from '@/api/adminInspection'
 import { useAdminInspectionStore } from '@/stores/adminInspectionStore'
 
 const router = useRouter()
@@ -31,7 +31,7 @@ onMounted(async () => {
 async function fetchDetail(inspectionId) {
   loading.value = true
   try {
-    const res = await getInspectionDetail(inspectionId)
+    const res = await getOnlineInspectionDetail(inspectionId)
     detail.value = {
       ...res,
       files: res.files || [],
@@ -71,7 +71,7 @@ const approve = async () => {
   loading.value = true
 
   try {
-    await approveInspection(inspectionId.value)
+    await approveOnlineInspection(inspectionId.value)
     alert('승인 처리가 완료되었습니다.')
     router.push('/admin/inspection/online')
   } catch (err) {
@@ -93,7 +93,7 @@ const reject = async () => {
 
   loading.value = true
   try {
-    await rejectInspection(inspectionId.value, reason)
+    await rejectOnlineInspection(inspectionId.value, reason)
     alert('반려 처리가 완료되었습니다.')
     router.push('/admin/inspection/online')
   } catch (err) {
