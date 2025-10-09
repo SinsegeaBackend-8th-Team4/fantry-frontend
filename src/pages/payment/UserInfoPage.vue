@@ -3,7 +3,6 @@ import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import openAddressSearch from '@/module/kakaoAddressSearch'
 import { useUserStore } from '@/stores/userStore'
-import { getMemberAddresses } from '@/api/address'
 
 const router = useRouter()
 
