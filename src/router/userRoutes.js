@@ -26,6 +26,8 @@ const ProductAuctionPage = () => import('@/pages/product/ProductAuctionPage.vue'
 const InspectionStep1Page = () => import('@/pages/user/inspection/Step1Page.vue');
 const InspectionStep2Page = () => import('@/pages/user/inspection/Step2Page.vue');
 const InspectionStep3Page = () => import('@/pages/user/inspection/Step3Page.vue');
+// 마이페이지
+const MyPageLayout = () => import('@/pages/user/mypage/MyPage.vue');
 
 const userRoutes = {
   path: '/',
@@ -136,6 +138,13 @@ const userRoutes = {
       name: 'InspectionStep3',
       component: InspectionStep3Page,
       meta: {requiredLogin: true },
+    },
+    // 마이페이지
+    {
+      path: 'mypage',
+      name: 'MyPageLayout',
+      component: MyPageLayout,
+      meta: { requiresAuth: true },
     },
   ],
 };

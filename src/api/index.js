@@ -1,5 +1,6 @@
 // src/api/index.js
 import axios from 'axios';
+import { useUserStore } from '@/stores/userStore.js';
 
 // Axios 클라이언트 인스턴스 생성
 const apiClient = axios.create({
@@ -114,11 +115,14 @@ apiClient.interceptors.response.use(
           isRefreshing = false;
           processQueue(err, null);
           // 재발급 실패 시 로그아웃 처리
-          const isLoggingOut = window.location.pathname === '/' || window.location.pathname === '/logout';
-          localStorage.removeItem('accessToken');
-          if(!isLoggingOut){
-            window.location.href = '/login';
-          }
+          // const isLoggingOut = window.location.pathname === '/' || window.location.pathname === '/logout';
+          // localStorage.removeItem('accessToken');
+          // if(!isLoggingOut){
+          //   window.location.href = '/login';
+          // }
+          const userStore = useUserStore();
+          userStore.logout();
+
           return Promise.reject(err);
         }
       }
