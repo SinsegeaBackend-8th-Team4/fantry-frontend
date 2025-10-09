@@ -285,7 +285,8 @@
         }
         
         const bidData = {
-            bidAmount: parseInt(bidAmount.value, 10)
+            memberId: userStore.currentUser.memberId, 
+            bidAmount: parseInt(bidAmount.value, 10),
         };
         
         // 중앙 websocketService의 발행 함수를 사용.
