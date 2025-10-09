@@ -184,7 +184,6 @@ const initializeDefaultAddress = () => {
 onMounted(async () => {
   try {
     initializeDefaultAddress()
-    savedAddresses.value = await getMemberAddresses()
   } catch (error) {
     console.error('배송지 목록 로드 실패:', error)
     savedAddresses.value = []
