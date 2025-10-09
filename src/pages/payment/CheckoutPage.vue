@@ -8,7 +8,7 @@ import openDialog from '@/module/dialog'
 const router = useRouter()
 
 // 이전 페이지에서 전달된 정보
-const userInfo = ref(null)
+const deliveryInfo = ref(null)
 const product = ref(null)
 
 // 수수료 설정
@@ -23,11 +23,11 @@ const totalPrice = computed(() => {
 })
 
 const goBackToUserInfo = () => {
-  router.push({ name: 'user-info' })
+  router.push({ name: 'Info' })
 }
 
 const requestPayment = () => {
-  if (!userInfo.value || !product.value) {
+  if (!deliveryInfo.value || !product.value) {
     openDialog('주문자 정보가 없습니다. 다시 시도해주세요.')
     goBackToUserInfo()
     return
@@ -35,10 +35,10 @@ const requestPayment = () => {
 
   // Payment 모듈의 purchase 함수에 맞는 파라미터 구성
   const member = {
-    id: userInfo.value.id || 'test-user-' + Date.now(), // 테스트용 ID
-    name: userInfo.value.name,
-    phone: userInfo.value.phone,
-    email: userInfo.value.email,
+    id: deliveryInfo.value.id || 'test-user-' + Date.now(), // 테스트용 ID
+    name: deliveryInfo.value.name,
+    phone: deliveryInfo.value.phone,
+    email: deliveryInfo.value.email,
   }
 
   const item = {
@@ -50,84 +50,114 @@ const requestPayment = () => {
 
   const onResponse = (response) => {
     console.log('결제 응답:', response)
-    if (response.data.success == true) {
-      // 결제 성공 시 결제 완료 페이지로 이동
-      router.push({ name: 'payment-complete' })
+    if (response.success == true) {
+      // 결제 성공 시 결제 완료 페이지로 이동 (받는 사람 정보 포함)
+      sessionStorage.setItem('paymentResult', JSON.stringify({
+        ...response.data,
+        // 주문자 정보
+        customerName: deliveryInfo.value?.name,
+        customerPhone: deliveryInfo.value?.phone,
+        customerEmail: deliveryInfo.value?.email,
+        // 받는 사람 정보
+        recipientName: deliveryInfo.value?.recipientName,
+        recipientPhone: deliveryInfo.value?.recipientPhone,
+        // 배송지 정보
+        deliveryZipcode: deliveryInfo.value?.zipcode,
+        deliveryAddress: deliveryInfo.value?.address,
+        deliveryDetailAddress: deliveryInfo.value?.detailAddress,
+        deliveryRequest: deliveryInfo.value?.deliveryRequest,
+      }))
+      sessionStorage.setItem('deliveryInfo', JSON.stringify(deliveryInfo.value))
+
+      router.push({ name: 'Complete' })
     } else {
-      openDialog(response.data.errorMessage)
+      openDialog(response.data?.errorMessage || '결제에 실패했습니다.')
     }
   }
 
   const onError = (error) => {
     console.error('결제 에러:', error)
-    openDialog(error.errorMessage || '결제 처리 중 오류가 발생했습니다.')
+    // error가 문자열일 수도 있고 객체일 수도 있음
+    const errorMessage = typeof error === 'string'
+      ? error
+      : error?.errorMessage || '결제 처리 중 오류가 발생했습니다.'
+    openDialog(errorMessage)
   }
 
   // 결제 요청 실행
   Payment.purchase(member, item, totalPrice.value, onResponse, onError)
 }
 
-// 테스트용 더미 데이터 설정
-const setDummyData = () => {
-  userInfo.value = {
-    id: 'test-user-001',
-    name: '김테스트',
-    phone: '010-1234-5678',
-    email: 'test@example.com',
-    zipcode: '12345',
-    address: '서울특별시 강남구 테헤란로 123',
-    detailAddress: '456호',
-    deliveryRequest: '문앞에 놓아주세요',
-  }
-
-  product.value = {
-    id: 1,
-    name: '나이키 에어맥스 270 - 화이트 (테스트 상품)',
-    price: 89000,
-    originalPrice: 120000,
-    condition: '중고 A급',
-    size: '270mm',
-    seller: '신발매니아',
-    images: ['/images/fantry_logo.png'],
-  }
-}
-
 onMounted(() => {
-  // 이전 페이지에서 전달된 사용자 정보와 상품 정보 가져오기
-  if (router.currentRoute.value.state?.userInfo && router.currentRoute.value.state?.product) {
-    userInfo.value = router.currentRoute.value.state.userInfo
-    product.value = router.currentRoute.value.state.product
-  } else {
-    // 테스트용: 더미 데이터로 초기화 (실제 서비스에서는 제거 필요)
-    console.warn('테스트 모드: 더미 데이터를 사용합니다.')
-    setDummyData()
+  console.log('CheckoutPage 마운트됨')
 
-    // 정보가 없으면 이전 페이지로 리다이렉트 (테스트용으로 주석 처리)
-    // openDialog('주문자 정보를 먼저 입력해주세요.')
-    // goBackToUserInfo()
+  let hasProductData = false
+  let hasDeliveryData = false
+
+  // 1. Router state에서 먼저 시도
+  if (router.currentRoute.value.state?.product) {
+    console.log('Router state에서 상품 정보 가져옴:', router.currentRoute.value.state.product)
+    product.value = router.currentRoute.value.state.product
+    hasProductData = true
   }
+
+  if (router.currentRoute.value.state?.deliveryInfo) {
+    console.log('Router state에서 배송 정보 가져옴:', router.currentRoute.value.state.deliveryInfo)
+    deliveryInfo.value = router.currentRoute.value.state.deliveryInfo
+    hasDeliveryData = true
+  }
+
+  // 2. sessionStorage에서 시도
+  if (!hasProductData) {
+    const storedProduct = sessionStorage.getItem('checkoutProduct')
+    console.log('SessionStorage에서 상품 정보 확인:', storedProduct)
+
+    if (storedProduct) {
+      try {
+        const parsedProduct = JSON.parse(storedProduct)
+        console.log('SessionStorage에서 상품 정보 가져옴:', parsedProduct)
+        product.value = parsedProduct
+        hasProductData = true
+      } catch (error) {
+        console.error('상품 정보 파싱 에러:', error)
+      }
+    }
+  }
+
+  if (!hasDeliveryData) {
+    const storedDelivery = sessionStorage.getItem('checkoutDeliveryInfo')
+    console.log('SessionStorage에서 배송 정보 확인:', storedDelivery)
+
+    if (storedDelivery) {
+      try {
+        const parsedDelivery = JSON.parse(storedDelivery)
+        console.log('SessionStorage에서 배송 정보 가져옴:', parsedDelivery)
+        deliveryInfo.value = parsedDelivery
+        hasDeliveryData = true
+      } catch (error) {
+        console.error('배송 정보 파싱 에러:', error)
+      }
+    }
+  }
+
+  // 데이터가 없으면 이전 페이지로 리다이렉트
+  if (!hasProductData || !hasDeliveryData) {
+    console.warn('필수 정보가 없습니다. 이전 페이지로 이동합니다.')
+    openDialog('주문 정보를 먼저 입력해주세요.')
+    goBackToUserInfo()
+    return
+  }
+
+  // 사용 후 sessionStorage 정리
+  sessionStorage.removeItem('checkoutProduct')
+  sessionStorage.removeItem('checkoutDeliveryInfo')
+
+  console.log('최종 상품 정보:', product.value)
+  console.log('최종 배송 정보:', deliveryInfo.value)
 })
 </script>
 
 <template>
-  <!-- 테스트 모드 컨트롤 패널 -->
-  <div class="test-panel bg-warning p-3 mb-3" v-if="!router.currentRoute.value.state?.userInfo">
-    <div class="container">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <h6 class="mb-0">🧪 테스트 모드</h6>
-          <small class="text-muted">더미 데이터로 결제 프로세스를 테스트할 수 있습니다</small>
-        </div>
-        <div>
-          <button class="btn btn-sm btn-outline-dark mr-2" @click="setDummyData">
-            더미 데이터 재설정
-          </button>
-          <button class="btn btn-sm btn-dark" @click="goBackToUserInfo">정상 플로우로 이동</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div class="hero-section mb-5">
     <div class="container-fluid">
       <div
@@ -165,26 +195,26 @@ onMounted(() => {
       </section>
 
       <!-- 주문자 정보 확인 -->
-      <section class="mb-5" v-if="userInfo">
+      <section class="mb-5" v-if="deliveryInfo">
         <h4 class="mb-3">주문자 정보</h4>
         <div class="border p-4">
           <div class="row mb-3">
-            <div class="col-sm-3 font-weight-medium">이름</div>
-            <div class="col-sm-9">{{ userInfo.name }}</div>
+            <div class="col-sm-3 font-weight-medium text-muted">이름</div>
+            <div class="col-sm-9">{{ deliveryInfo.name }}</div>
           </div>
           <div class="row mb-3">
-            <div class="col-sm-3 font-weight-medium">휴대폰</div>
-            <div class="col-sm-9">{{ userInfo.phone }}</div>
+            <div class="col-sm-3 font-weight-medium text-muted">휴대폰</div>
+            <div class="col-sm-9">{{ deliveryInfo.phone }}</div>
           </div>
           <div class="row">
-            <div class="col-sm-3 font-weight-medium">이메일</div>
-            <div class="col-sm-9">{{ userInfo.email }}</div>
+            <div class="col-sm-3 font-weight-medium text-muted">이메일</div>
+            <div class="col-sm-9">{{ deliveryInfo.email }}</div>
           </div>
         </div>
       </section>
 
       <!-- 배송지 정보 확인 -->
-      <section class="mb-5" v-if="userInfo">
+      <section class="mb-5" v-if="deliveryInfo">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h4 class="mb-0">배송지 정보</h4>
           <button class="btn btn-outline-primary btn-sm" @click="goBackToUserInfo">
@@ -192,21 +222,40 @@ onMounted(() => {
           </button>
         </div>
         <div class="border p-4">
-          <div class="row mb-3">
-            <div class="col-sm-3 font-weight-medium">우편번호</div>
-            <div class="col-sm-9">{{ userInfo.zipcode }}</div>
+          <!-- 받는 사람 정보 (한국 쇼핑몰 스타일) -->
+          <div class="recipient-section mb-4 pb-4 border-bottom">
+            <h6 class="text-primary mb-3">받는 사람</h6>
+            <div class="row mb-3">
+              <div class="col-sm-3 font-weight-medium text-muted">이름</div>
+              <div class="col-sm-9 font-weight-bold">{{ deliveryInfo.recipientName }}</div>
+            </div>
+            <div class="row">
+              <div class="col-sm-3 font-weight-medium text-muted">연락처</div>
+              <div class="col-sm-9 font-weight-bold">{{ deliveryInfo.recipientPhone }}</div>
+            </div>
           </div>
-          <div class="row mb-3">
-            <div class="col-sm-3 font-weight-medium">주소</div>
-            <div class="col-sm-9">{{ userInfo.address }}</div>
-          </div>
-          <div class="row mb-3" v-if="userInfo.detailAddress">
-            <div class="col-sm-3 font-weight-medium">상세주소</div>
-            <div class="col-sm-9">{{ userInfo.detailAddress }}</div>
-          </div>
-          <div class="row" v-if="userInfo.deliveryRequest">
-            <div class="col-sm-3 font-weight-medium">배송 요청사항</div>
-            <div class="col-sm-9">{{ userInfo.deliveryRequest }}</div>
+
+          <!-- 배송 주소 -->
+          <div class="address-section">
+            <h6 class="text-secondary mb-3">배송 주소</h6>
+            <div class="row mb-3">
+              <div class="col-sm-3 font-weight-medium text-muted">우편번호</div>
+              <div class="col-sm-9">{{ deliveryInfo.zipcode }}</div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-sm-3 font-weight-medium text-muted">주소</div>
+              <div class="col-sm-9">{{ deliveryInfo.address }}</div>
+            </div>
+            <div class="row mb-3" v-if="deliveryInfo.detailAddress">
+              <div class="col-sm-3 font-weight-medium text-muted">상세주소</div>
+              <div class="col-sm-9">{{ deliveryInfo.detailAddress }}</div>
+            </div>
+            <div class="row" v-if="deliveryInfo.deliveryRequest">
+              <div class="col-sm-3 font-weight-medium text-muted">배송 요청사항</div>
+              <div class="col-sm-9">
+                <span class="badge badge-info">{{ deliveryInfo.deliveryRequest }}</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -246,24 +295,7 @@ onMounted(() => {
   </div>
 </template>
 <style scoped>
-.product-img {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-}
-
-.test-panel {
-  border-left: 4px solid #ffc107;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.badge {
-  font-size: 12px;
-  padding: 4px 8px;
-}
-
+/* 공통 결제 페이지 스타일 */
 .hero-section {
   background-color: #f8f9fa;
   border-bottom: 1px solid #e9ecef;
@@ -281,5 +313,62 @@ onMounted(() => {
   font-size: 1rem;
   color: #6c757d;
   font-weight: 400;
+}
+
+.product-img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+/* 받는 사람/배송지 정보 공통 스타일 */
+.recipient-section h6,
+.address-section h6 {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.recipient-section .font-weight-bold {
+  color: #333;
+  font-size: 1.05rem;
+}
+
+.address-section h6 {
+  font-size: 0.9rem;
+}
+
+/* 페이지 특화 스타일 */
+.test-panel {
+  border-left: 4px solid #ffc107;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.badge {
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 1.5rem;
+  }
+
+  .product-img {
+    width: 80px;
+    height: 80px;
+  }
+
+  .recipient-section,
+  .address-section {
+    margin-bottom: 1rem;
+  }
+
+  .recipient-section h6,
+  .address-section h6 {
+    font-size: 0.85rem;
+  }
 }
 </style>

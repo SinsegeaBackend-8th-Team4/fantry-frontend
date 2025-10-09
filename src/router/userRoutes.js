@@ -12,24 +12,24 @@ import UserInfoPage from '@/pages/payment/UserInfoPage.vue'
 import PaymentCompletePage from '@/pages/payment/PaymentCompletePage.vue'
 
 // --- 페이지 컴포넌트 (Lazy Loading) ---
-const HomePage = () => import('@/pages/HomePage.vue');
-const LoginPage = () => import('@/pages/user/access/LoginPage.vue');
-const LoginFind = () => import('@/pages/user/access/LoginFind.vue');
-const LoginFindSuccess = () => import('@/pages/user/access/LoginFindSuccess.vue');
-const LoginResetPwd = () => import('@/pages/user/access/LoginResetPwd.vue');
-const LoginFail = () => import('@/pages/user/access/LoginFail.vue');
-const SignupTerms = () => import('@/pages/user/access/SignupTerms.vue');
-const SignupForm = () => import('@/pages/user/access/SignupForm.vue');
-const SignupComplete = () => import('@/pages/user/access/SignupComplete.vue');
-const SignupFail = () => import('@/pages/user/access/SignupFail.vue');
-const ProductListPage = () => import('@/pages/product/ProductListPage.vue');
-const ProductDetailPage = () => import('@/pages/product/ProductDetailPage.vue');
+const HomePage = () => import('@/pages/HomePage.vue')
+const LoginPage = () => import('@/pages/user/access/LoginPage.vue')
+const LoginFind = () => import('@/pages/user/access/LoginFind.vue')
+const LoginFindSuccess = () => import('@/pages/user/access/LoginFindSuccess.vue')
+const LoginResetPwd = () => import('@/pages/user/access/LoginResetPwd.vue')
+const LoginFail = () => import('@/pages/user/access/LoginFail.vue')
+const SignupTerms = () => import('@/pages/user/access/SignupTerms.vue')
+const SignupForm = () => import('@/pages/user/access/SignupForm.vue')
+const SignupComplete = () => import('@/pages/user/access/SignupComplete.vue')
+const SignupFail = () => import('@/pages/user/access/SignupFail.vue')
+const ProductListPage = () => import('@/pages/product/ProductListPage.vue')
+const ProductDetailPage = () => import('@/pages/product/ProductDetailPage.vue')
 // 검수 페이지 컴포넌트
-const InspectionStep1Page = () => import('@/pages/user/inspection/Step1Page.vue');
-const InspectionStep2Page = () => import('@/pages/user/inspection/Step2Page.vue');
-const InspectionStep3Page = () => import('@/pages/user/inspection/Step3Page.vue');
+const InspectionStep1Page = () => import('@/pages/user/inspection/Step1Page.vue')
+const InspectionStep2Page = () => import('@/pages/user/inspection/Step2Page.vue')
+const InspectionStep3Page = () => import('@/pages/user/inspection/Step3Page.vue')
 // 마이페이지
-const MyPageLayout = () => import('@/pages/user/mypage/MyPage.vue');
+const MyPageLayout = () => import('@/pages/user/mypage/MyPage.vue')
 
 const userRoutes = {
   path: '/',
@@ -121,19 +121,19 @@ const userRoutes = {
       path: 'inspection/step1',
       name: 'InspectionStep1',
       component: InspectionStep1Page,
-      meta: {requiredLogin: true },
+      meta: { requiredLogin: true },
     },
     {
       path: 'inspection/step2',
       name: 'InspectionStep2',
       component: InspectionStep2Page,
-      meta: {requiredLogin: true },
+      meta: { requiredLogin: true },
     },
     {
       path: 'inspection/step3',
       name: 'InspectionStep3',
       component: InspectionStep3Page,
-      meta: {requiredLogin: true },
+      meta: { requiredLogin: true },
     },
     // 마이페이지
     {
@@ -141,6 +141,29 @@ const userRoutes = {
       name: 'MyPageLayout',
       component: MyPageLayout,
       meta: { requiresAuth: true },
+    },
+    {
+      path: 'order',
+      children: [
+        {
+          path: 'info',
+          name: 'Info',
+          component: UserInfoPage,
+          meta: { requiredLogin: false },
+        },
+        {
+          path: 'checkout',
+          name: 'Checkout',
+          component: CheckoutPage,
+          meta: { requiredLogin: false },
+        },
+        {
+          path: 'complete',
+          name: 'Complete',
+          component: PaymentCompletePage,
+          meta: { requiredLogin: false },
+        },
+      ],
     },
   ],
 }
