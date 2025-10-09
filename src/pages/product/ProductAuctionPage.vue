@@ -149,7 +149,7 @@
  * ============================================= */
     import { ref, onMounted, onUnmounted, computed } from 'vue';
     import { useRoute } from 'vue-router';
-    import { publicApiClient } from '@/api';
+    import { getAuctionDetails} from '@/api/auction';  //경매 관련 API 함수들
     import { useUserStore } from '@/stores/userStore';
     import { subscribe, unsubscribe, publish } from '@/services/websocketService';
     const route = useRoute();
@@ -205,10 +205,16 @@
     const formatPrice = (price) => price != null ? price.toLocaleString() + '원' : '가격 정보 없음';
     const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleString('ko-KR') : '';
 
+    const endTimeMs = computed(() => {
+        if (!auction.value?.endTime) return null;
+        const dateObj = parseJavaLocalDateTime(auction.value.endTime);
+        return dateObj ? dateObj.getTime() : null;
+    });
+
     const formattedCurrentPrice = computed(() => formatPrice(currentBidPrice.value));
     const formattedStartPrice = computed(() => formatPrice(auction.value?.price));
-    const formattedStartTime = computed(() => formatDate(auction.value?.startTime));
-    const formattedEndTime = computed(() => formatDate(auction.value?.endTime));
+    const formattedStartTime = computed(() => formatDate(parseJavaLocalDateTime(auction.value?.startTime)));
+    const formattedEndTime = computed(() => formatDate(parseJavaLocalDateTime(auction.value?.endTime)));
 
 
     /* =============================================
@@ -221,8 +227,9 @@
     const fetchAuctionData = async () => {
         try {
             isLoading.value = true;
-            const response = await publicApiClient.get(`/api/auctions/${auctionId}`);
+            const response = await getAuctionDetails(auctionId);
             auction.value = response.data;
+            console.log(response.data);
             
             // 경매 상품일 경우에만 WebSocket 구독 및 초기 가격 설정
             if (isAuction.value) {
@@ -236,6 +243,7 @@
             console.error("Fetch auction data failed:", err);
         } finally {
             isLoading.value = false;
+            console.log("fetchAuctionData 완료");
         }
     };
     
@@ -262,7 +270,7 @@
      */
     const fetchBidHistory = async () => {
         try {
-            const response = await publicApiClient.get(`/api/bids/${auctionId}`);
+            const response = await publicApiClient.get(`/api/bids/auction/${auctionId}`);
             bidHistory.value = response.data; // 실제 API 응답 구조에 맞춰야 함
         } catch (err) {
             console.error("Failed to fetch bid history:", err);
@@ -342,14 +350,23 @@
         mainImageSrc.value = newSrc;
     };
 
+    //Java LocalDateTime 배열을 JS Date 객체로 변환
+    const parseJavaLocalDateTime = (dt) => {
+        if (!Array.isArray(dt) || dt.length < 5) {
+            return null; // 잘못된 형식의 데이터일 경우 null 반환
+        }
+        // [핵심] JavaScript의 Date 생성자는 월(month)을 0부터 시작하므로(0=1월), -1을 해줘야 함
+        const [year, month, day, hour, minute, second = 0] = dt;
+        return new Date(year, month - 1, day, hour, minute, second);
+    };
+
     // 경매 마감까지 남은 시간 계산 및 표시
     const startCountdown = () => {
-        if (!auction.value?.endTime) return;
-        const endTime = new Date(auction.value.endTime).getTime();
-
+        if (!endTimeMs.value) return;
+        
         countdownInterval = setInterval(() => {
             const now = new Date().getTime();
-            const distance = endTime - now;
+            const distance = endTimeMs.value - now;
 
             if (distance < 0) {
                 clearInterval(countdownInterval);
@@ -385,7 +402,7 @@
     };
 
     const quickBid = (amountToAdd) => {
-        bidAmount.value = currentNumericPrice.value + amountToAdd;
+        bidAmount.value = currentBidPrice.value + amountToAdd;
     };
 
     /* =============================================
@@ -393,6 +410,7 @@
     * ============================================= */
     onMounted(() => {
         fetchAuctionData();
+        console.log("페이지 마운트 됨");
     });
 
     // 컴포넌트가 언마운트되면 WebSocket 및 카운트다운 타이머 연결 해제

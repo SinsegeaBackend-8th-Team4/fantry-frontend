@@ -113,7 +113,7 @@ const userRoutes = {
       meta: { requiresAuth: false },
     },
         {
-      path: 'product/auction',
+      path: 'product/auction/:id',
       name: 'ProducAuction',
       component: ProductAuctionPage,
       meta: { requiresAuth: false },

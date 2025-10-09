@@ -1,5 +1,4 @@
-import apiClient from "./index";
-import publicApiClient from "./index";
+import { apiClient,publicApiClient } from './index'
 
 export const getAuctionDetails = (auctionId) => {
     return publicApiClient.get(`/auctions/${auctionId}`);
