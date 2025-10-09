@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import ProfileSection from './member/ProfileSection.vue'
+import PaymentAccount from './member/PaymentAccount.vue'
 import WithdrawalPage from './member/WithdrawalPage.vue'
 
 const activeMenu = ref('account')
@@ -9,6 +10,7 @@ const activeSubMenu = ref('profile')
 // 컴포넌트 매핑
 const componentMap = {
   'profile': ProfileSection,
+  'payment-account': PaymentAccount,
   'withdrawal': WithdrawalPage,
   // 다른 메뉴에 대한 컴포넌트도 여기에 추가
 }
@@ -264,7 +266,8 @@ const getContentTitle = () => {
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(60, 77, 255, 0.08);
-  min-height: 800px;
+  height: calc(100vh - 80px);
+  overflow-y: auto;
 }
 
 .content-header {

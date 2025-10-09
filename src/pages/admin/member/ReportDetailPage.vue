@@ -54,8 +54,7 @@
 <script setup>
   import { ref, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
-  import { getReportDetail } from '@/api/member';
-import { get } from 'jquery';
+  import { getReportDetail } from '@/api/report';
 
   const router = useRouter();
 
