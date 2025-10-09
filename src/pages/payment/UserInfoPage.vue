@@ -3,7 +3,6 @@ import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import openAddressSearch from '@/module/kakaoAddressSearch'
 import { useUserStore } from '@/stores/userStore'
-import { getMemberAddresses } from '@/api/address'
 
 const router = useRouter()
 
@@ -185,7 +184,6 @@ const initializeDefaultAddress = () => {
 onMounted(async () => {
   try {
     initializeDefaultAddress()
-    savedAddresses.value = await getMemberAddresses()
   } catch (error) {
     console.error('배송지 목록 로드 실패:', error)
     savedAddresses.value = []
