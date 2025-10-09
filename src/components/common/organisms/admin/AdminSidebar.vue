@@ -19,7 +19,7 @@ const menuItems = computed(() => {
 
       const subMenus = hasSubMenus
         ? route.children
-            .filter((child) => !(child.meta && child.meta.hidden))
+            .filter((child) => !(child.meta && (child.meta.hidden || child.meta.menu === false)))
             .map((child) => {
               const title = child.meta?.title ?? (child.path === 'list' ? '목록 조회' : child.path === 'write' ? '글쓰기 (샘플)' : '대시보드')
               return { to: { name: child.name }, title: title }
