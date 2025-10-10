@@ -2,17 +2,24 @@
 import { ref, computed } from 'vue'
 import ProfileSection from './member/ProfileSection.vue'
 import PaymentAccount from './member/PaymentAccount.vue'
+import Address from './member/Address.vue'
 import WithdrawalPage from './member/WithdrawalPage.vue'
+
+import MyProducts from './selling/MyProducts.vue'
 
 const activeMenu = ref('account')
 const activeSubMenu = ref('profile')
 
 // 컴포넌트 매핑
 const componentMap = {
+  //내 정보 관리========================
   'profile': ProfileSection,
   'payment-account': PaymentAccount,
+  'address': Address,
   'withdrawal': WithdrawalPage,
-  // 다른 메뉴에 대한 컴포넌트도 여기에 추가
+  //판매 관리===========================
+  'my-products': MyProducts,
+
 }
 
 const currentComponent = computed(()=>{

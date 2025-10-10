@@ -31,3 +31,13 @@ export const editAddress = (addressId, payload) => {
 export const deleteAddress = (addressId) => {
     return apiClient.delete(serverPath + `/api/address/${addressId}`);
 }
+
+//기본 배송지
+export const setDefaultAddress = (mId, aId) => {
+    return apiClient.patch(serverPath + `/api/address/default`, null, {
+        params: {
+            memberId: mId,
+            addressId: aId
+        }
+    })
+}
