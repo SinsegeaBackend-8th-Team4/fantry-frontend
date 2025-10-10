@@ -33,8 +33,8 @@ export const submitInspection = (inspectionData) => {
     shippingAddressDetail: inspectionData.shippingAddressDetail,
     bankName: inspectionData.bankName,
     bankAccount: inspectionData.bankAccount,
-    checklistTemplateId: inspectionData.templateId,
-    checklistTemplateVersion: inspectionData.templateVersion,
+    templateId: inspectionData.templateId,
+    templateVersion: inspectionData.templateVersion,
   }
 
   // request로 JSON 데이터 문자열화하여 추가

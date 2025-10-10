@@ -95,8 +95,8 @@ const submit = async () => {
       shippingAddressDetail: shippingAddressDetail.value,
       bankName: bankName.value,
       bankAccount: bankAccount.value,
-      checklistTemplateId: inspectionStore.templateId,
-      checklistTemplateVersion: inspectionStore.templateVersion,
+      templateId: inspectionStore.templateId,
+      templateVersion: inspectionStore.templateVersion,
     }
 
     await submitInspection(inspectionData)
