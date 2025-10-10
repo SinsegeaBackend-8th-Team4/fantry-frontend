@@ -7,6 +7,8 @@ import WithdrawalPage from './member/WithdrawalPage.vue'
 
 import MyProducts from './selling/MyProducts.vue'
 
+import ReportHistory from './report/ReportHistory.vue'
+
 const activeMenu = ref('account')
 const activeSubMenu = ref('profile')
 
@@ -16,9 +18,11 @@ const componentMap = {
   'profile': ProfileSection,
   'payment-account': PaymentAccount,
   'address': Address,
+  'report-history': ReportHistory,
   'withdrawal': WithdrawalPage,
   //판매 관리===========================
   'my-products': MyProducts,
+
 
 }
 
@@ -37,6 +41,7 @@ const menuItems = [
       { id: 'profile', title: '개인정보 관리' },
       { id: 'payment-account', title: '결제 계좌 관리' },
       { id: 'address', title: '배송지 관리' },
+      { id: 'report-history', title: '신고 내역 확인' },
       { id: 'withdrawal', title: '회원탈퇴' }
     ]
   },
@@ -68,15 +73,6 @@ const menuItems = [
     subMenus: [
       { id: 'qna-list', title: 'Q&A 내역' },
       { id: 'inquiry', title: '문의 접수' }
-    ]
-  },
-  {
-    id: 'report',
-    title: '신고 및 제재 관리',
-    icon: '⚠️',
-    subMenus: [
-      { id: 'report-history', title: '신고 내역 확인' },
-      { id: 'appeal', title: '신고 구제 요청' }
     ]
   }
 ]

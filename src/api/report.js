@@ -10,6 +10,11 @@ export const getAllReports = () => {
     return apiClient.get(serverPath + '/api/report/');
 }
 
+// 회원 한명에 대한 신고 조회
+export const getReportsMember = (memberId) => {
+    return apiClient.get(serverPath + `/api/report/member/${memberId}`);
+}
+
 // 회원 신고 상세 조회
 export const getReportDetail = (reportId) => {
     return apiClient.get(serverPath + `/api/report/${reportId}`);
@@ -28,4 +33,13 @@ export const registReport = (payload) => {
 // 회원 신고 구제 신청
 export const updateReceiveReport = (reportId, payload) => {
     return apiClient.put(serverPath + `/api/report/${reportId}`, payload);
+}
+
+// 회원 구제 신청 요청
+export const setReceivedReport = (id) => {
+    return apiClient.patch(serverPath + `/api/report/member/received`, null, {
+        params: {
+            reportId: id
+        }
+    });
 }
