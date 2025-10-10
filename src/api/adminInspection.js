@@ -38,24 +38,40 @@ export const getInspectionsByStatus = (params) => {
 }
 
 /**
- * 검수 상세 조회
+ * 1차 검수 상세 조회
  * @param {number} productInspectionId
  * @returns
  */
-export const getInspectionDetail = (productInspectionId) => unwrap(apiClient.get(`/admin/inspections/${productInspectionId}`)).catch(rethrow)
+export const getOnlineInspectionDetail = (productInspectionId) => unwrap(apiClient.get(`/admin/inspections/online/${productInspectionId}`)).catch(rethrow)
 
 /**
  * 1차 검수 승인
  * @param {number} productInspectionId
+ * @param {number} firstInspectorId
  */
-export const approveInspection = (productInspectionId) => unwrap(apiClient.post(`/admin/inspections/${productInspectionId}/firstApprove`)).catch(rethrow)
+export const approveOnlineInspection = (productInspectionId, firstInspectorId) =>
+  unwrap(apiClient.post(`/admin/inspections/${productInspectionId}/firstApprove`, null, { params: { firstInspectorId } })).catch(rethrow)
 
 /**
  * 1차 검수 반려
  * @param {number} productInspectionId
- * @param {string} rejectionReason 반려 사유
+ * @param {number} firstInspectorId
+ * @param {object} body { rejectionReason: string }
  */
-export const rejectInspection = (productInspectionId, rejectionReason) => {
-  const requestBody = { rejectionReason }
-  return unwrap(apiClient.post(`/admin/inspections/${productInspectionId}/firstReject`, requestBody)).catch(rethrow)
-}
+export const rejectOnlineInspection = (productInspectionId, firstInspectorId, body) =>
+  unwrap(apiClient.post(`/admin/inspections/${productInspectionId}/firstReject`, body, { params: { firstInspectorId } })).catch(rethrow)
+
+/**
+ * 2차 검수 상세 조회
+ * @param {number} productInspectionId
+ * @returns
+ */
+export const getOfflineInspectionDetail = (productInspectionId) => unwrap(apiClient.get(`/admin/inspections/offline/${productInspectionId}`)).catch(rethrow)
+
+/** 2차 승인 */
+export const approveOfflineInspection = (productInspectionId, secondInspectorId, body) =>
+  unwrap(apiClient.post(`/admin/inspections/${productInspectionId}/secondApprove`, body, { params: { secondInspectorId } })).catch(rethrow)
+
+/** 2차 검수 반려 */
+export const rejectOfflineInspection = (productInspectionId, secondInspectorId, body) =>
+  unwrap(apiClient.post(`/admin/inspections/${productInspectionId}/secondReject`, body, { params: { secondInspectorId } })).catch(rethrow)
