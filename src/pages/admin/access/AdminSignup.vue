@@ -5,27 +5,27 @@
 
     const router = useRouter();
 
-    //이전으로 페이지 이동
-    const goToPrev=()=>{
-        router.push("/signup/terms");
+    // 이전 페이지로 이동 (관리자 로그인 페이지로 설정)
+    const goToPrev = () => {
+        router.push("/admin/login");
     }
 
     /*-----------------------------------------------------------
         바인드 변수 선언
     -----------------------------------------------------------*/
-    //폼 데이터
+    // 폼 데이터
     const formState = reactive({
         id: '',
         password: '',
         passwordConfirm: '',
-        name: '',
-        phone: '',
-        emailLocal: '',
-        emailDomain: '',
+        name: '', // 관리자 이름 (실명)
+        phone: '', // 관리자 연락처
+        emailLocal: '', // 회사 내부 이메일 사용 가정
+        emailDomain: 'fantry.co.kr', // 회사 도메인으로 기본 설정
         verificationCode: ''
     });
 
-    //유효성 검사 상태 (default: true)
+    // 유효성 검사 상태 (default: true)
     const validation = reactive({
         id: {isValid: true, message: ''},
         password: {isValid: true, message: ''},
@@ -35,7 +35,7 @@
         verificationCode: {isValid: true, message: ''}
     });
 
-    //UI 관련 상태
+    // UI 관련 상태
     const uiState = reactive({
         isIdChecked: false,
         isEmailVerified: false,
@@ -46,9 +46,9 @@
     });
 
     /*-----------------------------------------------------------
-        유효성 검사 함수
+        유효성 검사 함수 (기존 로직 유지)
     -----------------------------------------------------------*/
-    //아이디 유효성 검사
+    // 아이디 유효성 검사
     const validateId = (id) => {
         const regex = /^[a-zA-Z0-9]{6,20}$/;
         validation.id.isValid = regex.test(id);
@@ -56,7 +56,7 @@
         uiState.isIdChecked = false; // 입력값이 변경되면 중복확인 상태 초기화
     }
 
-    //비밀번호 유효성 검사
+    // 비밀번호 유효성 검사
     const validatePassword = (password) => {
         const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
         validation.password.isValid = regex.test(password);
@@ -67,7 +67,7 @@
         validation.passwordConfirm.message = validation.passwordConfirm.isValid ? '' : '비밀번호가 일치하지 않습니다.';
     }
 
-    //전화번호 유효성 검사
+    // 전화번호 유효성 검사
     const validatePhone = (phone) => {
         const cleaned = phone.replace(/\D/g, ''); // 숫자만 추출
 
@@ -82,29 +82,28 @@
             return;
         }
 
-        // 유효한 번호인 경우
         validation.phone.isValid = true;
         validation.phone.message = '';
     }
 
-    //이메일 유효성 검사
+    // 이메일 유효성 검사
     const validateEmail = (local, domain) => {
         const fullEmail = `${local}@${domain}`;
         const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         validation.email.isValid = regex.test(fullEmail);
         validation.email.message = validation.email.isValid ? '' : '유효한 이메일 주소를 입력해주세요.';
-        uiState.isEmailVerified = false;    //이메일 변경 시 인증상태 초기화
+        uiState.isEmailVerified = false;     // 이메일 변경 시 인증상태 초기화
     }
 
     /*-----------------------------------------------------------
-        실시간 유효성 검사
+        실시간 유효성 검사 (기존 로직 유지)
     -----------------------------------------------------------*/
-    //아이디 검사
+    // 아이디 검사
     watch(()=> formState.id, (newVal)=>{
         validateId(newVal);
     });
 
-    //비밀번호 검사
+    // 비밀번호 검사
     watch(()=> formState.password, (newVal)=>{
         validatePassword(newVal);
         validatePasswordConfirm(newVal, formState.passwordConfirm);
@@ -113,9 +112,9 @@
         validatePasswordConfirm(formState.password, newVal);
     });
 
-    //전화번호 검사
+    // 전화번호 검사
     watch(()=> formState.phone, (newVal)=>{
-        //자동 하이픈('-') 추가
+        // 자동 하이픈('-') 추가
         let cleaned = newVal.replace(/\D/g, "");
         let formatted = cleaned;
         if (cleaned.length > 3 && cleaned.length <= 7) {
@@ -127,12 +126,12 @@
         validatePhone(formatted);
     });
 
-    //이메일 검사
+    // 이메일 검사
     watch(()=>[formState.emailLocal, formState.emailDomain], ([local, domain])=>{
         validateEmail(local, domain);
     });
 
-    //아이디 중복 확인
+    // 아이디 중복 확인 (기존 로직 유지)
     const checkIdDuplicate = async()=>{
         if(!validation.id.isValid){
             alert("유효한 아이디를 입력해주세요.");
@@ -140,7 +139,7 @@
         }
 
         try{
-            //서버에 중복 확인 요청
+            // 서버에 중복 확인 요청
             const response = await checkDuplicateUsername(formState.id);
 
             if(response.data){
@@ -160,9 +159,9 @@
     };
 
     /*-----------------------------------------------------------
-        인증코드 발급 및 검사
+        인증코드 발급 및 검사 (기존 로직 유지)
     -----------------------------------------------------------*/
-    //타이머 시작
+    // 타이머 시작
     const startTimer = (time)=>{
         uiState.timer = setInterval(()=>{
             time--;
@@ -179,7 +178,7 @@
         }, 1000);
     };
 
-    //인증 코드 발송
+    // 인증 코드 발송
     const sendVerificationCode = async()=>{
         if(!validation.email.isValid){
             alert("유효한 이메일을 입력해주세요");
@@ -189,10 +188,10 @@
         if(uiState.timer) clearInterval(uiState.timer);
 
         try{
-            //서버에 인증번호 발송 요청
+            // 서버에 인증번호 발송 요청
             const response = await sendAuthCode(formState.emailLocal + '@' + formState.emailDomain);
 
-            //서버 응답에서 TTL(초) 받기
+            // 서버 응답에서 TTL(초) 받기
             const ttlSeconds = response.data.ttl;
 
             uiState.verificationSent = true;
@@ -206,17 +205,17 @@
         }
     };
 
-    //인증번호 확인
+    // 인증번호 확인
     const verifyCode = async()=>{
         try{
-            //서버에 인증 번호 확인 요청
+            // 서버에 인증 번호 확인 요청
             const response = await verifyAuthCode(formState.emailLocal+"@"+formState.emailDomain, formState.verificationCode);
             if(response) {
                 validation.verificationCode.isValid = true;
                 validation.verificationCode.message = "인증 성공";
                 uiState.isEmailVerified = true;
 
-                //타이머 정지
+                // 타이머 정지
                 if(uiState.timer){
                     clearInterval(uiState.timer);
                     uiState.timer = null;
@@ -232,10 +231,10 @@
     };
 
     /*-----------------------------------------------------------
-        최종 가입 처리
+        최종 가입 처리 (ADMIN ROLE 추가)
     -----------------------------------------------------------*/
     const submitForm = async()=>{
-        //최종 유효성 검사
+        // 최종 유효성 검사
         const isFormValid = Object.values(validation).every(v=>v.isValid) && uiState.isIdChecked && uiState.isEmailVerified;
 
         if(!isFormValid){
@@ -244,7 +243,7 @@
         }
 
         try{
-            //서버로 회원가입 요청
+            // 서버로 관리자 회원가입 요청
             const payload = {
                 username: formState.id,
                 password: formState.password,
@@ -252,117 +251,105 @@
                 email: formState.emailLocal + "@" + formState.emailDomain,
                 phone: formState.phone
             };
+            
+            const response = await signup(payload, 'admin'); 
+            console.log("관리자 회원가입 성공: ", response);
 
-            await signup(payload, 'user');
-            router.push('/signup/complete');
+            // 관리자 가입 완료 페이지 또는 관리자 로그인 페이지로 리디렉션
+            alert("관리자 계정이 성공적으로 등록되었습니다. 관리자 로그인 페이지로 이동합니다.");
+            router.push('/admin/login');
         }catch(error){
             console.log(error);
-            alert(error.code + ": "+ error.response.data.error);
-            console.log("회원가입 실패: ", error.response.data || error.message);
-            router.push('/signup/fail');
+            alert(error.code + ": "+ error.message);
+            console.log("관리자 회원가입 실패: ", error.response.data || error.message);
+            router.push('/admin/signup/fail');
         }
     };
 
 </script>
 <template>
-  <div class="content-page">
-    <!--Banner Start-->
-    <div class="banner">
-      <img src="../../../../public/images/fantry_logo.png" />
-    </div>
-    <!--Banner End-->
-    
-    <!--Header Start-->
-    <div class="header">
-      <div class="header-term">
-        <label>01</label>
-        <label>약관 동의</label>
-      </div>
-      <label>></label>
-      <div class="header-form active">
-        <label>02</label>
-        <label>회원 가입</label>
-      </div>
-      <label>></label>
-      <div class="header-done">
-        <label>03</label>
-        <label>가입 완료</label>
-      </div>
-    </div>
-    <!--Header End-->
+    <div class="content-page">
+        <!--Banner Start: 관리자 테마 적용-->
+        <div class="banner">
+            <img src="../../../../public/images/fantry_logo.png" />
+        </div>
+        <!--Banner End-->
+        
+        <!-- 안내문 -->
+        <h1>관리자 계정 등록</h1>
+        <h4>FANTRY 관리 시스템에 접근할 계정 정보를 등록합니다.</h4>
 
-    <!-- 안내문 -->
-    <h1>회원가입</h1>
-    <h4>회원이 되어 다양한 서비스를 경험해보세요!</h4>
-
-    <!--Content Start-->
-    <div class="input-wrapper">
-        <!--정보 입력 부분-->
-        <form @submit.prevent="submitForm">
-            <label>아이디</label>
-            <div>
-                <input type="text" placeholder="아이디 입력(6~20자)" v-model="formState.id"/>
-                <button type="button" @click="checkIdDuplicate">중복확인</button>
-            </div>
-            <label class="input-error" v-if="!uiState.isIdChecked && !validation.id.isValid">{{ validation.id.message }}</label>
-            <label class="input-success" v-if="uiState.isIdChecked && validation.id.isValid">{{ validation.id.message }}</label> 
-            <label class="input-error" v-if="!uiState.isIdChecked && validation.id.isValid && formState.id.length > 0">중복확인이 필요합니다.</label>
-            
-            <label>비밀번호</label>
-            <input type="password" placeholder="비밀번호 입력(대소문자, 숫자, 특수문자 포함 8자 이상)" v-model="formState.password"/>
-            <label class="input-error" v-if="!validation.password.isValid">{{ validation.password.message }}</label>
-
-            <label>비밀번호 확인</label>
-            <input type="password" placeholder="비밀번호 재입력" v-model="formState.passwordConfirm"/>
-            <label class="input-error" v-if="!validation.passwordConfirm.isValid">{{ validation.passwordConfirm.message }}</label>
-
-            <label>이름</label>
-            <input type="text" placeholder="이름을 입력해주세요" v-model="formState.name"/>
-
-            <label>전화번호</label>
-            <input type="text" maxlength="13" placeholder="휴대폰 번호 입력('-' 제외 11자리 입력)" v-model="formState.phone"/>
-            <label class="input-error" v-if="!validation.phone.isValid">{{ validation.phone.message }}</label>
-
-            <label>이메일 주소</label>
-            <div class="email">
-                <input type="text" placeholder="이메일 주소" v-model="formState.emailLocal" :disabled="uiState.isEmailVerified"/>
-                <label>@</label>
-                <select v-model="formState.emailDomain" :disabled="uiState.isEmailVerified">
-                    <option value="">선택하세요</option>
-                    <option value="naver.com">naver.com</option>
-                    <option value="gmail.com">gmail.com</option>
-                    <option value="daum.net">daum.net</option>
-                </select>
-            </div>
-            <label class="input-error" v-if="!validation.email.isValid">{{ validation.email.message }}</label>
-
-            <button type="button" v-if="!uiState.verificationSent && !uiState.isEmailVerified" @click="sendVerificationCode" :disabled="!validation.email.isValid || uiState.isEmailSendLoading">
-                {{ uiState.isEmailSendLoading ? '이메일 전송 중...' : '인증코드 발송' }}
-            </button>
-            <label class="input-error" v-if="!validation.verificationCode.isValid">{{ validation.verificationCode.message }}</label>
-            <label class="input-success" v-if="validation.verificationCode.isValid">{{ validation.verificationCode.message }}</label>
-            
-            <div v-if="uiState.verificationSent && !uiState.isEmailVerified">
+        <!--Content Start-->
+        <div class="input-wrapper">
+            <!--정보 입력 부분-->
+            <form @submit.prevent="submitForm">
+                <label>아이디</label>
                 <div>
-                    <input type="text" placeholder="인증번호 6자리 입력" maxlength="6" v-model="formState.verificationCode" />
-                    <button type="button" @click="verifyCode">확인</button>
+                    <input type="text" placeholder="아이디 입력(6~20자)" v-model="formState.id"/>
+                    <button type="button" @click="checkIdDuplicate">중복확인</button>
+                </div>
+                <label class="input-error" v-if="!uiState.isIdChecked && !validation.id.isValid">{{ validation.id.message }}</label>
+                <label class="input-success" v-if="uiState.isIdChecked && validation.id.isValid">{{ validation.id.message }}</label> 
+                <label class="input-error" v-if="!uiState.isIdChecked && validation.id.isValid && formState.id.length > 0">중복확인이 필요합니다.</label><br></br>
+                
+                <label>비밀번호</label>
+                <input type="password" placeholder="비밀번호 입력(대소문자, 숫자, 특수문자 포함 8자 이상)" v-model="formState.password"/>
+                <label class="input-error" v-if="!validation.password.isValid">{{ validation.password.message }}</label><br></br>
+
+                <label>비밀번호 확인</label>
+                <input type="password" placeholder="비밀번호 재입력" v-model="formState.passwordConfirm"/>
+                <label class="input-error" v-if="!validation.passwordConfirm.isValid">{{ validation.passwordConfirm.message }}</label><br></br>
+
+                <label>이름</label>
+                <input type="text" placeholder="담당자 실명을 입력해주세요" v-model="formState.name"/>
+
+                <label>전화번호</label>
+                <input type="text" maxlength="13" placeholder="휴대폰 번호 입력('-' 제외 11자리 입력)" v-model="formState.phone"/>
+                <label class="input-error" v-if="!validation.phone.isValid">{{ validation.phone.message }}</label>
+
+                <label>회사 이메일 주소</label>
+                <div class="email">
+                    <input type="text" placeholder="이메일 주소" v-model="formState.emailLocal" :disabled="uiState.isEmailVerified"/>
+                    <label>@</label>
+                    <!-- 관리자이므로 도메인 선택지를 회사 도메인으로 한정하거나 제거할 수 있습니다. 여기서는 선택지 유지 -->
+                    <select v-model="formState.emailDomain" :disabled="uiState.isEmailVerified">
+                        <option value="">선택하세요</option>
+                        <option value="fantry.co.kr">fantry.co.kr</option>
+                        <option value="google.com">google.com</option>
+                    </select>
+                </div>
+                <label class="input-error" v-if="!validation.email.isValid">{{ validation.email.message }}</label>
+
+                <button type="button" v-if="!uiState.verificationSent && !uiState.isEmailVerified" @click="sendVerificationCode" :disabled="!validation.email.isValid || uiState.isEmailSendLoading">
+                    {{ uiState.isEmailSendLoading ? '이메일 전송 중...' : '인증코드 발송' }}
+                </button>
+                <label class="input-error" v-if="!validation.verificationCode.isValid">{{ validation.verificationCode.message }}</label>
+                <label class="input-success" v-if="validation.verificationCode.isValid">{{ validation.verificationCode.message }}</label>
+                
+                <div v-if="uiState.verificationSent && !uiState.isEmailVerified">
+                    <div>
+                        <!-- 인증코드 입력 칸과 확인 버튼을 flex-row로 배치 -->
+                        <div class="code-input-group">
+                            <input type="text" placeholder="인증번호 6자리 입력" maxlength="6" v-model="formState.verificationCode" class="code-input"/>
+                            <button type="button" @click="verifyCode" class="code-verify-btn">확인</button>
+                        </div>
+                    </div>
+
+                    <div class="verification-info">
+                        <span>남은 시간: {{ uiState.remainingTime }}</span>
+                        <a href="#" class="send-link" @click.prevent="sendVerificationCode">이메일이 오지 않을 경우 재전송</a>
+                    </div>
                 </div>
 
-                <div class="verification-info">
-                    <span>남은 시간: {{ uiState.remainingTime }}</span>
-                    <a href="#" class="send-link" @click.prevent="sendVerificationCode">이메일이 오지 않을 경우 재전송</a>
+                <!--버튼-->
+                <div class="btn-wrapper">
+                    <button type="button" class="prev-btn" @click="goToPrev">이전 (로그인)</button>
+                    <button type="button" class="sign-btn" @click="submitForm">계정 등록</button>
                 </div>
-            </div>
-
-            <!--버튼-->
-            <div class="btn-wrapper">
-                <button type="button" class="prev-btn" @click="goToPrev">이전</button>
-                <button type="button" class="sign-btn" @click="submitForm">가입하기</button>
-            </div>
-        </form>
+            </form>
+        </div>
+        <!--Content End-->
     </div>
-    <!--Content End-->
-  </div>
 </template>
 <style scoped>
     /* 기본 레이아웃 */
@@ -371,55 +358,41 @@
         flex-direction: column;
         align-items: center;
         font-family: 'Pretendard', sans-serif;
-        background-color: #fff;
+        background-color: #f7f7f7; /* 배경색 변경 */
         min-height: 100vh;
         padding: 0;
         margin: 0;
     }
 
-    /* 배너 */
+    /* 배너 (관리자 테마: admin_login.vue의 다크 블루 계열) */
     .banner {
         width: 100%;
-        background-color: #f2f3fb;
+        /* admin_login.vue의 그라데이션 색상 사용 */
+        background: linear-gradient(52deg, rgba(30, 50, 100, 1) 0%, rgba(50, 80, 150, 1) 50%, rgba(100, 150, 250, 1) 100%);
         display: flex;
         justify-content: center;
         align-items: center;
         padding: 32px 0;
         border-radius: 0 0 12px 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
     .banner img {
         height: 80px;
+        filter: brightness(1.2); /* 밝게 조정 */
     }
 
-    /* 헤더 (단계 표시) */
+    /* Header (단계 표시) 제거 - 관리자 가입은 단일 페이지로 */
     .header {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 24px 0;
-        font-size: 16px;
-        font-weight: 500;
-        gap: 16px;
-    }
-    .header div {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        color: #999;
-    }
-    .header div label:first-child {
-        font-weight: bold;
-    }
-    .header-form.active {
-        color: #2f4dca;
-        font-weight: bold;
+        display: none; /* 단계 표시 숨김 */
     }
 
     /* 안내문 */
     .content-page h1 {
-        font-size: 20px;
+        font-size: 24px;
         margin-bottom: 8px;
         margin-top: 50px;
+        color: #1e3264; /* 관리자 테마 색상 */
+        font-weight: 700;
     }
     .content-page h4 {
         font-size: 14px;
@@ -438,20 +411,19 @@
         background-color: #ffffff;
         padding: 32px;
         border-radius: 12px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        margin-bottom: 50px;
     }
 
     .input-wrapper label {
         font-size: 14px;
-        font-weight: 500;
-        color: #000;
-        font-style: bold;
+        font-weight: 600; /* 조금 더 강조 */
+        color: #333;
         margin-bottom: 4px;
     }
 
     /* 에러 메시지 */
     .input-wrapper .input-error {
-        display: block;
         color: #dc3545;
         font-size: 12px;
         margin-top: 0px;
@@ -461,8 +433,7 @@
 
     /* 성공 메시지 */
     .input-wrapper .input-success {
-        display: block;
-        color: green;
+        color: #28a745;
         font-size: 12px;
         margin-top: 0px;
         margin-bottom: 8px;
@@ -486,27 +457,49 @@
     .input-wrapper input[type="password"]:focus,
     .input-wrapper select:focus {
         outline: none;
-        border-color: #2f4dca;
-        box-shadow: 0 0 0 3px rgba(47, 77, 202, 0.2);
+        border-color: #1e3264; /* 관리자 테마 포커스 색상 */
+        box-shadow: 0 0 0 3px rgba(30, 50, 100, 0.2);
     }
 
-    /* 아이디 중복 확인 버튼 */
+    /* 아이디 중복 확인 버튼 그룹 */
+    .input-wrapper form > div:first-of-type {
+        display: flex;
+        gap: 10px;
+    }
+    .input-wrapper form > div:first-of-type input {
+        flex-grow: 1;
+        width: auto; /* flex 때문에 width: 100% 무시 */
+    }
+    .input-wrapper form > div:first-of-type button {
+        flex-shrink: 0;
+        width: 120px;
+        padding: 0 16px; /* 높이는 input과 맞추기 위해 0으로 설정, 내부 버튼 스타일이 높이를 조정 */
+        margin-top: 0;
+    }
+
+    /* 공통 버튼 스타일 (중복확인, 인증코드 발송/확인 버튼) */
     .input-wrapper button[type="button"] {
-        width: 100%;
         padding: 14px 16px;
         background-color: #f8f9fa;
-        color: #2f4dca;
+        color: #1e3264; /* 관리자 테마 색상 */
         font-size: 16px;
         font-weight: 600;
         border-radius: 8px;
         cursor: pointer;
-        border: 1px solid #2f4dca;
-        margin-top: 8px;
+        border: 1px solid #1e3264;
+        transition: background-color 0.2s ease, color 0.2s ease;
     }
-    .input-wrapper button[type="button"]:hover {
-        background-color: #2f4dca;
+    .input-wrapper button[type="button"]:hover:not(:disabled) {
+        background-color: #1e3264;
         color: white;
     }
+    .input-wrapper button[type="button"]:disabled {
+        background-color: #ccc;
+        border-color: #aaa;
+        color: #777;
+        cursor: not-allowed;
+    }
+
 
     /* 이메일 주소 입력 */
     .email {
@@ -515,7 +508,7 @@
         gap: 10px;
     }
     .email input[type="text"] {
-        flex-grow: 1; /* 남은 공간 채우기 */
+        flex-grow: 1;
     }
     .email label {
         font-size: 18px;
@@ -524,68 +517,39 @@
     }
     .email select {
         width: 150px;
-        padding: 14px 16px;
-        border: 1px solid #ced4da;
-        border-radius: 8px;
-        font-size: 16px;
-        background-color: #fff;
-        cursor: pointer;
-        flex-shrink: 0; /* 줄어들지 않도록 */
-    }
-    .email select:focus {
-        border-color: #2f4dca;
-        box-shadow: 0 0 0 3px rgba(47, 77, 202, 0.2);
+        flex-shrink: 0;
     }
 
-    /* 인증 코드 발송 버튼 */
-    .input-wrapper > button {
+    /* 인증 코드 발송 버튼 (form 바로 아래에 있는 버튼) */
+    .input-wrapper form > button:not(.btn-wrapper button) {
         width: 100%;
         padding: 14px 16px;
         border: none;
-        background-color: #2f4dca;
+        background-color: #1e3264; /* 관리자 테마 메인 색상 */
         color: white;
         font-size: 16px;
         font-weight: 700;
         border-radius: 8px;
         cursor: pointer;
         margin-top: 10px;
-        transition: background-color 0.2s ease;
     }
-    .input-wrapper > button:hover {
-        background-color: #273a9a;
+    .input-wrapper form > button:not(.btn-wrapper button):hover:not(:disabled) {
+        background-color: #325096;
     }
 
     /* 인증 코드 입력 영역 */
-    .input-wrapper > div > div {
+    .code-input-group {
         display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-top: 12px;
+        align-items: center;
+        gap: 10px;
     }
-    .input-wrapper > div > div .input-error {
-        margin-top: -8px;
-        margin-bottom: 4px;
+    .code-input {
+        flex-grow: 1;
     }
-    .input-wrapper > div > div input[type="text"] {
-        width: calc(100% - 110px);
-        margin-right: 10px;
-        display: inline-block;
-        vertical-align: top;
-    }
-    .input-wrapper > div > div button[type="button"] {
-        width: 100px;
-        padding: 14px 16px;
-        border: none;
-        background-color: #6c757d;
-        color: white;
-        font-size: 16px;
-        font-weight: 600;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
-    }
-    .input-wrapper > div > div button[type="button"]:hover {
-        background-color: #5a6268;
+    .code-verify-btn {
+        flex-shrink: 0;
+        width: 120px;
+        margin-top: 0 !important; /* 위쪽 버튼 마진 덮어쓰기 */
     }
 
     .verification-info {
@@ -601,13 +565,13 @@
         font-weight: 500;
     }
     .verification-info .send-link {
-        color: #007bff;
+        color: #325096; /* 관리자 테마 링크 색상 */
         text-decoration: none;
         font-weight: 500;
         transition: color 0.2s ease;
     }
     .verification-info .send-link:hover {
-        color: #0056b3;
+        color: #1e3264;
         text-decoration: underline;
     }
 
@@ -626,6 +590,7 @@
     }
     .btn-wrapper .prev-btn:hover {
         background-color: #d3d9df;
+        color: #333;
     }
 
     .btn-wrapper .sign-btn {
@@ -633,10 +598,13 @@
         color: white;
         font-weight: 700;
         border: none;
+        background-color: #1e3264; /* 관리자 테마 메인 색상 */
+    }
+    .btn-wrapper .sign-btn:hover {
+        background-color: #325096;
     }
 
-    /* 버튼 공통 스타일 */
-    .input-wrapper button[type="button"],
+    /* 버튼 공통 스타일 (폼 안의 모든 버튼에 적용) */
     .input-wrapper button {
         padding: 14px 16px;
         border: none;

@@ -50,7 +50,11 @@ export const getOnlineInspectionDetail = (productInspectionId) => unwrap(apiClie
  * @param {number} firstInspectorId
  */
 export const approveOnlineInspection = (productInspectionId, firstInspectorId) =>
-  unwrap(apiClient.post(`/admin/inspections/${productInspectionId}/firstApprove`, null, { params: { firstInspectorId } })).catch(rethrow)
+  unwrap(
+    apiClient.post(`/admin/inspections/${productInspectionId}/firstApprove`, null, {
+      params: { firstInspectorId },
+    }),
+  ).catch(rethrow)
 
 /**
  * 1차 검수 반려
@@ -59,7 +63,11 @@ export const approveOnlineInspection = (productInspectionId, firstInspectorId) =
  * @param {object} body { rejectionReason: string }
  */
 export const rejectOnlineInspection = (productInspectionId, firstInspectorId, body) =>
-  unwrap(apiClient.post(`/admin/inspections/${productInspectionId}/firstReject`, body, { params: { firstInspectorId } })).catch(rethrow)
+  unwrap(
+    apiClient.post(`/admin/inspections/${productInspectionId}/firstReject`, body, {
+      params: { firstInspectorId },
+    }),
+  ).catch(rethrow)
 
 /**
  * 2차 검수 상세 조회
@@ -70,8 +78,16 @@ export const getOfflineInspectionDetail = (productInspectionId) => unwrap(apiCli
 
 /** 2차 승인 */
 export const approveOfflineInspection = (productInspectionId, secondInspectorId, body) =>
-  unwrap(apiClient.post(`/admin/inspections/${productInspectionId}/secondApprove`, body, { params: { secondInspectorId } })).catch(rethrow)
+  unwrap(
+    apiClient.post(`/admin/inspections/${productInspectionId}/secondApprove`, body, {
+      params: { secondInspectorId },
+    }),
+  ).catch(rethrow)
 
 /** 2차 검수 반려 */
 export const rejectOfflineInspection = (productInspectionId, secondInspectorId, body) =>
-  unwrap(apiClient.post(`/admin/inspections/${productInspectionId}/secondReject`, body, { params: { secondInspectorId } })).catch(rethrow)
+  unwrap(
+    apiClient.post(`/admin/inspections/${productInspectionId}/secondReject`, body, {
+      params: { secondInspectorId },
+    }),
+  ).catch(rethrow)

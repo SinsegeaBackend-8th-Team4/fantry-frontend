@@ -192,7 +192,7 @@
                     Activity Log
                 </a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                <a class="dropdown-item" href="#" @click="handleLogout" data-toggle="modal" data-target="#logoutModal">
                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                     Logout
                 </a>
@@ -206,8 +206,10 @@
 </template>
 
 <script setup>
+import { logout } from '@/api/login';
 import { useUserStore } from '@/stores/userStore';
 import { computed } from 'vue';
+import router from '@/router';
 
 const userStore = useUserStore();
 
@@ -216,4 +218,15 @@ const userStore = useUserStore();
 const userName = computed(() => {
   return userStore.currentUser ? userStore.currentUser.name : 'Guest';
 });
+
+// 로그아웃 함수
+const handleLogout = () => {
+  logout().then(response => {
+    console.log('로그아웃 응답 : ', response)
+    userStore.logout();
+    router.push('/admin/login');
+  }).catch(error => {
+    console.error('로그아웃 에러 : ', error)
+  });
+}
 </script>

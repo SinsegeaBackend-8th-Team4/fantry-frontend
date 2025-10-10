@@ -43,10 +43,23 @@ const InventoryListPage = () => import('@/pages/admin/inventory/InventoryListPag
 // 회원 관리
 const MemberDashboardPage = () => import('@/pages/admin/member/MemberDashboardPage.vue')
 const MemberListPage = () => import('@/pages/admin/member/MemberListPage.vue')
+const MemberDetailPage = () => import('@/pages/admin/member/MemberDetailPage.vue')
+const MemberEditPage = () => import('@/pages/admin/member/MemberEditPage.vue')
+const MemberCreatePage = () => import('@/pages/admin/member/MemberCreatePage.vue')
+// 회원 관리 - 신고 관련
+const ReportListPage = () => import('@/pages/admin/member/ReportListPage.vue')
+const ReportDetailPage = () => import('@/pages/admin/member/ReportDetailPage.vue')
+const ReportCreatePage = () => import('@/pages/admin/member/ReportCreatePage.vue')
+const ReportReceiveListPage = () => import('@/pages/admin/member/ReportReceivedListPage.vue')
+const ReportReceiveEditPage = () => import('@/pages/admin/member/MemberReceivedEditPage.vue')
 
 // 경매 관리
 const AuctionDashboardPage = () => import('@/pages/admin/auction/AuctionDashboardPage.vue')
 const AuctionListPage = () => import('@/pages/admin/auction/AuctionListPage.vue')
+
+// 로그인
+const AdminLogin = () => import('@/pages/admin/access/AdminLogin.vue')
+const AdminSignUp = () => import('@/pages/admin/access/AdminSignup.vue')
 
 const adminRoutes = {
   path: '/admin',
@@ -57,6 +70,21 @@ const adminRoutes = {
       path: '',
       component: AdminContentLayout, // 모든 관리자 컨텐츠 페이지의 상위 레이아웃
       children: [
+        // --- 로그인 ---
+        {
+          path: 'login',
+          name: 'AdminLogin',
+          component: AdminLogin,
+          meta: { requiredLogin: false, isAdmin: false, menu: false },
+        },
+        // --- 회원가입 ---
+        {
+          path: 'signup',
+          name: 'AdminSignUp',
+          component: AdminSignUp,
+          meta: { requiredLogin: false, isAdmin: false, menu: false },
+        },
+
         // --- 대시보드 ---
         {
           path: '',
@@ -126,7 +154,15 @@ const adminRoutes = {
           meta: { title: '회원관리', icon: 'fas fa-fw fa-users', menu: true },
           children: [
             { path: 'dashboard', name: 'AdminMemberDashboard', component: MemberDashboardPage },
-            { path: 'list', name: 'AdminMemberList', component: MemberListPage },
+            { path: 'list', name: 'AdminMemberList', component: MemberListPage, meta: { title: '회원목록' } },
+            { path: 'create', name: 'AdminMemberCreate', component: MemberCreatePage, meta: { title: '회원등록' } },
+            { path: 'reportList', name: 'AdminReportList', component: ReportListPage, meta: { title: '신고관리' } },
+            { path: 'reportReceiveList', name: 'AdminReportReceiveList', component: ReportReceiveListPage, meta: { title: '접수된 신고' } },
+            { path: 'detail/:memberId', name: 'AdminMemberDetail', component: MemberDetailPage, props: true, meta: { menu: false } },
+            { path: 'edit/:memberId', name: 'AdminMemberEdit', component: MemberEditPage, props: true, meta: { menu: false } },
+            { path: 'reportDetail/:reportId', name: 'AdminReportDetail', component: ReportDetailPage, props: true, meta: { menu: false } },
+            { path: 'reportCreate', name: 'AdminReportCreate', component: ReportCreatePage, meta: { menu: false } },
+            { path: 'reportReceiveEdit/:reportId', name: 'AdminReportReceiveEdit', component: ReportReceiveEditPage, props: true, meta: { menu: false } },
           ],
         },
         // --- 경매 관리 ---

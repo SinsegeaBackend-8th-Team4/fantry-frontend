@@ -8,6 +8,10 @@ import SelectedAlbumModal from '@/pages/user/inspection/SelectedAlbumModal.vue'
 import { useInspectionStore } from '@/stores/inspectionStore'
 import { storeToRefs } from 'pinia'
 
+// 상태 관리 (Pinia)
+import { useInspectionStore } from '@/stores/inspectionStore'
+import { storeToRefs } from 'pinia'
+
 const router = useRouter()
 const inspectionStore = useInspectionStore()
 
