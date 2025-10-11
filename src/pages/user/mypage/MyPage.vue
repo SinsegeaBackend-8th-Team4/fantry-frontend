@@ -3,11 +3,13 @@ import { ref, computed } from 'vue'
 import ProfileSection from './member/ProfileSection.vue'
 import PaymentAccount from './member/PaymentAccount.vue'
 import Address from './member/Address.vue'
+import ReportHistory from './member/ReportHistory.vue'
 import WithdrawalPage from './member/WithdrawalPage.vue'
 
 import MyProducts from './selling/MyProducts.vue'
 
-import ReportHistory from './report/ReportHistory.vue'
+import MypageQna from './support/MypageQna.vue'
+import MypageInquiry from './support/MypageInquiry.vue'
 
 const activeMenu = ref('account')
 const activeSubMenu = ref('profile')
@@ -22,8 +24,10 @@ const componentMap = {
   'withdrawal': WithdrawalPage,
   //판매 관리===========================
   'my-products': MyProducts,
-
-
+  //구매 관리===========================
+  //고객 센터===========================
+  'qna-list': MypageQna,
+  'inquiry': MypageInquiry,
 }
 
 const currentComponent = computed(()=>{

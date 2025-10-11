@@ -84,7 +84,12 @@ apiClient.interceptors.response.use(
     // }
 
     // 1. 401 Unauthorized 에러이고, 토큰 갱신 시도가 아직 없는 경우
-    if(error.response && error.response.status === 401 && !originalRequest._retry) {
+    //if(error.response && error.response.status === 401 && !originalRequest._retry) {
+    const status = error.response?.status;
+    const url = originalRequest?.url || '';
+    const isAuthEndpoint = url.includes('/reissue') || url.includes('/login') || url.includes('/logout');
+    const shouldRefresh = !originalRequest._retry && !isAuthEndpoint && (status === 401 || status === 403);
+    if (error.response && shouldRefresh) {
       originalRequest._retry = true;
       
       // accessToken 재발급
@@ -93,12 +98,13 @@ apiClient.interceptors.response.use(
         try{
           // 재발급 API 호출
           const serverPath = import.meta.env.VITE_API_SERVER_URL;
+          const currentToken = localStorage.getItem('accessToken');
           const res = await axios.post(serverPath+'/api/reissue', null, {
-            withCredentials: true
+            withCredentials: true,
+            headers: currentToken ? { Authorization: `Bearer ${currentToken}` } : undefined
           });
           
-          console.log("새로운 AccessToken : "+res);
-          const newAccessToken = res.data.accessToken;
+          const newAccessToken = res.headers.accesstoken || res.data;
 
           // 로컬 스토리지에 새로운 토큰 저장 + 큐 처리
           localStorage.setItem('accessToken', newAccessToken);
@@ -115,14 +121,13 @@ apiClient.interceptors.response.use(
           isRefreshing = false;
           processQueue(err, null);
           // 재발급 실패 시 로그아웃 처리
-          // const isLoggingOut = window.location.pathname === '/' || window.location.pathname === '/logout';
-          // localStorage.removeItem('accessToken');
-          // if(!isLoggingOut){
-          //   window.location.href = '/login';
-          // }
-          const userStore = useUserStore();
-          userStore.logout();
-
+          try{
+            localStorage.removeItem('accessToken');
+            const userStore = useUserStore();
+            //userStore.logout();
+          } catch (e) {
+            console.warn('Logout failed inside interceptor', e);
+          }
           return Promise.reject(err);
         }
       }
