@@ -31,7 +31,9 @@ const CsWritePage = () => import('@/pages/admin/cs/CsWritePage.vue') // 글쓰�
 // 검수 관리
 const InspectionDashboardPage = () => import('@/pages/admin/inspection/InspectionDashboardPage.vue')
 const OnlineInspectionListPage = () => import('@/pages/admin/inspection/OnlineInspectionListPage.vue')
+const OnlineInspectionDetailPage = () => import('@/pages/admin/inspection/OnlineInspectionDetailPage.vue')
 const OfflineInspectionListPage = () => import('@/pages/admin/inspection/OfflineInspectionListPage.vue')
+const OfflineInspectionDetailPage = () => import('@/pages/admin/inspection/OfflineInspectionDetailPage.vue')
 const InspectionHistoryPage = () => import('@/pages/admin/inspection/InspectionHistoryPage.vue')
 
 // 재고 관리
@@ -39,25 +41,25 @@ const InventoryDashboardPage = () => import('@/pages/admin/inventory/InventoryDa
 const InventoryListPage = () => import('@/pages/admin/inventory/InventoryListPage.vue')
 
 // 회원 관리
-const MemberDashboardPage = () => import('@/pages/admin/member/MemberDashboardPage.vue');
-const MemberListPage = () => import('@/pages/admin/member/MemberListPage.vue');
-const MemberDetailPage = () => import('@/pages/admin/member/MemberDetailPage.vue');
-const MemberEditPage = () => import('@/pages/admin/member/MemberEditPage.vue');
-const MemberCreatePage = () => import('@/pages/admin/member/MemberCreatePage.vue');
+const MemberDashboardPage = () => import('@/pages/admin/member/MemberDashboardPage.vue')
+const MemberListPage = () => import('@/pages/admin/member/MemberListPage.vue')
+const MemberDetailPage = () => import('@/pages/admin/member/MemberDetailPage.vue')
+const MemberEditPage = () => import('@/pages/admin/member/MemberEditPage.vue')
+const MemberCreatePage = () => import('@/pages/admin/member/MemberCreatePage.vue')
 // 회원 관리 - 신고 관련
-const ReportListPage = () => import('@/pages/admin/member/ReportListPage.vue');
-const ReportDetailPage = () => import('@/pages/admin/member/ReportDetailPage.vue');
-const ReportCreatePage = () => import('@/pages/admin/member/ReportCreatePage.vue');
-const ReportReceiveListPage = () => import('@/pages/admin/member/ReportReceivedListPage.vue');
-const ReportReceiveEditPage = () => import('@/pages/admin/member/MemberReceivedEditPage.vue');
+const ReportListPage = () => import('@/pages/admin/member/ReportListPage.vue')
+const ReportDetailPage = () => import('@/pages/admin/member/ReportDetailPage.vue')
+const ReportCreatePage = () => import('@/pages/admin/member/ReportCreatePage.vue')
+const ReportReceiveListPage = () => import('@/pages/admin/member/ReportReceivedListPage.vue')
+const ReportReceiveEditPage = () => import('@/pages/admin/member/MemberReceivedEditPage.vue')
 
 // 경매 관리
 const AuctionDashboardPage = () => import('@/pages/admin/auction/AuctionDashboardPage.vue')
 const AuctionListPage = () => import('@/pages/admin/auction/AuctionListPage.vue')
 
 // 로그인
-const AdminLogin = () => import('@/pages/admin/access/AdminLogin.vue');
-const AdminSignUp = () => import('@/pages/admin/access/AdminSignup.vue');
+const AdminLogin = () => import('@/pages/admin/access/AdminLogin.vue')
+const AdminSignUp = () => import('@/pages/admin/access/AdminSignup.vue')
 
 const adminRoutes = {
   path: '/admin',
@@ -70,17 +72,17 @@ const adminRoutes = {
       children: [
         // --- 로그인 ---
         {
-          path : 'login',
-          name : 'AdminLogin',
-          component : AdminLogin,
-          meta: { requiredLogin: false, isAdmin: false, menu: false }
+          path: 'login',
+          name: 'AdminLogin',
+          component: AdminLogin,
+          meta: { requiredLogin: false, isAdmin: false, menu: false },
         },
         // --- 회원가입 ---
         {
-          path : 'signup',
-          name : 'AdminSignUp',
-          component : AdminSignUp,
-          meta: { requiredLogin: false, isAdmin: false, menu: false } 
+          path: 'signup',
+          name: 'AdminSignUp',
+          component: AdminSignUp,
+          meta: { requiredLogin: false, isAdmin: false, menu: false },
         },
 
         // --- 대시보드 ---
@@ -128,9 +130,11 @@ const adminRoutes = {
           meta: { title: '검수관리', icon: 'fas fa-fw fa-check-circle', menu: true },
           children: [
             { path: 'dashboard', name: 'AdminInspectionDashboard', component: InspectionDashboardPage },
-            { path: 'onlineList', name: 'OnlineInspectionListPage', component: OnlineInspectionListPage, meta: { title: '온라인 1차 검수' } },
-            { path: 'offlineList', name: 'OfflineInspectionListPage', component: OfflineInspectionListPage, meta: { title: '오프라인 2차 검수' } },
-            { path: 'history', name: 'InspectionHistoryPage', component: InspectionHistoryPage, meta: { title: '검수 이력' } },
+            { path: 'online', name: 'AdminOnlineInspectionList', component: OnlineInspectionListPage, meta: { title: '온라인 1차 검수' } },
+            { path: 'online/:id', name: 'AdminOnlineInspectionDetail', component: OnlineInspectionDetailPage, meta: { title: '온라인 1차 상세', hidden: true } },
+            { path: 'offline', name: 'AdminOfflineInspectionList', component: OfflineInspectionListPage, meta: { title: '오프라인 2차 검수' } },
+            { path: 'offline/:id', name: 'AdminOfflineInspectionDetail', component: OfflineInspectionDetailPage, meta: { title: '오프라인 2차 상세', hidden: true } },
+            { path: 'history', name: 'AdminInspectionHistory', component: InspectionHistoryPage, meta: { title: '검수 이력' } },
           ],
         },
         // --- 재고 관리 ---
@@ -150,15 +154,15 @@ const adminRoutes = {
           meta: { title: '회원관리', icon: 'fas fa-fw fa-users', menu: true },
           children: [
             { path: 'dashboard', name: 'AdminMemberDashboard', component: MemberDashboardPage },
-            { path: 'list', name: 'AdminMemberList', component: MemberListPage, meta: {title: '회원목록'} },
-            { path: 'create', name: 'AdminMemberCreate', component: MemberCreatePage, meta: {title: '회원등록'} },
-            { path: 'reportList', name: 'AdminReportList', component: ReportListPage, meta: {title: '신고관리'} },
-            { path: 'reportReceiveList', name: 'AdminReportReceiveList', component: ReportReceiveListPage, meta: {title: '접수된 신고'} },
-            { path: 'detail/:memberId', name: 'AdminMemberDetail', component: MemberDetailPage, props: true,  meta: {menu: false} },
-            { path: 'edit/:memberId', name: 'AdminMemberEdit', component: MemberEditPage, props: true, meta: {menu: false} },
-            { path: 'reportDetail/:reportId', name: 'AdminReportDetail', component: ReportDetailPage, props: true, meta: {menu: false} },
-            { path: 'reportCreate', name: 'AdminReportCreate', component: ReportCreatePage, meta: {menu: false} },
-            { path: 'reportReceiveEdit/:reportId', name: 'AdminReportReceiveEdit', component: ReportReceiveEditPage, props: true, meta: {menu: false} },
+            { path: 'list', name: 'AdminMemberList', component: MemberListPage, meta: { title: '회원목록' } },
+            { path: 'create', name: 'AdminMemberCreate', component: MemberCreatePage, meta: { title: '회원등록' } },
+            { path: 'reportList', name: 'AdminReportList', component: ReportListPage, meta: { title: '신고관리' } },
+            { path: 'reportReceiveList', name: 'AdminReportReceiveList', component: ReportReceiveListPage, meta: { title: '접수된 신고' } },
+            { path: 'detail/:memberId', name: 'AdminMemberDetail', component: MemberDetailPage, props: true, meta: { menu: false } },
+            { path: 'edit/:memberId', name: 'AdminMemberEdit', component: MemberEditPage, props: true, meta: { menu: false } },
+            { path: 'reportDetail/:reportId', name: 'AdminReportDetail', component: ReportDetailPage, props: true, meta: { menu: false } },
+            { path: 'reportCreate', name: 'AdminReportCreate', component: ReportCreatePage, meta: { menu: false } },
+            { path: 'reportReceiveEdit/:reportId', name: 'AdminReportReceiveEdit', component: ReportReceiveEditPage, props: true, meta: { menu: false } },
           ],
         },
         // --- 경매 관리 ---

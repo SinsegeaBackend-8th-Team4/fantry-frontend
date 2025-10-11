@@ -1,16 +1,10 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-
-// API 모듈
 import { getGoodsCategories, getArtists, getAlbumsByArtist } from '@/api/catalog.js'
 import { getChecklistsByCategory, getPriceBaselineByCategory, estimatePrice } from '@/api/checklist.js'
-
-// Modal 컴포넌트
 import SelectedArtistModal from '@/pages/user/inspection/SelectedArtistModal.vue'
 import SelectedAlbumModal from '@/pages/user/inspection/SelectedAlbumModal.vue'
-
-// 상태 관리 (Pinia)
 import { useInspectionStore } from '@/stores/inspectionStore'
 import { storeToRefs } from 'pinia'
 
@@ -26,13 +20,12 @@ const {
   itemName,
   itemDescription,
   hashtags,
-
   checklists,
   answers,
-
   expectedPrice,
   marketAvgPrice,
   sellerHopePrice,
+  completedStep,
 } = storeToRefs(inspectionStore)
 
 // 로컬 상태 변수
@@ -52,107 +45,100 @@ const loadingBaseline = ref(false) // 기준가 로딩
 const loadingEstimate = ref(false) // 예상가 로딩
 const loadingMarketAvg = ref(false) // 마켓 평균가 로딩
 const error = ref(null) // 에러 메시지
-
 const isPriceCalculated = ref(false) // 예상가 계산 완료 여부
 
-// fetchers : 카테고리/아티스트 조회
-async function fetchCategoriesAndArtists() {
-  const [categories, artists] = await Promise.all([getGoodsCategories(), getArtists()])
-  return {
-    categories: categories ?? [],
-    artists: artists ?? [],
-  }
-}
+// UI 상태 Computed
+const isCategoryDisabled = computed(() => loadingInitial.value)
+const isArtistDisabled = computed(() => loadingInitial.value)
+const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.value)
 
-// fetchers : 앨범 조회
-async function fetchAlbumsByArtistId(artistId) {
-  const albums = await getAlbumsByArtist(artistId)
-  return albums ?? []
-}
+// 상품명 미리보기 텍스트
+const previewText = computed(() => {
+  const ak = selectedArtist.value?.nameKo || '[아티스트]'
+  const at = selectedAlbum.value?.title || '[앨범]'
+  const nm = itemName.value || '[상품명]'
+  return `${ak} ${at} ${nm}`
+})
 
-// fetchers : 체크리스트 조회
-async function fetchChecklistsByCategoryId(categoryId) {
-  const checklists = await getChecklistsByCategory(categoryId)
-  return checklists ?? []
-}
+// 체크리스트 필드 파싱
+const fields = computed(() => {
+  return checklists.value.map((c) => ({
+    checklistItemId: c.checklistItemId,
+    itemKey: c.itemKey,
+    label: c.label,
+    type: c.type,
+    options: parseOptions(c.options), // 옵션을 파싱하여 사용
+    required: !!c.required, // boolean 형태로 변환
+    orderIndex: c.orderIndex,
+  }))
+})
 
-// fetchers : 가격 기준가 조회
-async function fetchBaselinePriceByCategoryId(categoryId) {
-  const baseline = await getPriceBaselineByCategory(categoryId)
-  return baseline ?? null
-}
-
-onMounted(async () => {
+// 초기 데이터 : 카테고리/아티스트 리스트 조회
+const fetchInitData = async () => {
   loadingInitial.value = true
   error.value = null
+
   try {
-    const { categories: cats, artists: arts } = await fetchCategoriesAndArtists()
-    categories.value = cats
-    artists.value = arts
+    const [cats, arts] = await Promise.all([getGoodsCategories(), getArtists()])
+    categories.value = cats ?? []
+    artists.value = arts ?? []
   } catch (err) {
-    error.value = err?.message || '초기 데이터(카테고리/아티스트) 조회 중 오류가 발생했습니다.'
+    error.value = err.message || '초기 데이터를 불러오는 중 오류가 발생했습니다.'
   } finally {
     loadingInitial.value = false
   }
-})
-
-watch(
-  answers,
-  () => {
-    isPriceCalculated.value = false
-  },
-  { deep: true },
-)
-
-// 카테고리 선택 후 체크리스트/기준가 조회
-const onSelectCategory = async () => {
-  selectedCategoryValue.value = categories.value.find((c) => c.GoodsCategoryId === selectedCategory.value) || null
-
-  // 상태 초기화
-  loadingChecklists.value = true
-  loadingBaseline.value = true
-  checklists.value = []
-  answers.value = {}
-  error.value = null
-  isPriceCalculated.value = false
-
-  try {
-    const [checklistRes, baselineRes] = await Promise.all([fetchChecklistsByCategoryId(selectedCategory.value), fetchBaselinePriceByCategoryId(selectedCategory.value)])
-
-    checklists.value = checklistRes
-    expectedPrice.value = baselineRes
-
-    // answers 초기화
-    for (const c of checklists.value) {
-      if (c.type === 'BOOL') answers.value[c.itemKey] = null
-      else answers.value[c.itemKey] = ''
-    }
-  } catch (err) {
-    error.value = err?.message || '체크리스트/가격 조회 중 오류가 발생했습니다.'
-  } finally {
-    loadingChecklists.value = false
-    loadingBaseline.value = false
-  }
 }
 
-// 아티스트 선택 후 앨범 조회
-const onSelectArtist = async (artist) => {
-  selectedArtist.value = artist
-  selectedAlbum.value = null
-  showArtistModal.value = false
+// 앨범 리스트 조회
+const fetchAlbums = async (artistId) => {
+  loadingAlbums.value = true
   error.value = null
-
   try {
-    loadingAlbums.value = true
-    albums.value = await fetchAlbumsByArtistId(artist.artistId)
+    albums.value = (await getAlbumsByArtist(artistId)) ?? []
   } catch (err) {
-    error.value = err?.message || '앨범 데이터 조회 중 오류가 발생했습니다.'
+    error.value = err.message || '앨범 목록을 불러오는 중 오류가 발생했습니다.'
   } finally {
     loadingAlbums.value = false
   }
 }
 
-// 앨범 선택
+// 카테고리 이벤트 핸들러
+const onSelectCategory = async () => {
+  // 카테고리 객체
+  selectedCategoryValue.value = categories.value.find((c) => c.GoodsCategoryId === selectedCategory.value) || null
+
+  // 상태 초기화
+  loadingChecklists.value = true
+  checklists.value = []
+  answers.value = {}
+  isPriceCalculated.value = false
+  error.value = null
+
+  try {
+    const [checklistRes, baselineRes] = await Promise.all([getChecklistsByCategory(selectedCategory.value), getPriceBaselineByCategory(selectedCategory.value)])
+    checklists.value = checklistRes.items ?? []
+    inspectionStore.templateId = checklistRes.templateId
+    inspectionStore.templateVersion = checklistRes.templateVersion
+    expectedPrice.value = baselineRes ?? null
+
+    // answers 초기화
+    checklists.value.forEach((c) => {
+      answers.value[c.itemKey] = c.type === 'BOOL' ? null : ''
+    })
+  } catch (err) {
+    error.value = err.message || '체크리스트와 가격 정보를 불러오는 중 오류가 발생했습니다.'
+  } finally {
+    loadingChecklists.value = false
+  }
+}
+
+const onSelectArtist = (artist) => {
+  selectedArtist.value = artist
+  selectedAlbum.value = null
+  showArtistModal.value = false
+  fetchAlbums(artist.artistId)
+}
+
 const onSelectAlbum = (album) => {
   selectedAlbum.value = album
   showAlbumModal.value = false
@@ -160,33 +146,25 @@ const onSelectAlbum = (album) => {
 
 // 예상가 계산
 const onEstimate = async () => {
-  // 검증
-  if (!selectedCategory.value) return alert('카테고리를 먼저 선택해주세요.')
-  if (!validateChkRequired()) return
-
+  if (!validateChecklist()) return
   loadingEstimate.value = true
   error.value = null
+
   try {
     const selections = buildSelections() // 서버 전송용 포맷으로 변환
-    const estimated = await estimatePrice(selectedCategory.value, selections)
-    expectedPrice.value = estimated ?? null
+    expectedPrice.value = (await estimatePrice(selectedCategory.value, selections)) ?? null
     isPriceCalculated.value = true
   } catch (err) {
-    error.value = err?.message || '예상가 계산 중 오류가 발생했습니다.'
+    error.value = err.message || '예상가를 계산하는 중 오류가 발생했습니다.'
   } finally {
     loadingEstimate.value = false
   }
 }
 
-// 체크리스트 필수 항목 검증
-const validateChkRequired = () => {
+// 체크리스트 필수 항목 유효성 검증
+const validateChecklist = () => {
   for (const f of fields.value) {
-    if (!f.required) continue
-
-    const v = answers.value[f.itemKey]
-    const isMissing = (f.type === 'BOOL' && v === null) || (f.type === 'SELECT' && (v === '' || v === 'null'))
-
-    if (isMissing) {
+    if (f.required && (answers.value[f.itemKey] === null || answers.value[f.itemKey] === '')) {
       alert(`'${f.label}' 항목을 선택해주세요.`)
       return false
     }
@@ -194,7 +172,7 @@ const validateChkRequired = () => {
   return true
 }
 
-const validateStep1 = () => {
+const validateAll = () => {
   // 상품 정보 검증
   if (!selectedCategory.value) {
     alert('카테고리를 선택해주세요.')
@@ -214,7 +192,7 @@ const validateStep1 = () => {
   }
 
   // 체크리스트 검증
-  if (!validateChkRequired()) return false
+  if (!validateChecklist()) return false
 
   // 3. 가격 정보 검증
   if (!isPriceCalculated.value) {
@@ -230,7 +208,6 @@ const validateStep1 = () => {
     return false
   }
 
-  // 모든 검증 통과
   return true
 }
 
@@ -261,37 +238,21 @@ const parseOptions = (raw) => {
 
 // 다음 단계 이동
 const goNext = () => {
-  if (!validateStep1()) return
-
+  if (!validateAll()) return
+  completedStep.value = 1
   router.push('/inspection/step2')
 }
 
-// 체크리스트 필드 파싱
-const fields = computed(() => {
-  return checklists.value.map((c) => ({
-    checklistItemId: c.checklistItemId,
-    itemKey: c.itemKey,
-    label: c.label,
-    type: c.type,
-    options: parseOptions(c.options), // 옵션을 파싱하여 사용
-    required: !!c.required, // boolean 형태로 변환
-    orderIndex: c.orderIndex,
-  }))
-})
-
-// 상품명 입력란 아래에 표시될 미리보기 텍스트
-const previewText = computed(() => {
-  const ak = selectedArtist.value?.nameKo || '[아티스트]'
-  const at = selectedAlbum.value?.title || '[앨범]'
-  const nm = itemName.value || '[상품명]'
-  return `${ak} ${at} ${nm}`
-})
-
-// UI 상태 편의
-const isCategoryDisabled = computed(() => loadingInitial.value)
-const isArtistDisabled = computed(() => loadingInitial.value)
-const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.value)
+onMounted(fetchInitData)
+watch(
+  answers,
+  () => {
+    isPriceCalculated.value = false
+  },
+  { deep: true },
+)
 </script>
+
 <template>
   <main class="bg-light py-5 inspection">
     <div class="container">
