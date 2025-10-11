@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getGoodsCategories, getArtists, getAlbumsByArtist } from '@/api/catalog.js'
-import { getChecklistsByCategory, getPriceBaselineByCategory, estimatePrice } from '@/api/checklist.js'
+import { getChecklistsByCategory, getPriceBaselineByCategory, estimatePrice, getMarketAvgPrice } from '@/api/checklist.js'
 import SelectedArtistModal from '@/pages/user/inspection/SelectedArtistModal.vue'
 import SelectedAlbumModal from '@/pages/user/inspection/SelectedAlbumModal.vue'
 import { useInspectionStore } from '@/stores/inspectionStore'
@@ -33,6 +33,7 @@ const categories = ref([]) // 카테고리 목록
 const artists = ref([]) // 아티스트 목록
 const albums = ref([]) // 앨범 목록
 const tagInput = ref('') // 해시태그 입력
+const marketAvgCount = ref(0)
 
 // 모달 상태
 const showArtistModal = ref(false)
@@ -47,6 +48,7 @@ const loadingEstimate = ref(false) // 예상가 로딩
 const loadingMarketAvg = ref(false) // 마켓 평균가 로딩
 const error = ref(null) // 에러 메시지
 const isPriceCalculated = ref(false) // 예상가 계산 완료 여부
+const isMarketAvgCalculated = ref(false) // 평균 시세 조회 완료 여부
 
 // UI 상태 Computed
 const isCategoryDisabled = computed(() => loadingInitial.value)
@@ -113,6 +115,9 @@ const onSelectCategory = async () => {
   checklists.value = []
   answers.value = {}
   isPriceCalculated.value = false
+  isMarketAvgCalculated.value = false
+  marketAvgPrice.value = null
+  marketAvgCount.value = 0
   error.value = null
 
   try {
@@ -136,6 +141,9 @@ const onSelectCategory = async () => {
 const onSelectArtist = (artist) => {
   selectedArtist.value = artist
   selectedAlbum.value = null
+  isMarketAvgCalculated.value = false
+  marketAvgPrice.value = null
+  marketAvgCount.value = 0
   showArtistModal.value = false
   fetchAlbums(artist.artistId)
 }
@@ -143,6 +151,9 @@ const onSelectArtist = (artist) => {
 const onSelectAlbum = (album) => {
   selectedAlbum.value = album
   showAlbumModal.value = false
+  isMarketAvgCalculated.value = false
+  marketAvgPrice.value = null
+  marketAvgCount.value = 0
 }
 
 // 해시태그 추가
@@ -187,6 +198,32 @@ const onEstimate = async () => {
   }
 }
 
+// 평균 시세 조회
+const onFetchMarketAvg = async () => {
+  if (!selectedCategory.value || !selectedArtist.value) {
+    alert('카테고리와 아티스트를 먼저 선택해주세요.')
+    return
+  }
+
+  loadingMarketAvg.value = true
+  error.value = null
+
+  try {
+    const res = await getMarketAvgPrice(selectedCategory.value, selectedArtist.value.artistId, selectedAlbum.value?.albumId)
+    console.log(res)
+
+    marketAvgPrice.value = res.marketAvgPrice
+    marketAvgCount.value = res.count
+    isMarketAvgCalculated.value = true
+  } catch (err) {
+    alert('평균 시세를 조회하는 중 오류가 발생했습니다.')
+    marketAvgPrice.value = null
+    marketAvgCount.value = 0
+  } finally {
+    loadingMarketAvg.value = false
+  }
+}
+
 // 체크리스트 필수 항목 유효성 검증
 const validateChecklist = () => {
   for (const f of fields.value) {
@@ -225,10 +262,14 @@ const validateAll = () => {
     alert('시스템 예상가를 다시 계산해주세요.')
     return false
   }
-  // if (marketAvgPrice.value === null) {
-  //   alert('평균 시세를 조회해주세요.')
-  //   return false
-  // }
+  if (!isMarketAvgCalculated.value) {
+    alert('평균 시세를 조회해주세요.')
+    return false
+  }
+  if (marketAvgPrice.value === null) {
+    alert('평균 시세를 조회해주세요.')
+    return false
+  }
   if (sellerHopePrice.value === null || sellerHopePrice.value <= 0) {
     alert('판매 희망가를 0보다 큰 값으로 입력해주세요.')
     return false
@@ -293,11 +334,6 @@ watch(
         <div class="progress" style="height: 6px">
           <div class="progress-bar bg-primary" style="width: 33%"></div>
         </div>
-      </div>
-
-      <!-- 오류/알림 -->
-      <div v-if="error" class="alert alert-danger" role="alert">
-        {{ error }}
       </div>
 
       <div class="row">
@@ -472,7 +508,7 @@ watch(
                 <span class="text-muted">평균 시세</span>
                 <div class="d-flex align-items-center">
                   <span class="mr-2">
-                    {{ marketAvgPrice ? marketAvgPrice.toLocaleString() + '원' : '데이터 없음' }}
+                    {{ marketAvgPrice ? `${marketAvgPrice.toLocaleString()}원 (${marketAvgCount}건)` : '데이터 없음' }}
                   </span>
                   <button class="btn btn-outline-secondary btn-sm" type="button" :disabled="!selectedCategory || loadingMarketAvg" @click="onFetchMarketAvg">
                     <span v-if="loadingMarketAvg">계산 중…</span>
