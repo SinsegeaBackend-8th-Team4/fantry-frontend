@@ -32,6 +32,7 @@ const {
 const categories = ref([]) // 카테고리 목록
 const artists = ref([]) // 아티스트 목록
 const albums = ref([]) // 앨범 목록
+const tagInput = ref('') // 해시태그 입력
 
 // 모달 상태
 const showArtistModal = ref(false)
@@ -142,6 +143,31 @@ const onSelectArtist = (artist) => {
 const onSelectAlbum = (album) => {
   selectedAlbum.value = album
   showAlbumModal.value = false
+}
+
+// 해시태그 추가
+const addTag = () => {
+  const newTag = tagInput.value.trim().replace(/#/g, '') // 공백, '#' 제거
+  if (newTag && !hashtags.value.includes(newTag)) {
+    if (hashtags.value.length < 5) {
+      hashtags.value.push(newTag)
+      tagInput.value = ''
+    } else {
+      alert('해시태그는 최대 5개까지 추가할 수 있습니ㅏㄷ.')
+    }
+  }
+}
+
+// 해시태그 삭제
+const removeTag = (index) => {
+  hashtags.value.splice(index, 1)
+}
+
+// 마지막 해시태그 삭제 (Backspace 키)
+const removeLastTag = () => {
+  if (tagInput.value === '' && hashtags.value.length > 0) {
+    hashtags.value.pop()
+  }
 }
 
 // 예상가 계산
@@ -356,7 +382,14 @@ watch(
               <!-- 해시태그 -->
               <div class="form-group">
                 <label class="font-weight-medium">해시태그</label>
-                <input type="text" class="form-control" placeholder="#아이브 #포토카드" v-model="hashtags" />
+                <div class="tag-input-wrapper">
+                  <span v-for="(tag, index) in hashtags" :key="index" class="tag-item">
+                    #{{ tag }}
+                    <button @click="removeTag(index)" class="remove-tag-btn">&times;</button>
+                  </span>
+                  <input type="text" class="tag-input" placeholder="태그 입력 후 Enter" v-model="tagInput" @keydown.enter.prevent="addTag" @keydown.backspace="removeLastTag" />
+                </div>
+                <small class="form-text text-muted">예: #아이브 #포토카드 (입력 후 엔터)</small>
               </div>
             </div>
           </div>
@@ -452,6 +485,7 @@ watch(
                 <label class="font-weight-medium"> 판매 희망가 <span class="text-danger">*</span> </label>
                 <input type="number" class="form-control" v-model="sellerHopePrice" />
                 <small class="form-text text-muted"> 희망가와 예상가가 다를 수 있으며, 최종 가격은 검수 후 확정됩니다. </small>
+                <small class="form-text text-info font-weight-bold mt-2"> ※ 참고: 희망가가 시스템 예상가의 150%를 초과할 경우, 상품은 48시간 동안 경매 방식으로 우선 판매됩니다. </small>
               </div>
             </div>
           </div>
@@ -551,5 +585,54 @@ label.font-weight-medium {
 .custom-select {
   height: auto;
   line-height: 1.5;
+}
+
+.tag-input-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  gap: 8px;
+  cursor: text;
+
+  &:focus-within {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+}
+
+.tag-item {
+  display: inline-flex;
+  align-items: center;
+  background-color: #e9ecef;
+  color: #495057;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.remove-tag-btn {
+  background: none;
+  border: none;
+  color: #6c757d;
+  margin-left: 6px;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1.1em;
+  line-height: 1;
+
+  &:hover {
+    color: #343a40;
+  }
+}
+
+.tag-input {
+  border: none;
+  outline: none;
+  flex-grow: 1;
+  padding: 4px 0;
+  background: transparent;
 }
 </style>
