@@ -91,6 +91,10 @@ const fetchInitData = async () => {
     loadingInitial.value = false
   }
 }
+// 카테고리가 포토카드(1), 앨범(2)일 때 true 반환
+const showAlbumSelection = computed(() => {
+  return [1, 2].includes(selectedCategory.value)
+})
 
 // 앨범 리스트 조회
 const fetchAlbums = async (artistId) => {
@@ -119,6 +123,10 @@ const onSelectCategory = async () => {
   marketAvgPrice.value = null
   marketAvgCount.value = 0
   error.value = null
+
+  if (!showAlbumSelection.value) {
+    selectedAlbum.value = null
+  }
 
   try {
     const [checklistRes, baselineRes] = await Promise.all([getChecklistsByCategory(selectedCategory.value), getPriceBaselineByCategory(selectedCategory.value)])
@@ -377,7 +385,7 @@ watch(
               </div>
 
               <!-- 앨범 -->
-              <div class="form-group">
+              <div class="form-group" v-if="showAlbumSelection">
                 <label class="font-weight-medium">앨범</label>
                 <div class="input-group">
                   <input
