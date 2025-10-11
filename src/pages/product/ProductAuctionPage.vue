@@ -40,8 +40,16 @@
                     </div>
                     <div class="bid-section-main text-center mb-5">
                         <h5 class="mb-3">현재 입찰가</h5>
-                        <!-- 현재 입찰가 데이터 바인딩 -->
-                        <p id="current-bid-price" :class="['current-bid-price-main', { 'bid-success-effect': isBidSuccess }]">{{ formattedCurrentPrice }}</p>
+                        <!-- Case 1: 입찰이 진행 중일 때 (hasBids가 true) -->
+                        <p v-if="hasBids" id="current-bid-price" :class="['current-bid-price-main', { 'bid-success-effect': isBidSuccess }]">
+                            {{ formattedCurrentPrice }}
+                        </p>
+                        
+                        <!-- Case 2: 아직 입찰이 없을 때 (hasBids가 false) -->
+                        <div v-else class="no-bids-info">
+                            <p class="no-bids-text">현재 입찰자가 없습니다.</p>
+                            <p class="start-price-info">(시작가: {{ formattedStartPrice }})</p>
+                        </div>
                     </div>
                     <!-- 로그인 상태에 따라 버튼 활성화/비활성화 -->
                     <button class="btn btn-danger btn-lg w-100" @click="openBidModal" :disabled="!userStore.isLoggedIn"
@@ -114,9 +122,16 @@
                         지난 입찰 기록 보기 {{ isBidHistoryVisible ? '▼' : '▶' }}
                     </button>
                     <div v-if="isBidHistoryVisible" class="bid-history-log">
-                        <p>16,000원 - 2025.09.24 11:30:15</p>
-                        <p>15,000원 - 2025.09.24 10:25:41</p>
-                        <p>...</p>
+                        <!-- 데이터가 없을 때 메시지 표시 -->
+                        <p v-if="!bidHistory || bidHistory.length === 0" class="text-muted text-center my-3">
+                            입찰 기록이 없습니다.
+                        </p>
+                        <!-- bidHistory 배열을 순회하며 입찰 기록 표시 -->
+                        <div v-else>
+                            <p v-for="(bid, index) in bidHistory" :key="index">
+                                {{ formatPrice(bid.bidAmount) }} - {{ formatDate(bid.bidAt) }}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -149,7 +164,8 @@
  * ============================================= */
     import { ref, onMounted, onUnmounted, computed } from 'vue';
     import { useRoute } from 'vue-router';
-    import { getAuctionDetails} from '@/api/auction';  //경매 관련 API 함수들
+    import { getAuctionDetails} from '@/api/auction';  //경매 관련 API 함수
+    import { getBidsByAuctionId } from '@/api/bid';  //입찰 관련 API 함수
     import { useUserStore } from '@/stores/userStore';
     import { subscribe, unsubscribe, publish } from '@/services/websocketService';
     const route = useRoute();
@@ -165,10 +181,7 @@
     const auction = ref(null);
     const isLoading = ref(true);
     const error = ref(null);
-    const bidHistory = ref([
-      { amount: 16000, time: '2025.09.24 11:30:15' },
-      { amount: 15000, time: '2025.09.24 10:25:41' }
-    ]);
+    const bidHistory = ref([]);
 
     // --- 실시간 데이터 상태 ---
     const currentBidPrice = ref(0);
@@ -202,6 +215,11 @@
     const isAuction = computed(() => auction.value?.saleType === 'AUCTION');
     const isInstantBuy = computed(() => auction.value?.saleType === 'INSTANT_BUY');
 
+    const hasBids = computed(()=>{
+        if (!auction.value) return false;
+        // 현재 입찰가와 시작가가 다르면 입찰이 진행된 것으로 간주
+        return currentBidPrice.value !== auction.value.startPrice;
+    })
     const formatPrice = (price) => price != null ? price.toLocaleString() + '원' : '가격 정보 없음';
     const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleString('ko-KR') : '';
 
@@ -211,8 +229,22 @@
         return dateObj ? dateObj.getTime() : null;
     });
 
-    const formattedCurrentPrice = computed(() => formatPrice(currentBidPrice.value));
-    const formattedStartPrice = computed(() => formatPrice(auction.value?.price));
+    const formattedCurrentPrice = computed(() =>{
+        if (!auction.value) {
+            return '';
+        }
+        
+        // 1. 현재 입찰가(currentBidPrice)와 시작가(startPrice)가 같은지 비교.
+        //    (백엔드에서 입찰이 없으면 currentPrice를 startPrice로 보내줌)
+        if (currentBidPrice.value === auction.value.startPrice) {
+            // 2. 같다면, 아직 입찰자가 없는 것이므로 안내 문구 반환.
+            return `현재 입찰자가 없습니다. (시작가: ${formatPrice(auction.value.startPrice)})`;
+        } else {
+            // 3. 다르다면, 입찰이 진행된 것이므로 현재 입찰가를 포맷팅하여 반환합니다.
+            return formatPrice(currentBidPrice.value);
+        }
+    });
+    const formattedStartPrice = computed(() => formatPrice(auction.value?.startPrice));
     const formattedStartTime = computed(() => formatDate(parseJavaLocalDateTime(auction.value?.startTime)));
     const formattedEndTime = computed(() => formatDate(parseJavaLocalDateTime(auction.value?.endTime)));
 
@@ -233,9 +265,9 @@
             
             // 경매 상품일 경우에만 WebSocket 구독 및 초기 가격 설정
             if (isAuction.value) {
-                currentBidPrice.value = auction.value.price; 
+                currentBidPrice.value = auction.value.currentPrice; 
                 setupWebSocketSubscription();
-                fetchBidHistory();
+                fetchBidHistory(auctionId);
             }
             startCountdown(); // 경매/판매 모두 카운트다운 시작
         } catch (err) {
@@ -255,8 +287,8 @@
             currentBidPrice.value = broadcast.newPrice;
             //새로운 입찰이 생기면 입찰 기록 갱신
         const newHistoryEntry = {
-            amount: broadcast.newPrice,
-            time: new Date().toLocaleString('ko-KR'),
+            bidAmount: broadcast.newPrice,
+            bidAt: new Date()
         };
         bidHistory.value.unshift(newHistoryEntry);
 
@@ -268,10 +300,13 @@
     /**
      * 현재 경매의 지난 입찰 기록을 API로 조회
      */
-    const fetchBidHistory = async () => {
+    const fetchBidHistory = async (auctionId) => {
         try {
-            const response = await publicApiClient.get(`/api/bids/auction/${auctionId}`);
-            bidHistory.value = response.data; // 실제 API 응답 구조에 맞춰야 함
+            const response = await getBidsByAuctionId(auctionId);
+            bidHistory.value = response.data.map(bid => ({
+                bidAmount: bid.bidAmount,
+                bidAt: parseJavaLocalDateTime(bid.bidAt)
+            }));
         } catch (err) {
             console.error("Failed to fetch bid history:", err);
         }
@@ -417,8 +452,10 @@
     // 컴포넌트가 언마운트되면 WebSocket 및 카운트다운 타이머 연결 해제
     onUnmounted(() => {
         // 컴포넌트를 떠날 때, 해당 페이지의 구독만 안전하게 취소합니다.
-        unsubscribe(`/topic/auctions/${auctionId}`);
-        // 메모리 누수를 방지하기 위해 인터벌을 반드시 정리합니다.
+        if (isAuction.value) { //isAuction.value를 확인하여 경매 상품일 때만 구독 취소
+            unsubscribe(`/topic/auctions/${auctionId}`);
+        }
+        // 메모리 누수를 방지하기 위해 인터벌 정리
         if (countdownInterval) {
             clearInterval(countdownInterval);
         }
@@ -548,6 +585,27 @@
     .input-group .form-control {
         border-top-right-radius: 0.375rem;
         border-bottom-right-radius: 0.375rem;
+    }
+
+    .no-bids-info {
+        padding: 1.2rem 0; 
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .no-bids-text {
+        font-size: 1.3rem; 
+        color: #6c757d;     
+        font-weight: 500;
+        margin-bottom: 0.25rem; 
+    }
+
+    .start-price-info {
+        font-size: 1.4rem;
+        color: #dc3545; 
+        margin-bottom: 0;
     }
 
 
