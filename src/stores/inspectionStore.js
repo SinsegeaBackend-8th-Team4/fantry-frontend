@@ -9,7 +9,7 @@ export const useInspectionStore = defineStore('inspection', () => {
   const selectedAlbum = ref(null)
   const itemName = ref('')
   const itemDescription = ref('')
-  const hashtags = ref('')
+  const hashtags = ref([])
 
   // Step 1: 체크리스트
   const checklists = ref([])
@@ -40,7 +40,7 @@ export const useInspectionStore = defineStore('inspection', () => {
     selectedAlbum.value = null
     itemName.value = ''
     itemDescription.value = ''
-    hashtags.value = ''
+    hashtags.value = []
     checklists.value = []
     answers.value = {}
     templateId.value = null

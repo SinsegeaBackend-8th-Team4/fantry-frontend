@@ -36,8 +36,16 @@ const {
   completedStep,
 } = storeToRefs(inspectionStore)
 
-// Modal 초기화
-const { initModal, show: openPolicyModal, hide: closePolicyModal } = useModal('#policyModal')
+// 정책 모달
+const { initModal: initPolicyModal, show: showPolicyModal, hide: closePolicyModal } = useModal('#policyModal')
+// 이미지 모달
+const selectedImage = ref(null)
+const { initModal: initImageModal, show: showImageModal } = useModal('#imageModal')
+// 썸네일 이미지 클릭 시 큰 이미지 모달
+const openImageModal = (url) => {
+  selectedImage.value = url
+  showImageModal()
+}
 
 // 체크리스트 답변 -> 화면 표시 텍스트
 const formatAnswer = (answer) => {
@@ -85,7 +93,7 @@ const submit = async () => {
       selectedAlbum: selectedAlbum.value,
       itemName: itemName.value,
       itemDescription: itemDescription.value,
-      hashtags: hashtags.value,
+      hashtags: hashtags.value.join(', '),
       answers: answers.value,
       expectedPrice: expectedPrice.value,
       marketAvgPrice: marketAvgPrice.value,
@@ -102,8 +110,7 @@ const submit = async () => {
     await submitInspection(inspectionData)
     alert('검수 신청이 성공적으로 완료되었습니다!')
     inspectionStore.$reset()
-    // TODO: 신청 완료 후에는 마이페이지로 이동시킵니다.
-    router.push('/')
+    router.push('/mypage')
   } catch (err) {
     error.value = err?.message || '신청 처리 중 오류가 발생했습니다.'
     alert(error.value)
@@ -118,7 +125,8 @@ onMounted(() => {
     router.replace('/inspection/step1')
   }
 
-  initModal()
+  initImageModal()
+  initPolicyModal()
 })
 </script>
 
@@ -211,7 +219,7 @@ onMounted(() => {
             <h6 class="font-weight-bold">업로드된 사진</h6>
             <div class="d-flex gap-2 mt-3 flex-wrap">
               <div v-for="f in uploadedFiles" :key="f.previewUrl" class="thumbnail-wrapper">
-                <img :src="f.previewUrl" class="img-thumbnail rounded" :alt="f.file?.name || 'uploaded-image'" />
+                <img :src="f.previewUrl" class="img-thumbnail rounded" :alt="f.file?.name || 'uploaded-image'" @click="openImageModal(f.previewUrl)" />
               </div>
             </div>
           </div>
@@ -220,7 +228,7 @@ onMounted(() => {
 
       <div class="mb-3 form-check">
         <input class="form-check-input" type="checkbox" id="agree" :checked="isAgreed" disabled />
-        <label class="form-check-label" for="agree" @click.prevent="openPolicyModal" style="cursor: pointer">
+        <label class="form-check-label" for="agree" @click.prevent="showPolicyModal" style="cursor: pointer">
           검수 및 판매 대행 정책에 모두 동의합니다.
           <span class="text-primary font-weight-bold ml-2">(내용 보기)</span>
         </label>
@@ -270,6 +278,17 @@ onMounted(() => {
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
           <button type="button" class="btn btn-primary" @click="agreeToPolicy">확인 및 동의</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 이미지 모달 -->
+  <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body text-center">
+          <img :src="selectedImage" class="img-fluid rounded" alt="preview" />
         </div>
       </div>
     </div>
