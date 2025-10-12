@@ -2,15 +2,8 @@
 <template>
   <div class="content-page">
     <h1 class="page-title">
-      <i class="fa-solid fa-store"></i> 등록 상품 내역
-    </h1>
-    <p class="page-description">내가 등록한 상품을 여기서 확인할 수 있습니다.</p>
-
-    <div v-if="isLoading" class="loading-state">
-      <div class="spinner"></div>
-      조회 중...
-    </div>
-
+    <i class="fa-solid fa-money-check-dollar"></i> 판매 완료 내역</h1>
+    <p class="page-description">판매 완료 내역을 확인해보세요.</p>
   </div>
 </template>
 <style scoped>
@@ -37,5 +30,4 @@
     margin-bottom: 30px;
     font-size: 0.95rem;
 }
-
 </style>

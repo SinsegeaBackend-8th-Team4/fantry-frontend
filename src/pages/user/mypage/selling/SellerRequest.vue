@@ -2,15 +2,8 @@
 <template>
   <div class="content-page">
     <h1 class="page-title">
-      <i class="fa-solid fa-store"></i> 등록 상품 내역
-    </h1>
-    <p class="page-description">내가 등록한 상품을 여기서 확인할 수 있습니다.</p>
-
-    <div v-if="isLoading" class="loading-state">
-      <div class="spinner"></div>
-      조회 중...
-    </div>
-
+    <i class="fa-solid fa-person-circle-check"></i> 판매자 승인 요청</h1>
+    <p class="page-description">판매를 원하는 사용자는 판매자 승인 요청을 받아야 합니다.</p>
   </div>
 </template>
 <style scoped>
@@ -37,5 +30,4 @@
     margin-bottom: 30px;
     font-size: 0.95rem;
 }
-
 </style>

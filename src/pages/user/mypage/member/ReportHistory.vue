@@ -85,7 +85,10 @@ const formatDate = (d) => {
 
 <template>
   <div class="content-page report-page">
-    <h2 class="page-title">내 신고 내역</h2>
+    <h1 class="page-title">
+      <i class="fa-solid fa-fire"></i> 내 신고 내역
+    </h1>
+    <p class="page-description">나의 신고된 내역을 확인하고 관리자에게 구제 신청을 할 수 있습니다.</p>
 
     <div v-if="isLoading" class="loading-state">
       <div class="spinner"></div>
@@ -138,10 +141,18 @@ const formatDate = (d) => {
 }
 
 .page-title {
-  margin: 0 0 12px;
-  font-size: 1.4rem;
+  font-size: 1.8rem;
   font-weight: 700;
-  color: #222;
+  color: #333;
+  border-bottom: 3px solid #f0f0f0;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.page-description {
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 0.95rem;
 }
 
 .loading-state, .error-state, .empty-state {

@@ -1,14 +1,21 @@
 <script setup>
 import { ref, computed } from 'vue'
+//내 정보 관리
 import ProfileSection from './member/ProfileSection.vue'
 import PaymentAccount from './member/PaymentAccount.vue'
 import Address from './member/Address.vue'
 import ReportHistory from './member/ReportHistory.vue'
 import WithdrawalPage from './member/WithdrawalPage.vue'
-
+//판매 관리
 import MyProducts from './selling/MyProducts.vue'
-
-import MypageQna from './support/MypageQna.vue'
+import Inspection from './selling/Inspection.vue'
+import SalesHistory from './selling/SalesHistory.vue'
+import SellerRequest from './selling/SellerRequest.vue'
+//구매 관리
+import AuctionHistory from './buying/AuctionHistory.vue'
+import PurchaseHistory from './buying/PurchaseHistory.vue'
+import DeliveryHistory from './buying/DeliveryHistory.vue'
+//고객 센터
 import MypageInquiry from './support/MypageInquiry.vue'
 
 const activeMenu = ref('account')
@@ -24,9 +31,14 @@ const componentMap = {
   'withdrawal': WithdrawalPage,
   //판매 관리===========================
   'my-products': MyProducts,
+  'inspection': Inspection,
+  'sales-history': SalesHistory,
+  'seller-request': SellerRequest,
   //구매 관리===========================
+  'auction-history': AuctionHistory,
+  'purchase-history': PurchaseHistory,
+  'delivery': DeliveryHistory,
   //고객 센터===========================
-  'qna-list': MypageQna,
   'inquiry': MypageInquiry,
 }
 
@@ -75,7 +87,6 @@ const menuItems = [
     title: '고객센터',
     icon: '💬',
     subMenus: [
-      { id: 'qna-list', title: 'Q&A 내역' },
       { id: 'inquiry', title: '문의 접수' }
     ]
   }
@@ -146,6 +157,7 @@ const getContentTitle = () => {
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf3 100%);
   padding: 40px 20px;
+  height: auto;
 }
 
 .mypage-container {
