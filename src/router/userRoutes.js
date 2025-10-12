@@ -12,18 +12,19 @@ import UserInfoPage from '@/pages/payment/UserInfoPage.vue'
 import PaymentCompletePage from '@/pages/payment/PaymentCompletePage.vue'
 
 // --- 페이지 컴포넌트 (Lazy Loading) ---
-const HomePage = () => import('@/pages/HomePage.vue')
-const LoginPage = () => import('@/pages/user/access/LoginPage.vue')
-const LoginFind = () => import('@/pages/user/access/LoginFind.vue')
-const LoginFindSuccess = () => import('@/pages/user/access/LoginFindSuccess.vue')
-const LoginResetPwd = () => import('@/pages/user/access/LoginResetPwd.vue')
-const LoginFail = () => import('@/pages/user/access/LoginFail.vue')
-const SignupTerms = () => import('@/pages/user/access/SignupTerms.vue')
-const SignupForm = () => import('@/pages/user/access/SignupForm.vue')
-const SignupComplete = () => import('@/pages/user/access/SignupComplete.vue')
-const SignupFail = () => import('@/pages/user/access/SignupFail.vue')
-const ProductListPage = () => import('@/pages/product/ProductListPage.vue')
-const ProductDetailPage = () => import('@/pages/product/ProductDetailPage.vue')
+const HomePage = () => import('@/pages/HomePage.vue');
+const LoginPage = () => import('@/pages/user/access/LoginPage.vue');
+const LoginFind = () => import('@/pages/user/access/LoginFind.vue');
+const LoginFindSuccess = () => import('@/pages/user/access/LoginFindSuccess.vue');
+const LoginResetPwd = () => import('@/pages/user/access/LoginResetPwd.vue');
+const LoginFail = () => import('@/pages/user/access/LoginFail.vue');
+const SignupTerms = () => import('@/pages/user/access/SignupTerms.vue');
+const SignupForm = () => import('@/pages/user/access/SignupForm.vue');
+const SignupComplete = () => import('@/pages/user/access/SignupComplete.vue');
+const SignupFail = () => import('@/pages/user/access/SignupFail.vue');
+const ProductListPage = () => import('@/pages/product/ProductListPage.vue');
+const ProductDetailPage = () => import('@/pages/product/ProductDetailPage.vue');
+const ProductAuctionPage = () => import('@/pages/product/ProductAuctionPage.vue');
 // 검수 페이지 컴포넌트
 const InspectionStep1Page = () => import('@/pages/user/inspection/Step1Page.vue')
 const InspectionStep2Page = () => import('@/pages/user/inspection/Step2Page.vue')
@@ -114,26 +115,32 @@ const userRoutes = {
       path: 'product/detail/:id',
       name: 'ProductDetail',
       component: ProductDetailPage,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: false },
+    },
+        {
+      path: 'product/auction/:id',
+      name: 'ProducAuction',
+      component: ProductAuctionPage,
+      meta: { requiresAuth: false },
     },
     // 검수
     {
       path: 'inspection/step1',
       name: 'InspectionStep1',
       component: InspectionStep1Page,
-      meta: { requiredLogin: true },
+      meta: { requiresAuth: true },
     },
     {
       path: 'inspection/step2',
       name: 'InspectionStep2',
       component: InspectionStep2Page,
-      meta: { requiredLogin: true },
+      meta: { requiresAuth: true },
     },
     {
       path: 'inspection/step3',
       name: 'InspectionStep3',
       component: InspectionStep3Page,
-      meta: { requiredLogin: true },
+      meta: { requiresAuth: true },
     },
     // 마이페이지
     {

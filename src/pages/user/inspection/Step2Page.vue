@@ -4,18 +4,37 @@ import { useRouter } from 'vue-router'
 import { useInspectionStore } from '@/stores/inspectionStore'
 import { useModal } from '@/composables/useModal'
 import { storeToRefs } from 'pinia'
+import { getMemberByToken } from '@/api/member'
+import openAddressSearch from '@/module/kakaoAddressSearch'
+
+//TODO : 회원 주소/계좌 정보  API 구현 시 불러오기 로직 완성
 
 const router = useRouter()
 const inspectionStore = useInspectionStore()
 
-// 로컬 상태 변수
-const selectedImage = ref(null) // 모달에서 크게 볼 이미지 URL
 // Store 값
 const { uploadedFiles, shippingAddress, shippingAddressDetail, bankName, bankAccount, completedStep } = storeToRefs(inspectionStore)
-// 모달 composable 초기화
+
+// 이미지 모달
+const selectedImage = ref(null) // 모달에서 크게 볼 이미지 URL
 const { initModal, show: showImageModal } = useModal('#imageModal')
 
-// TODO : 현재 로그인된 사용자 정보 가져오기
+// 로그인 회원 정보
+const memberInfo = ref(null)
+// 로그인 회원 정보 불러오기
+const fetchUserData = async () => {
+  if (memberInfo.value) return memberInfo.value
+
+  try {
+    const res = await getMemberByToken()
+    memberInfo.value = res.data.member
+    return memberInfo.value
+  } catch (error) {
+    console.error('회원 정보 불러오기 실패:', error)
+    alert('저장된 회원 정보를 불러오는 데 실패했습니다.')
+    return null
+  }
+}
 
 const onFileChange = (event) => {
   const newFiles = Array.from(event.target.files) // FileList -> Array
@@ -64,8 +83,30 @@ const removeFile = (index) => {
   uploadedFiles.value.splice(index, 1)
 }
 
-const loadMyInfo = () => {
-  // TODO : 현재 로그인된 사용의 주소와 계좌 정보 가져오는 API
+// 회원 배송지 정보 조회
+const loadMyAddress = async () => {
+  const member = await fetchAndCacheUserData()
+  if (member) {
+    shippingAddress.value = member.address || ''
+    shippingAddressDetail.value = member.addressDetail || ''
+  }
+}
+
+// 회원 계좌 정보 조회
+const loadMyAccount = async () => {
+  const member = await fetchAndCacheUserData()
+  if (member) {
+    bankName.value = member.bankName || ''
+    bankAccount.value = member.bankAccount || ''
+  }
+}
+
+// 주소 검색
+const onClickAddressSearch = () => {
+  openAddressSearch((data) => {
+    shippingAddress.value = data.address
+    shippingAddressDetail.value = ''
+  })
 }
 
 const validateAll = () => {
@@ -107,16 +148,20 @@ const goNext = () => {
 // 이전 단계 클릭 시
 const goPrev = () => router.push('/inspection/step1')
 
-onMounted(() => {
+onMounted(async () => {
   initModal()
   if (completedStep.value < 1) {
     alert('잘못된 접근입니다. 이전 단계를 먼저 완료해주세요.')
     router.replace('/inspection/step1')
+  } else {
+    const member = await fetchUserData()
+    if (member) {
+      shippingAddress.value = member.address || ''
+      shippingAddressDetail.value = member.addressDetail || ''
+      bankName.value = member.bankName || ''
+      bankAccount.value = member.bankAccount || ''
+    }
   }
-})
-
-onUnmounted(() => {
-  uploadedFiles.value.forEach((f) => URL.revokeObjectURL(f.previewUrl))
 })
 </script>
 
@@ -174,12 +219,17 @@ onUnmounted(() => {
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5 class="font-weight-bold mb-0">배송지 정보 <span class="text-danger">*</span></h5>
-                <a href="#" class="small" @click.prevent="loadMyInfo">내 정보 불러오기</a>
+                <a href="#" class="small" @click.prevent="loadMyAddress">내 정보 불러오기</a>
               </div>
               <small class="form-text text-muted mb-3"> 검수 불합격 시 상품을 반송받으실 주소를 입력해주세요. </small>
               <div class="form-group">
                 <label>주소</label>
-                <input type="text" class="form-control" v-model.trim="shippingAddress" placeholder="도로명 주소" />
+                <div class="input-group">
+                  <input type="text" class="form-control" v-model.trim="shippingAddress" placeholder="도로명 주소" readonly />
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" @click="onClickAddressSearch">주소 검색</button>
+                  </div>
+                </div>
               </div>
               <div class="form-group mb-0">
                 <label>상세주소</label>
@@ -192,7 +242,7 @@ onUnmounted(() => {
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5 class="font-weight-bold mb-0">계좌 정보 <span class="text-danger">*</span></h5>
-                <a href="#" class="small" @click.prevent="loadMyInfo">내 정보 불러오기</a>
+                <a href="#" class="small" @click.prevent="loadMyAccount">내 정보 불러오기</a>
               </div>
               <small class="form-text text-muted mb-3"> 판매 대금을 정산받으실 계좌 정보를 입력해주세요. </small>
               <div class="form-group">
@@ -215,7 +265,7 @@ onUnmounted(() => {
     </div>
   </main>
 
-  <!-- 모달 -->
+  <!-- 이미지 모달 -->
   <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">

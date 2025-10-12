@@ -18,9 +18,11 @@ const online = computed(() => detail.value?.onlineDetail ?? null) // 1차 온라
 // 이미지 모달
 const selectedImage = ref(null)
 const { initModal: initImageModal, show: showImageModal } = useModal('#imageModal')
+
 // 승인 모달
 const approveForm = reactive({ finalBuyPrice: null, priceDeductionReason: '', inspectionNotes: '' })
 const { initModal: initApproveModal, show: openApproveModal, hide: closeApproveModal } = useModal('#approveModal')
+
 // 반려 모달
 const rejectForm = reactive({ secondRejectionReason: '' })
 const { initModal: initRejectModal, show: openRejectModal, hide: closeRejectModal } = useModal('#rejectModal')
@@ -63,7 +65,7 @@ async function fetchDetail(id) {
   }
 }
 
-// 2차 승인 처리 (모달 제출 시)
+// 2차 승인 처리
 const approve = async () => {
   if (!approveForm.finalBuyPrice || Number(approveForm.finalBuyPrice) <= 0) {
     alert('최종 매입가를 0보다 큰 값으로 입력해주세요.')
@@ -83,8 +85,7 @@ const approve = async () => {
 
   loading.value = true
   try {
-    // TODO: 현재 로그인한 관리자 ID 가져오는 로직 필요 (예: 2)
-    await approveOfflineInspection(inspectionId.value, 2, payload)
+    await approveOfflineInspection(inspectionId.value, payload)
     closeApproveModal()
     alert('최종 승인이 완료되었습니다.')
     setTimeout(() => router.push('/admin/inspection/offline'), 300)
@@ -95,7 +96,7 @@ const approve = async () => {
   }
 }
 
-// 2차 반려 처리 (모달 제출 시)
+// 2차 반려 처리
 const reject = async () => {
   if (!rejectForm.secondRejectionReason || !rejectForm.secondRejectionReason.trim()) {
     alert('반려 사유를 반드시 입력해야 합니다.')
@@ -112,8 +113,7 @@ const reject = async () => {
 
   loading.value = true
   try {
-    // TODO: 현재 로그인한 관리자 ID 가져오는 로직 필요 (예: 2)
-    await rejectOfflineInspection(inspectionId.value, 2, payload)
+    await rejectOfflineInspection(inspectionId.value, payload)
     closeRejectModal()
     alert('반려 처리가 완료되었습니다.')
 
@@ -158,12 +158,18 @@ function toggleMatch(row) {
 const safeStr = (v) => (v == null ? '' : String(v).replace(/"/g, ''))
 const getImageUrl = (path) => {
   if (!path) return ''
+  if (/^https?:\/\//i.test(path)) return path
   const base = import.meta.env.VITE_FILE_BASE_URL || ''
   return `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`
 }
 const formatDate = (v) => (v ? new Date(v).toLocaleString('ko-KR') : '-')
 const formatPrice = (v) => (v != null ? `${Number(v).toLocaleString()}원` : '-')
 const openImage = (url) => {
+  selectedImage.value = url
+  showImageModal()
+}
+
+const openImageModal = (url) => {
   selectedImage.value = url
   showImageModal()
 }
@@ -183,10 +189,10 @@ const canDecide = computed(() => online.value?.inspectionStatus === 'OFFLINE_INS
           </div>
           <div class="d-flex align-items-center">
             <button class="btn btn-sm btn-outline-secondary fw-medium px-3" @click="router.back()">목록</button>
-            <template v-if="canDecide">
-              <button class="btn btn-sm btn-danger fw-medium px-3 ms-3" @click="openRejectModal">반려</button>
-              <button class="btn btn-sm btn-primary fw-medium px-3 ms-2" @click="openApproveModal">승인</button>
-            </template>
+            <div v-if="canDecide" class="ml-2">
+              <button class="btn btn-sm btn-danger fw-medium px-3" @click="openRejectModal">반려</button>
+              <button class="btn btn-sm btn-primary fw-medium px-3 ml-2" @click="openApproveModal">승인</button>
+            </div>
           </div>
         </div>
       </div>
@@ -310,8 +316,8 @@ const canDecide = computed(() => online.value?.inspectionStatus === 'OFFLINE_INS
 
             <section class="mt-4 pt-2">
               <h5 class="fw-semibold border-bottom pb-2 mb-3">상품 이미지</h5>
-              <div v-if="online.files.length" class="d-flex flex-wrap gap-2">
-                <div v-for="file in online.files" :key="file.fileId" class="thumbnail-wrapper" @click="openImage(getImageUrl(file.fileUrl))">
+              <div v-if="online.files.length" class="d-flex flex-wrap">
+                <div v-for="file in online.files" :key="file.fileId" class="thumbnail-wrapper mr-2 mb-2" @click="openImageModal(getImageUrl(file.fileUrl))">
                   <img :src="getImageUrl(file.fileUrl)" alt="상품 썸네일" />
                 </div>
               </div>
@@ -326,14 +332,18 @@ const canDecide = computed(() => online.value?.inspectionStatus === 'OFFLINE_INS
       </div>
     </div>
 
-    <div class="modal fade" id="imageModal" tabindex="-1">
+    <!-- 이미지 모달 -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 bg-transparent">
-          <div class="modal-body p-0"><img :src="selectedImage" class="img-fluid rounded" alt="확대 이미지" /></div>
+        <div class="modal-content">
+          <div class="modal-body text-center">
+            <img :src="selectedImage" class="img-fluid rounded" alt="preview" />
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- 승인 모달 -->
     <div class="modal fade" id="approveModal" tabindex="-1">
       <div class="modal-dialog modal-md modal-dialog-centered">
         <div class="modal-content">
@@ -429,6 +439,7 @@ const canDecide = computed(() => online.value?.inspectionStatus === 'OFFLINE_INS
     transform: scale(1.1);
   }
 }
+
 /* 체크리스트 테이블 */
 .checklist-table {
   border: 1px solid #eaeaea;
@@ -461,5 +472,14 @@ const canDecide = computed(() => online.value?.inspectionStatus === 'OFFLINE_INS
   .note textarea {
     resize: vertical;
   }
+}
+
+/* 이미지 모달 스타일 추가 */
+#imageModal .modal-content {
+  background: transparent; /* 배경 투명하게 */
+  border: none; /* 테두리 제거 */
+}
+#imageModal .modal-body {
+  padding: 0; /* 내부 여백 제거 */
 }
 </style>
