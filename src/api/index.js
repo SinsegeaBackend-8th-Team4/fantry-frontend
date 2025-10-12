@@ -9,7 +9,7 @@ const apiClient = axios.create({
      * API 서버의 기본 URL을 .env 파일에서 직접 주입받습니다.
      * 이제 이 apiClient를 사용하는 모든 요청은 이 주소를 기본으로 갖게 됩니다.
      */
-    baseURL: import.meta.env.VITE_API_SERVER_URL,
+    baseURL: import.meta.env.VITE_API_SERVER_URL+'/api',
 
     timeout: 10000,
     headers: {
@@ -92,7 +92,6 @@ apiClient.interceptors.response.use(
             withCredentials: true,
             headers: currentToken ? { Authorization: `Bearer ${currentToken}` } : undefined
           });
-          
           const newAccessToken = res.headers.accesstoken || res.data;
 
           // 로컬 스토리지에 새로운 토큰 저장 + 큐 처리
@@ -140,7 +139,7 @@ apiClient.interceptors.response.use(
 
 // 로그인이 필요없는 API 요청을 위한 별도 Axios 인스턴스
 const publicApiClient = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_SERVER_URL+'/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
