@@ -128,19 +128,19 @@ const userRoutes = {
       path: 'inspection/step1',
       name: 'InspectionStep1',
       component: InspectionStep1Page,
-      meta: { requiredLogin: true },
+      meta: { requiresAuth: true },
     },
     {
       path: 'inspection/step2',
       name: 'InspectionStep2',
       component: InspectionStep2Page,
-      meta: { requiredLogin: true },
+      meta: { requiresAuth: true },
     },
     {
       path: 'inspection/step3',
       name: 'InspectionStep3',
       component: InspectionStep3Page,
-      meta: { requiredLogin: true },
+      meta: { requiresAuth: true },
     },
     // 마이페이지
     {

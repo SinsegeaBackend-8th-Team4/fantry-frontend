@@ -4,29 +4,18 @@ import { useUserStore } from '@/stores/userStore.js';
 
 // Axios 클라이언트 인스턴스 생성
 const apiClient = axios.create({
-  /**
-   * API 서버의 기본 URL을 설정합니다.
-   * - 로컬 개발 환경에서는 Vite의 프록시 설정을 통해 '/api' 요청을 백엔드 서버로 전달합니다.
-   * - .env 파일 등을 통해 환경별로 다른 URL을 주입하는 것이 이상적입니다.
-   */
-  baseURL: '/api',
+    /**
+     * [핵심 수정!]
+     * API 서버의 기본 URL을 .env 파일에서 직접 주입받습니다.
+     * 이제 이 apiClient를 사용하는 모든 요청은 이 주소를 기본으로 갖게 됩니다.
+     */
+    baseURL: import.meta.env.VITE_API_SERVER_URL,
 
-  /**
-   * 요청 타임아웃을 10초로 설정합니다.
-   * 이 시간 내에 서버로부터 응답을 받지 못하면 요청은 실패 처리됩니다.
-   */
-  timeout: 10000,
-
-  /**
-   * 요청 헤더의 기본값을 설정합니다.
-   * 모든 요청에 'Content-Type'으로 'application/json'을 포함시킵니다.
-   */
-  headers: {
-    'Content-Type': 'application/json',
-  },
-
-  // 쿠키(Http를 사용하는 인증이 필요
-  withCredentials: true,
+    timeout: 10000,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    withCredentials: true,
 });
 
 // 토큰 갱신이 완료되면 대기열 요청들을 처리
