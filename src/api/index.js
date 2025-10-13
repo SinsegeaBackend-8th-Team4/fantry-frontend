@@ -4,29 +4,18 @@ import { useUserStore } from '@/stores/userStore.js';
 
 // Axios 클라이언트 인스턴스 생성
 const apiClient = axios.create({
-  /**
-   * API 서버의 기본 URL을 설정합니다.
-   * - 로컬 개발 환경에서는 Vite의 프록시 설정을 통해 '/api' 요청을 백엔드 서버로 전달합니다.
-   * - .env 파일 등을 통해 환경별로 다른 URL을 주입하는 것이 이상적입니다.
-   */
-  baseURL: '/api',
+    /**
+     * [핵심 수정!]
+     * API 서버의 기본 URL을 .env 파일에서 직접 주입받습니다.
+     * 이제 이 apiClient를 사용하는 모든 요청은 이 주소를 기본으로 갖게 됩니다.
+     */
+    baseURL: import.meta.env.VITE_API_SERVER_URL+'/api',
 
-  /**
-   * 요청 타임아웃을 10초로 설정합니다.
-   * 이 시간 내에 서버로부터 응답을 받지 못하면 요청은 실패 처리됩니다.
-   */
-  timeout: 10000,
-
-  /**
-   * 요청 헤더의 기본값을 설정합니다.
-   * 모든 요청에 'Content-Type'으로 'application/json'을 포함시킵니다.
-   */
-  headers: {
-    'Content-Type': 'application/json',
-  },
-
-  // 쿠키(Http를 사용하는 인증이 필요
-  withCredentials: true,
+    timeout: 10000,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    withCredentials: true,
 });
 
 // 토큰 갱신이 완료되면 대기열 요청들을 처리
@@ -84,7 +73,12 @@ apiClient.interceptors.response.use(
     // }
 
     // 1. 401 Unauthorized 에러이고, 토큰 갱신 시도가 아직 없는 경우
-    if(error.response && error.response.status === 401 && !originalRequest._retry) {
+    //if(error.response && error.response.status === 401 && !originalRequest._retry) {
+    const status = error.response?.status;
+    const url = originalRequest?.url || '';
+    const isAuthEndpoint = url.includes('/reissue') || url.includes('/login') || url.includes('/logout');
+    const shouldRefresh = !originalRequest._retry && !isAuthEndpoint && (status === 401 || status === 403);
+    if (error.response && shouldRefresh) {
       originalRequest._retry = true;
       
       // accessToken 재발급
@@ -93,12 +87,12 @@ apiClient.interceptors.response.use(
         try{
           // 재발급 API 호출
           const serverPath = import.meta.env.VITE_API_SERVER_URL;
+          const currentToken = localStorage.getItem('accessToken');
           const res = await axios.post(serverPath+'/api/reissue', null, {
-            withCredentials: true
+            withCredentials: true,
+            headers: currentToken ? { Authorization: `Bearer ${currentToken}` } : undefined
           });
-          
-          console.log("새로운 AccessToken : "+res);
-          const newAccessToken = res.data.accessToken;
+          const newAccessToken = res.headers.accesstoken || res.data;
 
           // 로컬 스토리지에 새로운 토큰 저장 + 큐 처리
           localStorage.setItem('accessToken', newAccessToken);
@@ -115,14 +109,13 @@ apiClient.interceptors.response.use(
           isRefreshing = false;
           processQueue(err, null);
           // 재발급 실패 시 로그아웃 처리
-          // const isLoggingOut = window.location.pathname === '/' || window.location.pathname === '/logout';
-          // localStorage.removeItem('accessToken');
-          // if(!isLoggingOut){
-          //   window.location.href = '/login';
-          // }
-          const userStore = useUserStore();
-          userStore.logout();
-
+          try{
+            localStorage.removeItem('accessToken');
+            const userStore = useUserStore();
+            //userStore.logout();
+          } catch (e) {
+            console.warn('Logout failed inside interceptor', e);
+          }
           return Promise.reject(err);
         }
       }
@@ -146,7 +139,7 @@ apiClient.interceptors.response.use(
 
 // 로그인이 필요없는 API 요청을 위한 별도 Axios 인스턴스
 const publicApiClient = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_SERVER_URL+'/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

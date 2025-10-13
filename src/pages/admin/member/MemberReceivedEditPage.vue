@@ -82,7 +82,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { getReportDetail, updateReceiveReport } from '@/api/member';
+import { getReportDetail, updateReceiveReport } from '@/api/report';
 
 const router = useRouter();
 

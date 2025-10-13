@@ -41,7 +41,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { registReport } from '@/api/member';
+import { registReport } from '@/api/report';
 
 const router = useRouter();
 

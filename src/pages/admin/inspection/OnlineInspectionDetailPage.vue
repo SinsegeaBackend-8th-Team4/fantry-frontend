@@ -61,8 +61,7 @@ const approve = async () => {
   loading.value = true
 
   try {
-    // TODO: 현재 로그인한 관리자 ID를 가져오는 로직 필요
-    await approveOnlineInspection(inspectionId.value, 2)
+    await approveOnlineInspection(inspectionId.value)
     alert('승인 처리가 완료되었습니다.')
     setTimeout(() => router.push('/admin/inspection/online'), 300)
   } catch (err) {
@@ -82,8 +81,7 @@ const reject = async () => {
   loading.value = true
   try {
     const reason = rejectForm.rejectionReason.trim()
-    // TODO: 현재 로그인한 관리자 ID를 가져오는 로직 필요
-    await rejectOnlineInspection(inspectionId.value, 1, { rejectionReason: reason })
+    await rejectOnlineInspection(inspectionId.value, { rejectionReason: reason })
     closeRejectModal()
     alert('반려 처리가 완료되었습니다.')
     setTimeout(() => router.push('/admin/inspection/online'), 300)
@@ -122,11 +120,12 @@ const openImageModal = (url) => {
             <h4 class="fw-semibold text-dark mb-1">1차 온라인 검수 상세</h4>
             <p class="text-muted small mb-0">판매자가 제출한 상품의 상세 정보를 확인하고 승인 또는 반려를 진행합니다.</p>
           </div>
+
           <div class="d-flex align-items-center">
             <button class="btn btn-sm btn-outline-secondary fw-medium px-3" @click="router.back()">목록</button>
-            <div v-if="detail && detail.inspectionStatus === 'SUBMITTED'">
-              <button class="btn btn-sm btn-danger fw-medium px-3 ms-3" @click="openRejectModal">반려</button>
-              <button class="btn btn-sm btn-primary fw-medium px-3 ms-2" @click="approve">승인</button>
+            <div v-if="detail && detail.inspectionStatus === 'SUBMITTED'" class="ml-2">
+              <button class="btn btn-sm btn-danger fw-medium px-3" @click="openRejectModal">반려</button>
+              <button class="btn btn-sm btn-primary fw-medium px-3 ml-2" @click="approve">승인</button>
             </div>
           </div>
         </div>
@@ -158,12 +157,12 @@ const openImageModal = (url) => {
                   <dd>#{{ detail.productInspectionId }}</dd>
                   <dt>제출일</dt>
                   <dd>{{ formatDate(detail.submittedAt) }}</dd>
-                  <template v-if="detail.firstInspector">
+                  <dt>UUID</dt>
+                  <dd class="text-break">{{ detail.submissionUuid }}</dd>
+                  <template v-if="detail.firstInspector && detail.firstInspector.id">
                     <dt>1차 검수자</dt>
                     <dd>#{{ detail.firstInspector.id }} {{ detail.firstInspector.name }}</dd>
                   </template>
-                  <dt>UUID</dt>
-                  <dd class="text-break">{{ detail.submissionUuid }}</dd>
                 </dl>
               </div>
             </section>
@@ -228,8 +227,8 @@ const openImageModal = (url) => {
 
             <section class="mt-4 pt-2">
               <h5 class="fw-semibold border-bottom pb-2 mb-3">상품 이미지</h5>
-              <div v-if="detail.files.length" class="d-flex flex-wrap gap-2">
-                <div v-for="file in detail.files" :key="file.fileId" class="thumbnail-wrapper" @click="openImageModal(getImageUrl(file.fileUrl))">
+              <div v-if="detail.files.length" class="d-flex flex-wrap">
+                <div v-for="file in detail.files" :key="file.fileId" class="thumbnail-wrapper mr-2 mb-2" @click="openImageModal(getImageUrl(file.fileUrl))">
                   <img :src="getImageUrl(file.fileUrl)" alt="상품 썸네일" />
                 </div>
               </div>
@@ -244,14 +243,18 @@ const openImageModal = (url) => {
       </div>
     </div>
 
-    <div class="modal fade" id="imageModal" tabindex="-1">
+    <!-- 이미지 모달 -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 bg-transparent">
-          <div class="modal-body p-0"><img :src="selectedImage" class="img-fluid rounded" alt="확대 이미지" /></div>
+        <div class="modal-content">
+          <div class="modal-body text-center">
+            <img :src="selectedImage" class="img-fluid rounded" alt="preview" />
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- 반려 모달 -->
     <div class="modal fade" id="rejectModal" tabindex="-1">
       <div class="modal-dialog modal-md modal-dialog-centered">
         <div class="modal-content">
@@ -312,8 +315,8 @@ const openImageModal = (url) => {
 
 /* 썸네일 이미지 스타일 */
 .thumbnail-wrapper {
-  width: 80px;
-  height: 80px;
+  width: 120px;
+  height: 120px;
   border-radius: 0.5rem;
   overflow: hidden;
   cursor: pointer;
@@ -330,5 +333,14 @@ const openImageModal = (url) => {
   &:hover img {
     transform: scale(1.1);
   }
+}
+
+/* 이미지 모달 스타일 추가 */
+#imageModal .modal-content {
+  background: transparent; /* 배경 투명하게 */
+  border: none; /* 테두리 제거 */
+}
+#imageModal .modal-body {
+  padding: 0; /* 내부 여백 제거 */
 }
 </style>

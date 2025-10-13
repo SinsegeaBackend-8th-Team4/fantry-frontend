@@ -25,7 +25,7 @@
 import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
 import { ref, nextTick, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { getAllReceiveReports } from '@/api/member';
+import { getAllReceiveReports } from '@/api/report';
 
 const router = useRouter();
 const keyword = ref('');
