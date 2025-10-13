@@ -11,7 +11,7 @@ const adminStore = useAdminInspectionStore()
 const loading = ref(false) // 로딩 상태
 const keyword = ref('')
 const tableKey = ref(0) // 필터 변경 시 테이블을 강제로 리로드하기 위한 키
-const currentFilter = ref(['SUBMITTED', 'ONLINE_APPROVED', 'ONLINE_REJECTED']) // 필터 상태 관리 (기본값 : 1차 제출)
+const currentFilter = ref(['SUBMITTED']) // 필터 상태 관리 (기본값 : 1차 제출)
 
 // 필터 목록
 const filters = [

@@ -176,8 +176,8 @@ const openImageModal = (url) => {
                 <dd>{{ detail.goodsCategoryName || '-' }}</dd>
                 <dt>아티스트</dt>
                 <dd>{{ detail.artistName || '-' }}</dd>
-                <dt>앨범명</dt>
-                <dd>{{ detail.albumTitle || '-' }}</dd>
+                <dt v-if="detail.albumTitle != null || detail.albumTitle != undefined">앨범명</dt>
+                <dd v-if="detail.albumTitle != null || detail.albumTitle != undefined">{{ detail.albumTitle || '-' }}</dd>
                 <dt>상품 설명</dt>
                 <dd>{{ detail.itemDescription || '-' }}</dd>
               </dl>
