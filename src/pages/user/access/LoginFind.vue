@@ -1,7 +1,7 @@
 <script setup>
   import { ref, reactive, watch } from "vue";
   import { useRouter } from "vue-router";
-  import axios from 'axios';
+  import { sendAuthCode, verifyAuthCode, findUserId } from "@/api/login";
 
   const router = useRouter();
 
@@ -94,9 +94,7 @@
     try{
       uiState.isTimerLable = true;
       //서버 요청
-      const response = await axios.post(serverPath+'/api/send/authCode',{
-        email: email.value
-      });
+      const response = await sendAuthCode(email.value);
       
       const ttlSeconds = response.data.ttl;
       startTimer(ttlSeconds);
@@ -121,12 +119,8 @@
     errorMessages.findIdError = '';
 
     try{
-      //서버 요청
-      const params = new FormData();
-      params.append("email", email.value);
-      params.append("code", code.value);
-
-      const response = await axios.post(serverPath+'/api/user/verifyCode', params);
+      //인증번호 확인
+      const response = await verifyAuthCode(email.value, code.value);
       if(response){
         //인증 성공 시
         validation.verificationCode.isValid = true;
@@ -141,9 +135,7 @@
 
         //아이디 가져오기
         try {
-          const emailParam = encodeURIComponent(email.value);
-          const res = await axios.get(serverPath + `/api/user/findId?email=${emailParam}`);
-          
+          const res = await findId(email.value);
           const data = res.data;
 
           if (data.result === "회원 찾기 완료") {

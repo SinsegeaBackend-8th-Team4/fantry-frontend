@@ -6,7 +6,10 @@
  */
 
 // --- 레이아웃 ---
-import UserLayout from '@/layouts/UserLayout.vue';
+import UserLayout from '@/layouts/UserLayout.vue'
+import CheckoutPage from '@/pages/payment/CheckoutPage.vue'
+import UserInfoPage from '@/pages/payment/UserInfoPage.vue'
+import PaymentCompletePage from '@/pages/payment/PaymentCompletePage.vue'
 
 // --- 페이지 컴포넌트 (Lazy Loading) ---
 const HomePage = () => import('@/pages/HomePage.vue');
@@ -21,6 +24,13 @@ const SignupComplete = () => import('@/pages/user/access/SignupComplete.vue');
 const SignupFail = () => import('@/pages/user/access/SignupFail.vue');
 const ProductListPage = () => import('@/pages/product/ProductListPage.vue');
 const ProductDetailPage = () => import('@/pages/product/ProductDetailPage.vue');
+const ProductAuctionPage = () => import('@/pages/product/ProductAuctionPage.vue');
+// 검수 페이지 컴포넌트
+const InspectionStep1Page = () => import('@/pages/user/inspection/Step1Page.vue')
+const InspectionStep2Page = () => import('@/pages/user/inspection/Step2Page.vue')
+const InspectionStep3Page = () => import('@/pages/user/inspection/Step3Page.vue')
+// 마이페이지
+const MyPageLayout = () => import('@/pages/user/mypage/MyPage.vue')
 
 const userRoutes = {
   path: '/',
@@ -33,38 +43,38 @@ const userRoutes = {
     },
     {
       path: 'login',
-      children:[
+      children: [
         {
           path: '',
           name: 'Login',
           component: LoginPage,
-          meta: { requiredLogin: false }
+          meta: { requiredLogin: false },
         },
         {
           path: 'find',
           name: 'LoginFind',
           component: LoginFind,
-          meta: { requiredLogin: false }
+          meta: { requiredLogin: false },
         },
         {
           path: 'findSuccess/:foundEmail',
           name: 'LoginFindSuccess',
           component: LoginFindSuccess,
-          meta: { requiredLogin: false }
+          meta: { requiredLogin: false },
         },
         {
           path: 'resetPwd',
           name: 'LoginResetPwd',
           component: LoginResetPwd,
-          meta: { requiredLogin: false }
+          meta: { requiredLogin: false },
         },
         {
           path: 'fail',
           name: 'LoginFail',
           component: LoginFail,
-          meta: { requiredLogin: false }
-        }
-      ]
+          meta: { requiredLogin: false },
+        },
+      ],
     },
     {
       path: 'signup',
@@ -73,27 +83,27 @@ const userRoutes = {
           path: 'terms',
           name: 'SignupTerms',
           component: SignupTerms,
-          meta: { requiredLogin: false }
+          meta: { requiredLogin: false },
         },
         {
           path: 'form',
           name: 'SignupForm',
           component: SignupForm,
-          meta: { requiredLogin: false }
+          meta: { requiredLogin: false },
         },
         {
           path: 'complete',
-          name: "SignupComplete",
+          name: 'SignupComplete',
           component: SignupComplete,
-          meta: { requiredLogin: false }
+          meta: { requiredLogin: false },
         },
         {
           path: 'fail',
-          name: "SignupFail",
+          name: 'SignupFail',
           component: SignupFail,
-          meta: { requiredLogin: false }
-        }
-      ]
+          meta: { requiredLogin: false },
+        },
+      ],
     },
     {
       path: 'product',
@@ -105,9 +115,64 @@ const userRoutes = {
       path: 'product/detail/:id',
       name: 'ProductDetail',
       component: ProductDetailPage,
+      meta: { requiresAuth: false },
+    },
+        {
+      path: 'product/auction/:id',
+      name: 'ProducAuction',
+      component: ProductAuctionPage,
+      meta: { requiresAuth: false },
+    },
+    // 검수
+    {
+      path: 'inspection/step1',
+      name: 'InspectionStep1',
+      component: InspectionStep1Page,
       meta: { requiresAuth: true },
     },
+    {
+      path: 'inspection/step2',
+      name: 'InspectionStep2',
+      component: InspectionStep2Page,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: 'inspection/step3',
+      name: 'InspectionStep3',
+      component: InspectionStep3Page,
+      meta: { requiresAuth: true },
+    },
+    // 마이페이지
+    {
+      path: 'mypage',
+      name: 'MyPageLayout',
+      component: MyPageLayout,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: 'order',
+      children: [
+        {
+          path: 'info',
+          name: 'Info',
+          component: UserInfoPage,
+          meta: { requiredLogin: false },
+        },
+        {
+          path: 'checkout',
+          name: 'Checkout',
+          component: CheckoutPage,
+          meta: { requiredLogin: false },
+        },
+        {
+          path: 'complete',
+          name: 'Complete',
+          component: PaymentCompletePage,
+          meta: { requiredLogin: false },
+        },
+      ],
+    },
   ],
-};
+}
 
-export default userRoutes;
+export default userRoutes
