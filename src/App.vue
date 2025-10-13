@@ -3,7 +3,7 @@ import { useUiStore } from '@/stores/uiStore';
 import LoadingSpinner from '@/components/common/atoms/LoadingSpinner.vue';
 import { onMounted} from 'vue';
 import { useUserStore } from '@/stores/userStore';
-import { useIdleTimer } from './utils/TimerComposable';
+import { useIdleTimer } from './utils/timerComposable';
 
 const uiStore = useUiStore();
 const userStore = useUserStore();

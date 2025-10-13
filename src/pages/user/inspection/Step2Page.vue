@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useInspectionStore } from '@/stores/inspectionStore'
 import { useModal } from '@/composables/useModal'
@@ -85,19 +85,19 @@ const removeFile = (index) => {
 
 // 회원 배송지 정보 조회
 const loadMyAddress = async () => {
-  const member = await fetchAndCacheUserData()
+  const member = await fetchUserData()
   if (member) {
-    shippingAddress.value = member.address || ''
-    shippingAddressDetail.value = member.addressDetail || ''
+    shippingAddress.value = member.roadAddress || ''
+    shippingAddressDetail.value = member.detailAddress || ''
   }
 }
 
 // 회원 계좌 정보 조회
 const loadMyAccount = async () => {
-  const member = await fetchAndCacheUserData()
+  const member = await fetchUserData()
   if (member) {
     bankName.value = member.bankName || ''
-    bankAccount.value = member.bankAccount || ''
+    bankAccount.value = member.accountNumber || ''
   }
 }
 
@@ -156,10 +156,10 @@ onMounted(async () => {
   } else {
     const member = await fetchUserData()
     if (member) {
-      shippingAddress.value = member.address || ''
-      shippingAddressDetail.value = member.addressDetail || ''
+      shippingAddress.value = member.roadAddress || ''
+      shippingAddressDetail.value = member.detailAddress || ''
       bankName.value = member.bankName || ''
-      bankAccount.value = member.bankAccount || ''
+      bankAccount.value = member.accountNumber || ''
     }
   }
 })
