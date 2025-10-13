@@ -67,9 +67,8 @@ const menuItems = [
     icon: '💼',
     subMenus: [
       { id: 'my-products', title: '등록 상품 내역' },
-      { id: 'inspection', title: '검수 현황' },
       { id: 'sales-history', title: '판매 완료 내역' },
-      { id: 'seller-request', title: '판매자 승인 요청' }
+      { id: 'inspection', title: '검수 현황' }
     ]
   },
   {

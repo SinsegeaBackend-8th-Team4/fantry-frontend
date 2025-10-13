@@ -293,6 +293,7 @@
         :columns="columns"
         :fetcher="fetchInquiries"
         :page-size="10"
+        @loaded="attachClickHandlers"
       >
         <!-- 커스텀 셀: 날짜 포맷 -->
         <template #cell-inquiredAt="{ row }">

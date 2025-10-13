@@ -120,7 +120,7 @@ function close() {
                     <a :href="url" target="_blank" class="attachment-link">
                         <i class="fas fa-file"></i>
                         <span class="file-name">{{ url.substring(url.lastIndexOf('/') + 1) }}</span>
-                        <i class="fas fa-download download-icon"></i>
+                        <i class="fas fa-solid fa-eye"></i>
                     </a>
                 </li>
             </ul>
