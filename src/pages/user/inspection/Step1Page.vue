@@ -58,9 +58,8 @@ const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.va
 // 상품명 미리보기 텍스트
 const previewText = computed(() => {
   const ak = selectedArtist.value?.nameKo || '[아티스트]'
-  const at = selectedAlbum.value?.title || '[앨범]'
   const nm = itemName.value || '[상품명]'
-  return `${ak} ${at} ${nm}`
+  return `${ak} ${nm}`
 })
 
 // 체크리스트 필드 파싱
@@ -218,7 +217,6 @@ const onFetchMarketAvg = async () => {
 
   try {
     const res = await getMarketAvgPrice(selectedCategory.value, selectedArtist.value.artistId, selectedAlbum.value?.albumId)
-    console.log(res)
 
     marketAvgPrice.value = res.marketAvgPrice
     marketAvgCount.value = res.count
@@ -271,10 +269,6 @@ const validateAll = () => {
     return false
   }
   if (!isMarketAvgCalculated.value) {
-    alert('평균 시세를 조회해주세요.')
-    return false
-  }
-  if (marketAvgPrice.value === null) {
     alert('평균 시세를 조회해주세요.')
     return false
   }

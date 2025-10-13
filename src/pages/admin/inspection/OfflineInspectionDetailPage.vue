@@ -2,6 +2,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useModal } from '@/composables/useModal'
+import { estimatePrice, getMarketAvgPrice } from '@/api/checklist.js'
 import { getOfflineInspectionDetail, approveOfflineInspection, rejectOfflineInspection } from '@/api/adminInspection'
 import { useAdminInspectionStore } from '@/stores/adminInspectionStore'
 
@@ -14,6 +15,13 @@ const loading = ref(false)
 const inspectionId = ref(null)
 const detail = ref(null) // 2차 오프라인 검수 상세 응답
 const online = computed(() => detail.value?.onlineDetail ?? null) // 1차 온라인 검수 상세 응답
+const localChecklist = ref([]) // 로컬 체크리스트
+
+// 실시간 가격
+const loadingMarketAvg = ref(false) // 시세 조회 로딩
+const loadingEstimate = ref(false) // 예상가 재로딩
+const currentMarketAvgPrice = ref(null) // 실시간 시세
+const currentExpectedPrice = ref(null) // 실시간 예상가
 
 // 이미지 모달
 const selectedImage = ref(null)
@@ -26,9 +34,6 @@ const { initModal: initApproveModal, show: openApproveModal, hide: closeApproveM
 // 반려 모달
 const rejectForm = reactive({ secondRejectionReason: '' })
 const { initModal: initRejectModal, show: openRejectModal, hide: closeRejectModal } = useModal('#rejectModal')
-
-// 체크리스트 로컬 편집 상태
-const localChecklist = ref([])
 
 // 생명주기
 onMounted(async () => {
@@ -52,7 +57,9 @@ async function fetchDetail(id) {
     detail.value = res
     initializeLocalChecklist(res.checklist) // 로컬 체크리스트 상태 초기화
 
-    console.log(res)
+    currentMarketAvgPrice.value = res.onlineDetail?.marketAvgPrice ?? null
+    currentExpectedPrice.value = res.onlineDetail?.expectedPrice ?? null
+
     // 승인 모달 폼 초기값 설정
     approveForm.finalBuyPrice = res.finalBuyPrice ?? res.onlineDetail?.expectedPrice ?? null
     approveForm.priceDeductionReason = res.priceDeductionReason ?? ''
@@ -62,6 +69,48 @@ async function fetchDetail(id) {
     alert(err.message || '데이터를 불러오는 데 실패했습니다.')
   } finally {
     loading.value = false
+  }
+}
+
+// 예상가 재계산
+async function recalculateExpectedPrice() {
+  if (!online.value) return
+  loadingEstimate.value = true
+
+  try {
+    const selections = {}
+    localChecklist.value.forEach((item) => {
+      const answer = item.match ? item.sellerAnswer : item.localInspectorAnswer
+      if (answer === null || answer === '') return
+      selections[item.itemKey] = typeof answer === 'boolean' ? (answer ? 'Y' : 'N') : answer
+    })
+
+    const newPrice = await estimatePrice(online.value.goodsCategoryId, selections)
+    currentExpectedPrice.value = newPrice
+    alert('시스템 예상가가 업데이트되었습니다.')
+  } catch (err) {
+    alert('예상가를 재계산하는 중 오류가 발생했습니다.')
+    console.error('예상가 재계산 실패:', err)
+  } finally {
+    loadingEstimate.value = false
+  }
+}
+
+// 시세 재조회
+async function refetchMarketAvg() {
+  if (!online.value?.artistId && !online.value?.goodsCategoryId) {
+    alert('시세 조회를 위한 필수 정보(카테고리, 아티스트)가 없습니다.')
+    return
+  }
+  loadingMarketAvg.value = true
+  try {
+    const res = await getMarketAvgPrice(online.value.goodsCategoryId, online.value.artistId, online.value.albumId)
+    currentMarketAvgPrice.value = res.marketAvgPrice
+    alert('최신 시세 정보로 업데이트되었습니다.')
+  } catch (err) {
+    alert('최신 시세 정보를 가져오는 데 실패했습니다.')
+  } finally {
+    loadingMarketAvg.value = false
   }
 }
 
@@ -77,14 +126,18 @@ const approve = async () => {
     inspectorAnswers: localChecklist.value.map((it) => ({
       itemKey: it.itemKey,
       answerValue: it.match ? safeStr(it.sellerAnswer) : safeStr(it.localInspectorAnswer),
+      note: it.localNote || null,
     })),
     inspectionNotes: safeStr(approveForm.inspectionNotes),
     finalBuyPrice: Number(approveForm.finalBuyPrice),
+    expectedPrice: currentExpectedPrice.value, // 수정된 예상가
+    marketAvgPrice: currentMarketAvgPrice.value, // 갱신된 평균 시세
     priceDeductionReason: safeStr(approveForm.priceDeductionReason),
   }
 
   loading.value = true
   try {
+    console.log(payload)
     await approveOfflineInspection(inspectionId.value, payload)
     closeApproveModal()
     alert('최종 승인이 완료되었습니다.')
@@ -108,6 +161,7 @@ const reject = async () => {
     inspectorAnswers: localChecklist.value.map((it) => ({
       itemKey: it.itemKey,
       answerValue: it.match ? safeStr(it.sellerAnswer) : safeStr(it.localInspectorAnswer),
+      note: it.localNote || null,
     })),
   }
 
@@ -131,14 +185,24 @@ const reject = async () => {
  */
 const initializeLocalChecklist = (apiChecklist) => {
   localChecklist.value = (apiChecklist || []).map((item) => {
-    const sellerAnswer = safeStr(item.sellerAnswer)
-    const inspectorAnswer = safeStr(item.inspectorAnswer ?? sellerAnswer)
+    const parseAnswer = (answer) => {
+      if (answer == null || answer == undefined) return ''
+      try {
+        return JSON.parse(answer)
+      } catch {
+        return answer
+      }
+    }
+    const sellerAnswer = parseAnswer(item.sellerAnswer)
+    const inspectorAnswer = item.inspectorAnswer !== null ? parseAnswer(item.inspectorAnswer) : sellerAnswer
 
     return {
-      ...item,
-      match: sellerAnswer === inspectorAnswer, // '일치' 여부 초기값 계산
-      localInspectorAnswer: inspectorAnswer, // 관리자 답변 input에 바인딩될 값
-      localNote: item.note || '', // 노트 textarea에 바인딩될 값
+      ...item.checklistItem,
+      options: parseOptions(item.checklistItem.options),
+      sellerAnswer: sellerAnswer,
+      match: JSON.stringify(sellerAnswer) === JSON.stringify(inspectorAnswer), // '일치' 여부 초기값
+      localInspectorAnswer: inspectorAnswer, // 관리자 답변 v-model용
+      localNote: item.note || '', // 노트 v-model용
     }
   })
 }
@@ -164,14 +228,22 @@ const getImageUrl = (path) => {
 }
 const formatDate = (v) => (v ? new Date(v).toLocaleString('ko-KR') : '-')
 const formatPrice = (v) => (v != null ? `${Number(v).toLocaleString()}원` : '-')
-const openImage = (url) => {
-  selectedImage.value = url
-  showImageModal()
-}
 
 const openImageModal = (url) => {
   selectedImage.value = url
   showImageModal()
+}
+
+// 체크리스트 옵션 파싱
+const parseOptions = (raw) => {
+  if (raw == null) return []
+  if (Array.isArray(raw)) return raw
+  try {
+    return JSON.parse(raw)
+  } catch (e) {
+    console.log('JSON 파싱 실패: ', raw, e)
+    return []
+  }
 }
 
 // 승인/반려 버튼 활성화 조건
@@ -201,6 +273,10 @@ const canDecide = computed(() => online.value?.inspectionStatus === 'OFFLINE_INS
         <div v-if="online && online.inspectionStatus === 'OFFLINE_REJECTED'" class="alert alert-danger" role="alert">
           <h6 class="alert-heading fw-bold">2차 반려 사유</h6>
           <p class="mb-0">{{ detail.secondRejectionReason }}</p>
+        </div>
+        <div v-if="online && online.inspectionStatus === 'COMPLETED'" class="alert alert-info" role="alert">
+          <h6 class="alert-heading fw-bold">검수자 승인 노트</h6>
+          <p class="mb-0">{{ detail.inspectionNotes }}</p>
         </div>
 
         <div v-if="loading" class="text-center py-5">
@@ -246,8 +322,8 @@ const canDecide = computed(() => online.value?.inspectionStatus === 'OFFLINE_INS
                 <dd>{{ online.goodsCategoryName || '-' }}</dd>
                 <dt>아티스트</dt>
                 <dd>{{ online.artistName || '-' }}</dd>
-                <dt>앨범명</dt>
-                <dd>{{ online.albumTitle || '-' }}</dd>
+                <dt v-if="online.albumTitle != null || online.albumTitle != undefined">앨범명</dt>
+                <dd v-if="online.albumTitle != null || online.albumTitle != undefined">{{ online.albumTitle || '-' }}</dd>
                 <dt>상품 설명</dt>
                 <dd>{{ online.itemDescription || '-' }}</dd>
               </dl>
@@ -259,9 +335,15 @@ const canDecide = computed(() => online.value?.inspectionStatus === 'OFFLINE_INS
                 <dt>판매자 희망가</dt>
                 <dd class="text-primary fw-bold">{{ formatPrice(online.sellerHopePrice) }}</dd>
                 <dt>시스템 예상가</dt>
-                <dd>{{ formatPrice(online.expectedPrice) }}</dd>
+                <dd>{{ currentExpectedPrice ? formatPrice(currentExpectedPrice) : '-' }}</dd>
                 <dt>팬트리 평균가</dt>
-                <dd>{{ online.marketAvgPrice ? formatPrice(online.marketAvgPrice) : '-' }}</dd>
+                <dd class="d-flex justify-content-between align-items-center">
+                  <span>{{ currentMarketAvgPrice ? formatPrice(currentMarketAvgPrice) : '-' }}</span>
+                  <button v-if="canDecide" class="btn btn-sm btn-outline-secondary py-0 px-2" @click="refetchMarketAvg" :disabled="loadingMarketAvg">
+                    <span v-if="loadingMarketAvg" class="spinner-border spinner-border-sm" role="status"></span>
+                    <span v-else>시세 재조회</span>
+                  </button>
+                </dd>
               </dl>
             </section>
 
@@ -293,25 +375,51 @@ const canDecide = computed(() => online.value?.inspectionStatus === 'OFFLINE_INS
                   <div class="cl-col inspector">관리자</div>
                   <div class="cl-col note">노트</div>
                 </div>
-                <div v-for="row in localChecklist" :key="row.itemKey" class="cl-row">
-                  <div class="cl-col label">{{ row.itemLabel }}</div>
-                  <div class="cl-col seller text-primary">{{ safeStr(row.sellerAnswer) }}</div>
+                <div v-for="row in localChecklist" :key="row.checklistItemId" class="cl-row">
+                  <div class="cl-col label">{{ row.label }}</div>
+                  <div class="cl-col seller text-primary">
+                    {{ row.sellerAnswer === true ? '예' : row.sellerAnswer === false ? '아니오' : row.sellerAnswer }}
+                  </div>
                   <div class="cl-col match text-center">
                     <div class="form-check form-switch d-inline-flex align-items-center">
                       <input class="form-check-input" type="checkbox" v-model="row.match" @change="toggleMatch(row)" :disabled="!canDecide" />
                     </div>
                   </div>
                   <div class="cl-col inspector">
-                    <input v-if="!row.match" type="text" class="form-control form-control-sm" v-model="row.localInspectorAnswer" :disabled="!canDecide" />
+                    <template v-if="!row.match">
+                      <select v-if="row.type === 'SELECT'" class="form-control form-control-sm" v-model="row.localInspectorAnswer" :disabled="!canDecide">
+                        <option value="">선택하세요</option>
+                        <option v-for="opt in row.options" :key="opt" :value="opt">{{ opt }}</option>
+                      </select>
+
+                      <div v-else-if="row.type === 'BOOL'" class="d-flex align-items-center small">
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" :name="`inspector_${row.itemKey}`" v-model="row.localInspectorAnswer" :value="true" :disabled="!canDecide" />
+                          <label class="form-check-label">예</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" :name="`inspector_${row.itemKey}`" v-model="row.localInspectorAnswer" :value="false" :disabled="!canDecide" />
+                          <label class="form-check-label">아니오</label>
+                        </div>
+                      </div>
+
+                      <input v-else type="text" class="form-control form-control-sm" v-model="row.localInspectorAnswer" :disabled="!canDecide" />
+                    </template>
                     <span v-else class="text-muted small">셀러와 동일</span>
                   </div>
                   <div class="cl-col note">
-                    <textarea v-if="!row.match" rows="2" class="form-control form-control-sm" v-model="row.localNote" :disabled="!canDecide" />
+                    <textarea v-if="!row.match" rows="2" class="form-control form-control-sm" v-model="row.localNote" :disabled="!canDecide" placeholder="감가 또는 특이사항 메모"></textarea>
                     <span v-else class="text-muted small">-</span>
                   </div>
                 </div>
               </div>
               <p v-else class="text-muted small mb-0">체크리스트 항목이 없습니다.</p>
+              <div v-if="canDecide" class="text-right mt-3">
+                <button class="btn btn-info" @click="recalculateExpectedPrice" :disabled="loadingEstimate">
+                  <span v-if="loadingEstimate" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  예상가 계산
+                </button>
+              </div>
             </section>
 
             <section class="mt-4 pt-2">
@@ -352,10 +460,24 @@ const canDecide = computed(() => online.value?.inspectionStatus === 'OFFLINE_INS
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>
           <div class="modal-body">
+            <div class="mb-3 p-3 bg-light rounded small">
+              <h6 class="mb-2 font-weight-bold">참고 가격</h6>
+              <div class="d-flex justify-content-between">
+                <span>시스템 예상가</span>
+                <strong>{{ formatPrice(currentExpectedPrice) }}</strong>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span>판매자 희망가</span>
+                <strong>{{ formatPrice(online?.sellerHopePrice) }}</strong>
+              </div>
+              <div class="d-flex justify-content-between mt-1">
+                <span>평균 시세</span>
+                <strong>{{ formatPrice(currentMarketAvgPrice) }}</strong>
+              </div>
+            </div>
             <div class="mb-3">
               <label class="form-label">최종 매입가<span class="text-danger">*</span></label>
               <input type="number" class="form-control" v-model.number="approveForm.finalBuyPrice" placeholder="예: 35,000" />
-              <div class="form-text">예상가: {{ formatPrice(online?.expectedPrice) }}</div>
             </div>
             <div class="mb-3">
               <label class="form-label">감가 사유</label>
