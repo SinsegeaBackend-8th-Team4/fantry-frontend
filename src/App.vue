@@ -4,10 +4,16 @@ import LoadingSpinner from '@/components/common/atoms/LoadingSpinner.vue';
 import { onMounted, watch } from 'vue';
 import { useUserStore } from '@/stores/userStore';
 import { connect, disconnect } from '@/services/websocketService';
+import { useIdleTimer } from './utils/TimerComposable';
 
 const uiStore = useUiStore();
-
 const userStore = useUserStore();
+
+// 미활동 시 자동 로그아웃 로직 적용
+const IDLE_TIMEOUT_MINUTES = 110;   //2시간 기준 10분 일찍 로그아웃
+const { showLogoutMessage } = useIdleTimer(IDLE_TIMEOUT_MINUTES);
+console.log("미활동 감지 메시지: ", showLogoutMessage);
+
 onMounted(() => {
   if(userStore.isLoggedIn || userStore.currentUser == null) {
     userStore.fetchUser();  //토큰 기반 유저 상태복구

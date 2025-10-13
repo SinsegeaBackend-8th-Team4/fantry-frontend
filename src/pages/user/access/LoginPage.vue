@@ -15,14 +15,13 @@
   };
 
   const gotoLogin= async ()=>{
-    const response = await login(username.value, password.value);
-
-    if(response.status === 200){
+    try{
+      const response = await login(username.value, password.value);
       localStorage.setItem("accessToken", response.data.accessToken);
       userStore.setLoginInfo(response.data.tokenMemberResponse, response.data.accessToken);
       router.push('/');
-    } else {
-      console.log(response);
+    } catch (error) {
+      console.log("로그인결과: ", error);
       router.push('/login/fail');
     }
   }
@@ -46,17 +45,17 @@
     <!--Login Header End-->
 
     <!--Login contenxt Start-->
-    <div class="login-form">
+    <form class="login-form" @submit.prevent="gotoLogin">
       <input type="text" name="username" placeholder="username" v-model="username" required>
       <div class="password-wrapper">
         <input :type='isPwdVisible?"password":"text"' name="password" placeholder="password" v-model="password" required>
         <img class="toggle-visibility" :src="isPwdVisible ? '/images/eyeSlash.png' : '/images/eyeView.png'" @click="pushShowPwd" />
       </div>
-      <button type="button" class="login-btn" name="login" @click="gotoLogin">LOGIN</button>
+      <button type="submit" class="login-btn" name="login">LOGIN</button>
       <div class="forgot-wrap">
         <span @click="goToFind">Forgot your password?</span>
       </div>
-    </div>
+    </form>
     <!--Login contenxt End-->
 
     <!--Sing up Start-->
