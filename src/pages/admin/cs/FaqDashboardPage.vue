@@ -46,6 +46,12 @@ async function fetchData() {
     loading.value = true;
     // 모든 데이터를 가져오기 위해 큰 size 값 사용
     const response = await searchFaqs({ page: 0, size: 9999 });
+
+    if (!response || !response.data || !response.data.content) {
+      // 응답 구조가 예상과 다를 경우 에러 처리
+      throw new Error('Invalid API response structure');
+    }
+
     const faqs = response.data.content;
 
     totalFaqs.value = response.data.totalElements;
@@ -53,7 +59,7 @@ async function fetchData() {
     // 유형별 집계
     const counts = {};
     faqs.forEach(faq => {
-      const typeName = faq.csType ? faq.csType.name : '기타';
+      const typeName = faq.csType || '기타';
       counts[typeName] = (counts[typeName] || 0) + 1;
     });
     faqsByType.value = counts;

@@ -7,7 +7,27 @@ import { apiClient } from './index';
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const searchNotices = (params) => {
-  return apiClient.get('/admin/cs/notice', { params });
+  const queryParams = {
+    page: params.page > 0 ? params.page - 1 : 0,
+    size: params.size,
+    sort: params.sort,
+    status: params.status,
+    csTypeId: params.csTypeId,
+    keyword: params.keyword,
+  };
+
+  return apiClient.get('/admin/cs/notices', {
+    params: queryParams,
+    paramsSerializer: (p) => {
+      const qs = new URLSearchParams();
+      for (const key in p) {
+        if (p[key] !== undefined && p[key] !== null && p[key] !== '') {
+          qs.append(key, p[key]);
+        }
+      }
+      return qs.toString();
+    },
+  });
 };
 
 /**

@@ -13,6 +13,8 @@ const statusFilters = [
   { label: '전체', value: null },
   { label: '활성', value: 'ACTIVE' },
   { label: '비활성', value: 'INACTIVE' },
+  { label: '고정', value: 'PINNED' },
+  { label: '초안', value: 'DRAFT' },
 ];
 const currentStatusFilter = ref(null);
 
@@ -28,19 +30,14 @@ const typeFilters = [
 const currentTypeFilter = ref(null);
 
 async function fetcher({ page, size, sort, keyword }) {
-  const params = {
-    pageable: {
-      page: page > 0 ? page - 1 : 0,
-      size: size,
-      sort: sort,
-    },
-    condition: {
-      status: currentStatusFilter.value,
-      csTypeId: currentTypeFilter.value,
-      title: keyword,
-    }
-  };
-  const response = await searchFaqs(params);
+  const response = await searchFaqs({
+    page: page,
+    size: size,
+    sort: sort,
+    status: currentStatusFilter.value,
+    csTypeId: currentTypeFilter.value,
+    keyword: keyword,
+  });
   const data = response.data;
   return {
     rows: data.content,
@@ -55,8 +52,7 @@ const columns = [
     title: '문의 유형',
     className: 'text-center',
     render: (data) => {
-      // csType이 객체 형태일 수 있으므로 name을 추출
-      const typeName = data && data.name ? data.name : 'N/A';
+      const typeName = data || 'N/A';
       let badgeClass = 'bg-secondary';
       switch (typeName) {
         case '배송문의': badgeClass = 'bg-primary'; break;
@@ -76,15 +72,32 @@ const columns = [
       return `<a href="javascript:void(0)" class="text-primary" data-id="${row.faqId}">${data}</a>`;
     }
   },
-  { data: 'authorName', title: '작성자', className: 'text-center' },
+  { data: 'createdBy', title: '작성자', className: 'text-center' },
   {
     data: 'status',
     title: '상태',
     className: 'text-center',
     render: (data) => {
-      const isActive = data === 'ACTIVE';
-      const badgeClass = isActive ? 'bg-success' : 'bg-danger';
-      const text = isActive ? '활성' : '비활성';
+      let badgeClass = 'bg-light text-dark';
+      let text = data;
+      switch (data) {
+        case 'ACTIVE':
+          badgeClass = 'bg-success';
+          text = '활성';
+          break;
+        case 'INACTIVE':
+          badgeClass = 'bg-danger';
+          text = '비활성';
+          break;
+        case 'PINNED':
+          badgeClass = 'bg-info';
+          text = '고정';
+          break;
+        case 'DRAFT':
+          badgeClass = 'bg-secondary';
+          text = '초안';
+          break;
+      }
       return `<span class="badge ${badgeClass}">${text}</span>`;
     },
   },

@@ -9,9 +9,28 @@ import { apiClient } from './index';
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const searchFaqs = (params) => {
-  return apiClient.get('/admin/cs/faq', { params });
-};
+  const queryParams = {
+    page: params.page > 0 ? params.page - 1 : 0,
+    size: params.size,
+    sort: params.sort,
+    status: params.status,
+    csTypeId: params.csTypeId,
+    keyword: params.keyword,
+  };
 
+  return apiClient.get('/admin/cs/faq', {
+    params: queryParams,
+    paramsSerializer: (p) => {
+      const qs = new URLSearchParams();
+      for (const key in p) {
+        if (p[key] !== undefined && p[key] !== null && p[key] !== '') {
+          qs.append(key, p[key]);
+        }
+      }
+      return qs.toString();
+    },
+  });
+};
 /**
  * 특정 ID의 FAQ 상세 정보를 조회합니다.
  * @param {number} faqId - 조회할 FAQ의 ID
