@@ -8,4 +8,46 @@ body.admin-layout-active {
   .admin-scope-initialized { display: none; }
   // 예시: 사이드바 커스터마이징 필요 시 아래 추가
   //.sidebar { font-size: 0.95rem; }
+
+  // ===============================================================
+  // DataTables 공통 커스텀 스타일
+  // ===============================================================
+
+  // 라이브러리 기본 스타일을 덮어쓰기 위한 구체적인 선택자 사용
+  table.dataTable th {
+    background-color: #f9fafb;
+    font-weight: 600;
+    color: #333;
+    text-align: center !important;
+    vertical-align: middle;
+  }
+
+  table.dataTable td {
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 0.9rem 0.75rem;
+    white-space: nowrap;
+  }
+
+  table.dataTable td.text-end {
+    text-align: right !important;
+  }
+
+  table.dataTable td.text-left {
+    text-align: left !important;
+  }
+
+  table.dataTable tr:hover td {
+    background-color: #f8f9fa;
+  }
+
+  /* 정렬 화살표 중앙 배치 */
+  table.dataTable th.sorting,
+  table.dataTable th.sorting_asc,
+  table.dataTable th.sorting_desc {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 4px;
+  }
 }
