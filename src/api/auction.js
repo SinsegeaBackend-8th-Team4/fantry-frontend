@@ -34,7 +34,7 @@ export const getAuctionDetails = (auctionId) => {
  * @returns {Promise<Page<AuctionSummaryResponse>>}
  */
 export const getAuctionList = ({ page, size, sort, saleType, saleStatus }) => {
-    return apiClient.get('/api/auctions', {
+    return apiClient.get('/auctions', {
         params: { page, size, sort, saleType, saleStatus }
     });
 }
@@ -45,7 +45,7 @@ export const getAuctionList = ({ page, size, sort, saleType, saleStatus }) => {
  * @returns {Promise<List<AuctionSummaryResponse>>}
  */
 export const getAuctionsByMember = (memberId) => {
-    return apiClient.get(`/api/auctions/member/${memberId}`);
+    return apiClient.get(`/auctions/member/${memberId}`);
 }
 
 /**
@@ -56,7 +56,7 @@ export const getAuctionsByMember = (memberId) => {
  * @returns {Promise<List<AuctionSummaryResponse>>}
  */
 export const getAuctionsByMemberAndStatus = ({ memberId, saleStatus }) => {
-    return apiClient.get(`/api/auctions/member/${memberId}/status`, {
+    return apiClient.get(`/auctions/member/${memberId}/status`, {
         params: { saleStatus }
     });
 }
@@ -67,7 +67,7 @@ export const getAuctionsByMemberAndStatus = ({ memberId, saleStatus }) => {
  * @returns {Promise<string>} - 성공 메시지
  */
 export const createAuction = (payload) => {
-    return apiClient.post('/api/auctions', payload);
+    return apiClient.post('/auctions', payload);
 }
 
 /**
@@ -76,7 +76,7 @@ export const createAuction = (payload) => {
  * @returns {Promise<string>} - 성공 메시지
  */
 export const deleteAuction = (auctionId) => {
-    return apiClient.delete(`/api/auctions/${auctionId}`);
+    return apiClient.delete(`/auctions/${auctionId}`);
 }
 
 /**
@@ -87,7 +87,7 @@ export const deleteAuction = (auctionId) => {
  * @returns {Promise<string>} - 성공 메시지
  */
 export const markAuctionAsSold = ({ auctionId, finalPrice }) => {
-    return apiClient.patch(`/api/auctions/${auctionId}/status/sold`, null, {
+    return apiClient.patch(`/auctions/${auctionId}/status/sold`, null, {
         params: { finalPrice }
     });
 }
@@ -98,7 +98,7 @@ export const markAuctionAsSold = ({ auctionId, finalPrice }) => {
  * @returns {Promise<string>} - 성공 메시지
  */
 export const markAuctionAsNotSold = (auctionId) => {
-    return apiClient.patch(`/api/auctions/${auctionId}/status/not-sold`);
+    return apiClient.patch(`/auctions/${auctionId}/status/not-sold`);
 }
 
 /**
@@ -107,7 +107,7 @@ export const markAuctionAsNotSold = (auctionId) => {
  * @returns {Promise<string>} - 성공 메시지
  */
 export const cancelAuction = (auctionId) => {
-    return apiClient.patch(`/api/auctions/${auctionId}/status/cancelled`);
+    return apiClient.patch(`/auctions/${auctionId}/status/cancelled`);
 }
 
 /**
@@ -116,7 +116,7 @@ export const cancelAuction = (auctionId) => {
  * @returns {Promise<string>} - 성공 메시지
  */
 export const activateAuction = (auctionId) => {
-    return apiClient.patch(`/api/auctions/${auctionId}/status/active`);
+    return apiClient.patch(`/auctions/${auctionId}/status/active`);
 }
 
 /**
@@ -127,7 +127,7 @@ export const activateAuction = (auctionId) => {
  * @returns {Promise<string>} - 성공 메시지
  */
 export const changeAuctionSaleType = ({ auctionId, newSaleType }) => {
-    return apiClient.patch(`/api/auctions/${auctionId}/sale-type`, null, {
+    return apiClient.patch(`/auctions/${auctionId}/sale-type`, null, {
         params: { newSaleType }
     });
 }

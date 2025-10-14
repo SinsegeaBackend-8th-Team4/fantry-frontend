@@ -196,6 +196,21 @@ const adminRoutes = {
             },
           ],
         },
+
+        // --- 입찰 관리 (추가) ---
+        {
+          path: 'bid',
+          redirect: { name: 'AdminBidList' },
+          meta: { title: '입찰관리', icon: 'fas fa-fw fa-hand-paper', menu: true },
+          children: [
+            {
+              path: 'list',
+              name: 'AdminBidList',
+              component: () => import('@/pages/admin/bid/BidListPage.vue'),
+              meta: { title: '입찰 목록' }
+            },
+          ],
+        },
       ],
     },
   ],

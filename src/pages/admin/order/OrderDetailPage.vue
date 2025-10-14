@@ -24,11 +24,11 @@
                 <tr><th class="bg-light">주문번호</th><td>{{ order.ordersId }}</td></tr>
                 <tr><th class="bg-light">상품명</th><td>{{ order.itemName }}</td></tr>
                 <tr><th class="bg-light">주문금액</th><td>{{ (order.price || 0).toLocaleString() }}원</td></tr>
-                <tr><th class="bg-light">주문상태</th><td><span :class="getStatusBadge(order.orderStatus)">{{ order.orderStatus }}</span></td></tr>
-                <tr><th class="bg-light">주문일시</th><td>{{ formatDate(order.orderedAt) }}</td></tr>
-                <tr><th class="bg-light">결제일시</th><td>{{ formatDate(order.paidAt) }}</td></tr>
-                <tr><th class="bg-light">배송완료일시</th><td>{{ formatDate(order.deliveredAt) }}</td></tr>
-                <tr><th class="bg-light">취소일시</th><td>{{ formatDate(order.cancelledAt) }}</td></tr>
+                <tr><th class="bg-light">주문상태</th><td><span :class="getStatusBadge(order.orderStatus)">{{ translateOrderStatus(order.orderStatus) }}</span></td></tr>
+                <tr><th class="bg-light">주문일시</th><td>{{ (d => d ? d.toLocaleString('ko-KR') : '-')(parseJavaLocalDateTime(order.orderedAt)) }}</td></tr>
+                <tr><th class="bg-light">결제일시</th><td>{{ (d => d ? d.toLocaleString('ko-KR') : '-')(parseJavaLocalDateTime(order.paidAt)) }}</td></tr>
+                <tr><th class="bg-light">배송완료일시</th><td>{{ (d => d ? d.toLocaleString('ko-KR') : '-')(parseJavaLocalDateTime(order.deliveredAt)) }}</td></tr>
+                <tr><th class="bg-light">취소일시</th><td>{{ (d => d ? d.toLocaleString('ko-KR') : '-')(parseJavaLocalDateTime(order.cancelledAt)) }}</td></tr>
               </tbody>
             </table>
           </div>
@@ -52,10 +52,7 @@
             <button @click="updateStatus('prepare-shipment')" class="btn btn-sm btn-primary">배송 준비중</button>
             <button @click="updateStatus('ship')" class="btn btn-sm btn-info">배송중</button>
             <button @click="updateStatus('delivered')" class="btn btn-sm btn-success">배송 완료</button>
-            <button @click="updateStatus('confirmed')" class="btn btn-sm btn-dark">구매 확정</button>
-            <button @click="updateStatus('cancel-requested')" class="btn btn-sm btn-warning">취소 요청</button>
             <button @click="updateStatus('cancelled')" class="btn btn-sm btn-danger">취소 완료</button>
-            <button @click="updateStatus('refund-requested')" class="btn btn-sm btn-outline-warning">환불 요청</button>
             <button @click="updateStatus('refunded')" class="btn btn-sm btn-outline-danger">환불 완료</button>
           </div>
         </div>
@@ -109,10 +106,7 @@ const statusUpdateActions = {
   'prepare-shipment': prepareShipment,
   'ship': shipOrder,
   'delivered': markAsDelivered,
-  'confirmed': confirmPurchase,
-  'cancel-requested': requestCancel,
   'cancelled': cancelOrder,
-  'refund-requested': requestRefund,
   'refunded': completeRefund
 };
 
@@ -135,10 +129,28 @@ async function updateStatus(statusKey) {
   }
 }
 
-function formatDate(dateString) {
-  if (!dateString) return '-';
-  const date = new Date(dateString);
-  return date.toLocaleString('ko-KR');
+const parseJavaLocalDateTime = (dt) => {
+    if (!Array.isArray(dt) || dt.length < 5) {
+        return null; 
+    }
+    const [year, month, day, hour, minute, second = 0] = dt;
+    return new Date(year, month - 1, day, hour, minute, second);
+};
+
+const orderStatusMap = {
+  'PAID': '결제완료',
+  'SHIPPED': '배송중',
+  'DELIVERED': '배송완료',
+  'CONFIRMED': '구매확정',
+  'CANCELLED': '취소완료',
+  'REFUNDED': '환불완료',
+  'PREPARE_SHIPMENT': '배송 준비중',
+  'CANCEL_REQUESTED': '취소 요청',
+  'REFUND_REQUESTED': '환불 요청'
+};
+
+function translateOrderStatus(status) {
+    return orderStatusMap[status] || status;
 }
 
 function getStatusBadge(status) {

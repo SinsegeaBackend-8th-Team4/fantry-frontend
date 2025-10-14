@@ -8,15 +8,6 @@
       :columns="columns"
       :fetcher="fetchOrders"
     >
-      <template #cell-orderStatus="{ row }">
-        <span :class="getStatusBadge(row.orderStatus)">{{ row.orderStatus }}</span>
-      </template>
-      <template #cell-price="{ row }">
-        {{ (row.price || 0).toLocaleString() }}원
-      </template>
-      <template #cell-orderedAt="{ row }">
-        {{ formatDate(row.orderedAt) }}
-      </template>
       <template #empty>주문 내역이 없습니다.</template>
     </ServerDataTable>
   </div>
@@ -46,9 +37,29 @@ const columns = [
   },
   { data: 'itemName', title: '상품명', sortable: true },
   { data: 'buyerName', title: '구매자명', sortable: true },
-  { data: 'price', title: '주문금액', sortable: true },
-  { data: 'orderStatus', title: '주문상태', sortable: true },
-  { data: 'orderedAt', title: '주문일시', sortable: true },
+  {
+    data: 'price',
+    title: '주문금액',
+    sortable: true,
+    render: (data) => `${(data || 0).toLocaleString()}원`
+  },
+  {
+    data: 'orderStatus',
+    title: '주문상태',
+    sortable: true,
+    render: (data) => {
+      return `<span class="${getStatusBadge(data)}">${translateOrderStatus(data)}</span>`;
+    }
+  },
+  {
+    data: 'orderedAt',
+    title: '주문일시',
+    sortable: true,
+    render: (data) => {
+      const dateObj = parseJavaLocalDateTime(data);
+      return dateObj ? dateObj.toLocaleString('ko-KR') : '-';
+    }
+  },
 ].map(col => ({ ...col, className: 'text-center' }));
 
 async function fetchOrders({ page, size, sort, keyword }) {
@@ -94,11 +105,28 @@ onMounted(() => {
   }
 });
 
+const parseJavaLocalDateTime = (dt) => {
+    if (!Array.isArray(dt) || dt.length < 5) {
+        return null; 
+    }
+    const [year, month, day, hour, minute, second = 0] = dt;
+    return new Date(year, month - 1, day, hour, minute, second);
+};
 
-function formatDate(dateString) {
-  if (!dateString) return '-';
-  const date = new Date(dateString);
-  return date.toLocaleString('ko-KR');
+const orderStatusMap = {
+  'PAID': '결제완료',
+  'SHIPPED': '배송중',
+  'DELIVERED': '배송완료',
+  'CONFIRMED': '구매확정',
+  'CANCELLED': '취소완료',
+  'REFUNDED': '환불완료',
+  'PREPARE_SHIPMENT': '배송 준비중',
+  'CANCEL_REQUESTED': '취소 요청',
+  'REFUND_REQUESTED': '환불 요청'
+};
+
+function translateOrderStatus(status) {
+    return orderStatusMap[status] || status;
 }
 
 function getStatusBadge(status) {
@@ -122,8 +150,21 @@ function getStatusBadge(status) {
   :deep(table td) {
     text-align: center;
   }
-  /*
-    pointer-events 관련 스타일을 제거하여 이벤트 버블링이 정상적으로 동작하도록 합니다.
-    이벤트 위임 패턴에서는 이벤트가 자식 요소에서 부모 요소로 전달(버블링)되어야 하기 때문입니다.
-  */
+  :deep(table td) {
+    pointer-events: none;
+  }
+
+  :deep(table td .order-link) {
+    pointer-events: auto;
+  }
+
+  :deep(table tbody tr:hover) {
+    background-color: transparent; /* 배경색 변경 없음 */
+    cursor: default; /* 기본 커서 유지 */
+  }
+
+  :deep(.order-link:hover) {
+    font-weight: bold;
+    filter: brightness(1.1);
+  }
 </style>
