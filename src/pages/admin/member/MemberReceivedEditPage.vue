@@ -2,7 +2,7 @@
   <div>
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h1 class="h3 mb-0 text-gray-800">신고 상세 정보</h1>
-      <button class="btn btn-secondary" @click="router.back()">목록으로</button>
+      <button class="btn btn-secondary" @click="gotoList">목록으로</button>
     </div>
 
     <div v-if="loading" class="text-center py-5">
@@ -29,7 +29,7 @@
             </tr>
             <tr>
               <th class="bg-light">신고 일시</th>
-              <td>{{ report.reportAt }}</td>
+              <td>{{ formatDate(report.reportAt) }}</td>
             </tr>
             <tr>
               <th class="bg-light">신고 처리 상태</th>
@@ -92,6 +92,9 @@ const newStatus = ref('WITHDRAWN');  // 기본값은 'WITHDRAWN' (신고 철회)
 const rejectedComment = ref('');
 let reportId = null;
 
+const gotoList = () => {
+  router.push("/admin/member/reportReceiveList");
+}
 
 function formatDate(dateString) {
   if (!dateString) return '';

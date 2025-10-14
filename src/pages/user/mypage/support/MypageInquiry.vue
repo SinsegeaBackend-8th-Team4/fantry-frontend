@@ -1,12 +1,17 @@
 <script setup>
   import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
-  import { ref, nextTick } from 'vue';
+  import { ref, nextTick, onMounted } from 'vue';
   import { getMyInquiryList, createInquiry, addInquiryAttachments } from '@/api/inquiry';
+  import MypageInquiryDetail from './MypageInquiryDetail.vue';
 
   const dataTableRef = ref(null);
   const keyword = ref('');
   const loading = ref(false);
   const showForm = ref(false);
+
+  //모달 상태
+  const showDetail = ref(false);
+  const selectedInquiryId = ref(null);
 
   const subject = ref('');
   const category = ref('deliver');
@@ -21,6 +26,8 @@
     { value: 'order', label: '결제문의', csTypeId: 2 },
     { value: 'etc', label: '기타문의', csTypeId: 3 },
     { value: 'product', label: '상품문의', csTypeId: 4 },
+    { value: 'refund', label: '환불/반품 문의', csTypeId: 5 },
+    { value: 'sell', label: '판매문의', csTypeId: 6 }
   ];
 
   // 날짜 포맷 함수
@@ -112,6 +119,16 @@
     className: col.className || 'text-center',
   }));
 
+  //상세 열기/닫기
+  function openDetail(id) {
+    selectedInquiryId.value = id;
+    showDetail.value = true;
+  }
+  function closeDetail() {
+    selectedInquiryId.value = null;
+    showDetail.value = false;
+  }
+
   // 테이블 렌더링 후 클릭 이벤트 바인딩
   function attachClickHandlers() {
     nextTick(() => {
@@ -123,9 +140,8 @@
         el.addEventListener('click', (e) => {
           e.stopPropagation(); // 이벤트 버블링 방지
           const inquiryId = e.currentTarget.dataset.inquiryId;
-          console.log('문의 클릭:', inquiryId);
-          // 상세 페이지로 이동하거나 모달을 띄우는 로직
-          // router.push({ name: 'InquiryDetail', params: { inquiryId } });
+          // 상세 페이지로 모달을 띄우기
+          openDetail(inquiryId);
         });
       });
     });
@@ -253,6 +269,10 @@
       loading.value = false;
     }
   }
+
+  onMounted(() => {
+    setTimeout(attachClickHandlers, 500);
+  })
 </script>
 
 <template>
@@ -273,7 +293,7 @@
         :columns="columns"
         :fetcher="fetchInquiries"
         :page-size="10"
-        @draw="attachClickHandlers"
+        @loaded="attachClickHandlers"
       >
         <!-- 커스텀 셀: 날짜 포맷 -->
         <template #cell-inquiredAt="{ row }">
@@ -326,6 +346,17 @@
           </button>
         </div>
       </form>
+    </div>
+
+    <!-- 상세 모달 -->
+    <div v-if="showDetail" class="inquiry-modal-backdrop" @click.self="closeDetail">
+      <div class="inquiry-modal">
+        <button class="modal-close btn btn-sm btn-light" @click="closeDetail">닫기 ×</button>
+        <MypageInquiryDetail
+          v-if="selectedInquiryId !== null"
+          :inquiryId="selectedInquiryId" 
+          @close="closeDetail" />
+      </div>
     </div>
   </div>
 </template>
@@ -420,5 +451,33 @@
 
   :deep(.inquiry-title:hover) {
     text-decoration: underline;
+  }
+
+  /* 간단한 모달 스타일 */
+  .inquiry-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+  }
+  .inquiry-modal {
+    width: 90%;
+    max-width: 900px;
+    max-height: 85vh;
+    overflow: auto;
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  }
+  .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
   }
 </style>

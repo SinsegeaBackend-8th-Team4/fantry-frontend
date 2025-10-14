@@ -14,6 +14,7 @@
       :columns="columns"
       :fetcher="fetchReceivedReports"
       :page-size="10"
+      @loaded="attachClickHandlers"
     >
       <!-- 데이터가 없을 때 -->
       <template #empty>접수된 구제 신청 내역이 없습니다.</template>
@@ -115,8 +116,6 @@ const columns = [
  * 테이블 렌더링 후 이벤트 바인딩 (클릭 핸들러)
  */
 function attachClickHandlers() {
-  console.log('attachClickHandlers 호출됨');
-  
   nextTick(() => {
     // 신고 ID 클릭 시 신고 상세 페이지 이동
     const reportIdElements = document.querySelectorAll('.report-link');
