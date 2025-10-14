@@ -1,22 +1,19 @@
 import Bootpay from '@bootpay/client-js'
-import { apiClient } from '@/api'
+import {
+  requestPaymentApprove,
+  requestPaymentCreate,
+  requestPaymentApproveVerify,
+  requestPaymentCancelVerify,
+  requestPaymentCancel,
+  requestPaymentReturnVerify,
+  requestPaymentVoid,
+} from '@/api/payment'
 
-const REQUEST_URL = {
-  create: '/payments',
-  approve: (orderId) => {
-    return `/payments/${orderId}/approve`
-  },
-  cancel: (orderId) => {
-    return `/payments/${orderId}/cancel`
-  },
-  verify: (orderId) => {
-    return `/payments/${orderId}/verify`
-  },
-}
 const PAYMENT_APP_ID = import.meta.env.VITE_BOOTPAY_APPLICATION_ID
 const INSTALLMENT = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+const INSTALLMENT_STRING = INSTALLMENT.join(',')
 const EXPOSUR_TYPE = Object.freeze({
-  IFRAME: 'ifreme',
+  IFRAME: 'iframe',
   POPUP: 'popup',
 })
 const RESPONSE_EVENT = Object.freeze({
@@ -27,7 +24,16 @@ const RESPONSE_EVENT = Object.freeze({
   ISSUED: 'issued', //가상계좌 발급이 완료되면 호출되는 이벤트입니다.
   CLOSE: 'close', //(앱 SDK 전용) 결제창이 닫힐때 호출됩니다. 성공, 실패, 취소에 상관없이 모두 호출됩니다. bootpay-js를 통한 웹 개발시에는 이 이벤트는 호출되지 않습니다.
 })
+
 const PAYMENT_STATUS = Object.freeze({
+  VERIFYING: 'verifying',
+  COMPLETE: 'complete',
+  FORGED: 'forged',
+  RETURNED: 'return',
+  CANCELED: 'cancel',
+})
+
+const BOOTPAY_STATUS = Object.freeze({
   // 현금영수증 관련 실패
   CASH_RECEIPT_CANCEL_FAILED: -61, //현금영수증 발행취소가 실패한 상태값입니다.
   CASH_RECEIPT_ISSUE_FAILED: -60, //현금영수증 발행이 실패한 상태값입니다.
@@ -66,9 +72,27 @@ const PAYMENT_STATUS = Object.freeze({
 })
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-const startPayment = async (member, item, price, onSuccess, onError) => {
+const requestPayment = async (member, item, price, onSuccess, onError) => {
+  if (!member) {
+    throw {
+      errorMessage: '멤버 정보가 존재하지 않습니다.',
+      description: '클라이언트에 멤버정보 없음.',
+    }
+  }
+
+  if (!item) {
+    throw {
+      errorMessage: '아이템 정보가 존재하지 않습니다.',
+      description: '클라이언트에 아이템정보 없음.',
+    }
+  }
+
   try {
-    const responseCreated = await requestCreatePayment(member, item, price)
+    const responseCreated = await requestPaymentCreate({
+      username: member.name,
+      itemId: item.id,
+      price: price,
+    })
     if (!responseCreated.data.success) {
       throw {
         errorMessage: responseCreated.data.errorMessage || '결제 생성에 실패했습니다.',
@@ -78,55 +102,56 @@ const startPayment = async (member, item, price, onSuccess, onError) => {
       member,
       responseCreated.data.data.orderId,
       item,
+      price,
     )
-    const responseSendReceipt = await sendReceipt(resultReceipt)
-    if (!responseSendReceipt.data.success) {
-      throw {
-        errorMessage: responseSendReceipt.data.errorMessage || '영수증 전송에 실패했습니다.',
+    try {
+      const responseSendReceipt = await requestPaymentApprove(resultReceipt.order_id, {
+        receiptData: JSON.stringify(resultReceipt),
+      })
+      if (!responseSendReceipt.data.success) {
+        throw {
+          errorMessage: responseSendReceipt.data.errorMessage || '영수증 전송에 실패했습니다.',
+        }
       }
+    } catch (error) {
+      await requestPaymentVoid(resultReceipt.receipt_id)
+      throw error
     }
-    await confirmPayment(resultReceipt.order_id, onSuccess)
+    await confirmPayment(async () => {
+      return await requestPaymentApproveVerify(resultReceipt.order_id, {
+        receiptId: resultReceipt.receipt_id,
+        paymentStatus: PAYMENT_STATUS.COMPLETE,
+      })
+    }, onSuccess)
   } catch (error) {
     // 이미 객체 형태면 그대로, 아니면 객체로 변환
     const errorObj =
       typeof error === 'object' && error !== null ? error : { errorMessage: String(error) }
-    onError(errorObj)
-  }
-}
-
-const requestCreatePayment = async (member, item, price) => {
-  if (!member) {
-    throw {
-      errorMessage: '멤버 정보가 존재하지 않습니다.',
-      description: '클라이언트에 멤버정보 없음.',
+    if (typeof onError == 'function') {
+      onError(errorObj)
     }
   }
-  return await apiClient.post(REQUEST_URL.create, {
-    memberId: member.id,
-    itemId: item.id,
-    price: price,
-  })
 }
 
-const requestPaymentToBootpay = async (member, orderId, item) => {
+const requestPaymentToBootpay = async (member, orderId, item, price) => {
   const response = await Bootpay.requestPayment({
     application_id: PAYMENT_APP_ID,
     price: item.price * item.qty,
     order_name: item.name,
     order_id: orderId,
     tax_free: 0,
-    user: createMemberData(member),
+    user: createUserData(member),
     items: [
       {
         id: item.id,
         name: item.name,
-        qty: item.qty,
-        price: item.price,
+        qty: 1,
+        price: price,
       },
     ],
     extra: {
       open_type: EXPOSUR_TYPE.POPUP,
-      card_quota: INSTALLMENT.join(','),
+      card_quota: INSTALLMENT_STRING,
       escrow: false,
       separately_confirmed: false,
       display_error_result: true,
@@ -140,27 +165,30 @@ const requestPaymentToBootpay = async (member, orderId, item) => {
   }
 }
 
-const sendReceipt = async (receiptData) => {
-  return await apiClient.post(REQUEST_URL.approve(receiptData.order_id), {
-    receiptData: JSON.stringify(receiptData),
-  })
-}
-
-const confirmPayment = async (orderId, onSuccess) => {
-  const maxRetries = 15
-  const interval = 2000 // 2초
-
+const confirmPayment = async (func, onSuccess) => {
+  const maxRetries = 10
+  const baseInterval = 500
+  const maxInterval = 5000
+  const timeoutMs = 30000
+  const startTime = Date.now()
   for (let i = 0; i < maxRetries; i++) {
+    if (Date.now() - startTime > timeoutMs) {
+      throw {
+        errorMessage: '결제 확인 지연 중입니다. 마이페이지에서 확인해주세요.',
+        code: 'VERIFICATION_TIMEOUT',
+      }
+    }
     try {
-      const response = await apiClient.get(REQUEST_URL.verify(orderId))
+      const response = await func()
       const data = response.data
       if (data.success) {
-        onSuccess(data)
+        if (typeof onSuccess === 'function') {
+          onSuccess(data)
+        }
         return
       }
-      if (i < maxRetries - 1) {
-        await sleep(interval)
-      }
+      const delay = Math.min(baseInterval * Math.pow(2, i), maxInterval)
+      await sleep(delay)
     } catch (error) {
       if (i === maxRetries - 1) {
         throw {
@@ -168,7 +196,8 @@ const confirmPayment = async (orderId, onSuccess) => {
           originalError: error,
         }
       }
-      await sleep(interval)
+      const delay = Math.min(baseInterval * Math.pow(2, i), maxInterval)
+      await sleep(delay)
     }
   }
 
@@ -177,7 +206,7 @@ const confirmPayment = async (orderId, onSuccess) => {
   }
 }
 
-const createMemberData = (member) => {
+const createUserData = (member) => {
   return {
     id: member.id,
     username: member.name,
@@ -186,8 +215,77 @@ const createMemberData = (member) => {
   }
 }
 
-const Payment = {
-  purchase: startPayment,
+const requestVerification = async (
+  orderId,
+  cancelPrice,
+  username,
+  cancelReason,
+  verificationType,
+  onSuccess,
+) => {
+  const resultCancel = await requestPaymentCancel(orderId, {
+    orderId,
+    cancelPrice,
+    username,
+    cancelReason,
+  })
+
+  if (!resultCancel.data.success) {
+    throw {
+      errorMessage: resultCancel.data.errorMessage || '취소 요청에 실패했습니다.',
+      code: 'CANCEL_REQUEST_FAILED',
+    }
+  }
+
+  // 응답에서 receiptId 추출
+  const receiptId = resultCancel.data.receiptId || resultCancel.data.data?.receiptId
+
+  if (!receiptId) {
+    throw {
+      errorMessage: '영수증 ID를 찾을 수 없습니다.',
+      code: 'RECEIPT_ID_MISSING',
+    }
+  }
+
+  if (onSuccess) {
+    const verifyFunc =
+      verificationType === PAYMENT_STATUS.CANCELED
+        ? requestPaymentCancelVerify
+        : requestPaymentReturnVerify
+
+    await confirmPayment(async () => {
+      return await verifyFunc(orderId, {
+        receiptId,
+        paymentStatus: verificationType,
+      })
+    }, onSuccess)
+  }
 }
 
-export { Payment, RESPONSE_EVENT, PAYMENT_STATUS, EXPOSUR_TYPE }
+const requestCancel = (orderId, cancelPrice, username, cancelReason, onSuccess) =>
+  requestVerification(
+    orderId,
+    cancelPrice,
+    username,
+    cancelReason,
+    PAYMENT_STATUS.CANCELED,
+    onSuccess,
+  )
+
+const requestReturn = (orderId, cancelPrice, username, cancelReason, onSuccess) =>
+  requestVerification(
+    orderId,
+    cancelPrice,
+    username,
+    cancelReason,
+    PAYMENT_STATUS.RETURNED,
+    onSuccess,
+  )
+
+const Payment = {
+  purchase: requestPayment,
+  return: requestReturn,
+  cancel: requestCancel,
+}
+
+export { Payment, RESPONSE_EVENT, BOOTPAY_STATUS, PAYMENT_STATUS, EXPOSUR_TYPE }
