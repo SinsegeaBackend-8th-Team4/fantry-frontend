@@ -175,6 +175,27 @@ const adminRoutes = {
             { path: 'list', name: 'AdminAuctionList', component: AuctionListPage },
           ],
         },
+        // --- 주문 관리 (추가) ---
+        {
+          path: 'order',
+          redirect: { name: 'AdminOrderList' },
+          meta: { title: '주문관리', icon: 'fas fa-fw fa-receipt', menu: true },
+          children: [
+            { 
+              path: 'list', 
+              name: 'AdminOrderList', 
+              component: () => import('@/pages/admin/order/OrderListPage.vue'), 
+              meta: { title: '주문 목록' } 
+            },
+            { 
+              path: 'detail/:orderId', 
+              name: 'AdminOrderDetail', 
+              component: () => import('@/pages/admin/order/OrderDetailPage.vue'), 
+              props: true, 
+              meta: { menu: false, hidden: true, title: '주문 상세' } 
+            },
+          ],
+        },
       ],
     },
   ],
