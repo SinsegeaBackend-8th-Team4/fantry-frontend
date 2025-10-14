@@ -1,16 +1,41 @@
 <script setup>
 import { ref, computed } from 'vue'
+//내 정보 관리
 import ProfileSection from './member/ProfileSection.vue'
+import PaymentAccount from './member/PaymentAccount.vue'
+import Address from './member/Address.vue'
+import ReportHistory from './member/ReportHistory.vue'
 import WithdrawalPage from './member/WithdrawalPage.vue'
+//판매 관리
+import MyProducts from './selling/MyProducts.vue'
+import Inspection from './selling/Inspection.vue'
+import SalesHistory from './selling/SalesHistory.vue'
+//구매 관리
+import AuctionHistory from './buying/AuctionHistory.vue'
+import PurchaseHistory from './buying/PurchaseHistory.vue'
+//고객 센터
+import MypageInquiry from './support/MypageInquiry.vue'
 
 const activeMenu = ref('account')
 const activeSubMenu = ref('profile')
 
 // 컴포넌트 매핑
 const componentMap = {
+  //내 정보 관리========================
   'profile': ProfileSection,
+  'payment-account': PaymentAccount,
+  'address': Address,
+  'report-history': ReportHistory,
   'withdrawal': WithdrawalPage,
-  // 다른 메뉴에 대한 컴포넌트도 여기에 추가
+  //판매 관리===========================
+  'my-products': MyProducts,
+  'inspection': Inspection,
+  'sales-history': SalesHistory,
+  //구매 관리===========================
+  'auction-history': AuctionHistory,
+  'purchase-history': PurchaseHistory,
+  //고객 센터===========================
+  'inquiry': MypageInquiry,
 }
 
 const currentComponent = computed(()=>{
@@ -28,6 +53,7 @@ const menuItems = [
       { id: 'profile', title: '개인정보 관리' },
       { id: 'payment-account', title: '결제 계좌 관리' },
       { id: 'address', title: '배송지 관리' },
+      { id: 'report-history', title: '신고 내역 확인' },
       { id: 'withdrawal', title: '회원탈퇴' }
     ]
   },
@@ -37,9 +63,8 @@ const menuItems = [
     icon: '💼',
     subMenus: [
       { id: 'my-products', title: '등록 상품 내역' },
-      { id: 'inspection', title: '검수 현황' },
       { id: 'sales-history', title: '판매 완료 내역' },
-      { id: 'seller-request', title: '판매자 승인 요청' }
+      { id: 'inspection', title: '검수 현황' }
     ]
   },
   {
@@ -48,8 +73,7 @@ const menuItems = [
     icon: '🛒',
     subMenus: [
       { id: 'auction-history', title: '경매/입찰 내역' },
-      { id: 'purchase-history', title: '구매 완료 내역' },
-      { id: 'delivery', title: '배송 현황' }
+      { id: 'purchase-history', title: '구매 완료 내역' }
     ]
   },
   {
@@ -57,17 +81,7 @@ const menuItems = [
     title: '고객센터',
     icon: '💬',
     subMenus: [
-      { id: 'qna-list', title: 'Q&A 내역' },
       { id: 'inquiry', title: '문의 접수' }
-    ]
-  },
-  {
-    id: 'report',
-    title: '신고 및 제재 관리',
-    icon: '⚠️',
-    subMenus: [
-      { id: 'report-history', title: '신고 내역 확인' },
-      { id: 'appeal', title: '신고 구제 요청' }
     ]
   }
 ]
@@ -137,6 +151,7 @@ const getContentTitle = () => {
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf3 100%);
   padding: 40px 20px;
+  height: auto;
 }
 
 .mypage-container {
@@ -264,7 +279,8 @@ const getContentTitle = () => {
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(60, 77, 255, 0.08);
-  min-height: 800px;
+  height: calc(100vh - 80px);
+  overflow-y: auto;
 }
 
 .content-header {

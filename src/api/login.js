@@ -1,12 +1,10 @@
 import {apiClient, publicApiClient} from './index';
 
-const serverPath = import.meta.env.VITE_API_SERVER_URL;
-
 /* -------------------------------------------------------------
     로그인 
 ---------------------------------------------------------------*/
 export const login = (id, pwd) => {
-    return publicApiClient.post(serverPath + '/api/login', {
+    return publicApiClient.post('/login', {
         username: id,
         password: pwd
     });
@@ -17,14 +15,14 @@ export const login = (id, pwd) => {
 ---------------------------------------------------------------*/
 // 중복 아이디 체크
 export const checkDuplicateUsername = (username) => {
-    return publicApiClient.get(serverPath + '/api/user/checkId', {
+    return publicApiClient.get('/user/checkId', {
         params: { id: username }
     });
 }
 
 // 회원 가입
 export const signup = (payload, type) => {
-    return publicApiClient.post(serverPath + `/api/${type}/signup`, payload);
+    return publicApiClient.post(`/${type}/signup`, payload);
 }
 
 
@@ -33,14 +31,14 @@ export const signup = (payload, type) => {
 ---------------------------------------------------------------*/
 // 인증코드 발송
  export const sendAuthCode = (email) => {
-    return publicApiClient.post(serverPath + '/api/send/authCode', {
+    return publicApiClient.post('/send/authCode', {
         email: email
     });
 }
 
 // 인증코드 검수
 export const verifyAuthCode = (email, code) => {
-    return publicApiClient.post(serverPath + '/api/user/verifyCode', {
+    return publicApiClient.post('/user/verifyCode', {
         email: email,
         code: code
     });
@@ -52,7 +50,7 @@ export const verifyAuthCode = (email, code) => {
 ---------------------------------------------------------------*/
 // 아이디 가져오기
 export const findUserId = (email) => {
-    return publicApiClient.get(serverPath + '/api/user/findId', {
+    return publicApiClient.get('/user/findId', {
         params: { email }
     });
 }
@@ -61,5 +59,5 @@ export const findUserId = (email) => {
     로그아웃 처리
 ---------------------------------------------------------------*/
 export const logout = () => {
-    return apiClient.post(serverPath + '/api/logout');
+    return apiClient.post('/logout');
 }

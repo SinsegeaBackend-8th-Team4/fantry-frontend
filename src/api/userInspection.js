@@ -54,3 +54,24 @@ export const submitInspection = (inspectionData) => {
 
   return unwrap(requestPromise).catch(rethrow)
 }
+
+/**
+ * 마이페이지>검수 현황 목록 조회
+ */
+export const getMyInspections = (params) => {
+  const requestPromise = apiClient.get(`/inspections/my`, { 
+    params: {
+      page: params.page - 1,
+      size: params.size,
+      sort: params.sort,
+      keyword: params.keyword,
+    }
+  });
+
+  return unwrap(requestPromise).catch(rethrow)
+}
+
+export const startOfflineInspection = (productInspectionId) => {
+  const requestPromise = apiClient.post(`/inspections/${productInspectionId}/start-offline`)
+  return unwrap(requestPromise).catch(rethrow)
+}

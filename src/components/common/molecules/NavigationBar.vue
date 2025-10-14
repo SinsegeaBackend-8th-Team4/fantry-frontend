@@ -41,11 +41,13 @@ const goToMyPage = () => {
     </button>
     <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
       <div class="navbar-nav mr-auto py-0">
-        <NavigationItem>Home</NavigationItem>
-        <NavigationItem>Shop</NavigationItem>
-        <NavigationItem>Shop Detail</NavigationItem>
-        <NavigationDropdownButton />
-        <NavigationItem>Contact</NavigationItem>
+        <NavigationItem @click="router.push('/')">전체</NavigationItem>
+        <NavigationItem>남자 그룹</NavigationItem>
+        <NavigationItem>여자 그룹</NavigationItem>
+        <NavigationItem>남자 솔로</NavigationItem>
+        <NavigationItem>여자 솔로</NavigationItem>
+        <NavigationItem>혼성 그룹</NavigationItem>
+        <NavigationItem>기타</NavigationItem>
       </div>
       <div class="navbar-nav ml-auto py-0">
         <template v-if="userStore.isLoggedIn">

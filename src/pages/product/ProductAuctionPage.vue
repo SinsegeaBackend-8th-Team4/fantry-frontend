@@ -38,24 +38,62 @@
                         <span class="countdown-label">경매 마감까지 남은 시간</span>
                         <span class="countdown-time">{{ timeRemaining }}</span>
                     </div>
-                    <div class="bid-section-main text-center mb-5">
-                        <h5 class="mb-3">현재 입찰가</h5>
-                        <!-- Case 1: 입찰이 진행 중일 때 (hasBids가 true) -->
-                        <p v-if="hasBids" id="current-bid-price" :class="['current-bid-price-main', { 'bid-success-effect': isBidSuccess }]">
-                            {{ formattedCurrentPrice }}
-                        </p>
-                        
-                        <!-- Case 2: 아직 입찰이 없을 때 (hasBids가 false) -->
-                        <div v-else class="no-bids-info">
-                            <p class="no-bids-text">현재 입찰자가 없습니다.</p>
-                            <p class="start-price-info">(시작가: {{ formattedStartPrice }})</p>
+
+                    <!-- 경매 진행 중일 때 UI -->
+                    <template v-if="!isAuctionEnded">
+                        <div class="bid-section-main text-center mb-5">
+                            <h5 class="mb-3">현재 입찰가</h5>
+                            <p v-if="hasBids" id="current-bid-price" :class="['current-bid-price-main', { 'bid-success-effect': isBidSuccess }]">
+                                {{ formattedCurrentPrice }}
+                            </p>
+                            <div v-else class="no-bids-info">
+                                <p class="no-bids-text">현재 입찰자가 없습니다.</p>
+                                <p class="start-price-info">(시작가: {{ formattedStartPrice }})</p>
+                            </div>
                         </div>
-                    </div>
-                    <!-- 로그인 상태에 따라 버튼 활성화/비활성화 -->
-                    <button class="btn btn-danger btn-lg w-100" @click="openBidModal" :disabled="!userStore.isLoggedIn"
-                        :title="!userStore.isLoggedIn ? '로그인이 필요합니다.' : '입찰에 참여하세요'">
-                        {{ userStore.isLoggedIn ? '경매 참여하기' : '로그인 후 참여 가능' }}
-                    </button>
+                        <button class="btn btn-danger btn-lg w-100" @click="openBidModal" :disabled="!userStore.isLoggedIn"
+                            :title="!userStore.isLoggedIn ? '로그인이 필요합니다.' : '입찰에 참여하세요'">
+                            {{ userStore.isLoggedIn ? '경매 참여하기' : '로그인 후 참여 가능' }}
+                        </button>
+                    </template>
+
+                    <!-- 경매 종료 후 UI -->
+                    <template v-else>
+                        <!-- Case 1-2: 낙찰자이며, 결제 대기 중 (PENDING_PAYMENT) -->
+                        <div v-if="userAuctionState === '결제 대기중'" class="text-center">
+                            <div class="bid-section-main text-center mb-5">
+                                <h5 class="mb-3" style="font-size: 1.5rem; color: #28a745;">🎉 축하드립니다! 🎉</h5>
+                                <p class="current-bid-price-main" style="font-size: 1.8rem;">회원님이 낙찰하셨습니다.</p>
+                            </div>
+                            <button class="btn btn-primary btn-lg w-100" @click="goToPayment">
+                                결제하기
+                            </button>
+                        </div>
+
+                        <!-- Case 1-2: 미로그인 또는 미낙찰자 (USER) -->
+                        <div v-else-if ="userAuctionState === 'USER'" class="text-center">
+                             <div class="bid-section-main text-center mb-5">
+                                <h5 class="mb-3">경매 종료</h5>
+                                <p class="current-bid-price-main" style="font-size: 2rem;">낙찰에 실패하셨습니다.</p>
+                            </div>
+                            <button class="btn btn-secondary btn-lg w-100" disabled>
+                                경매에 참여할 수 없습니다
+                            </button>
+                        </div>
+
+                        
+                        <!-- Case 1-3: 낙찰자이며, 결제 완료 이후  -->
+                        <div v-else class="text-center">
+                            <div class="bid-section-main text-center mb-5">
+                                <h5 class="mb-3" style="font-size: 1.5rem; color: #28a745;">🎉 축하드립니다! 🎉</h5>
+                                <p class="current-bid-price-main" style="font-size: 1.8rem;">회원님이 낙찰하셨습니다.</p>
+                            </div>
+                            <button class="btn btn-success btn-lg w-100" disabled>
+                                {{userAuctionState}}
+                            </button>
+                        </div>
+
+                    </template>
                 </template>
 
                 <!-- Case 2: 즉시 구매 상품일 경우 ('INSTANT_BUY') -->
@@ -158,25 +196,23 @@
 </template>
 
 <script setup>
-
 /* =============================================
  * 1. 임포트 (Import) & 초기 설정
  * ============================================= */
-    import { ref, onMounted, onUnmounted, computed } from 'vue';
+    import { ref, onMounted, onUnmounted, computed , watch} from 'vue';
     import { useRoute } from 'vue-router';
-    import { getAuctionDetails} from '@/api/auction';  //경매 관련 API 함수
+    import { getAuctionDetails, getAuctionWinnerStatus} from '@/api/auction';  //경매 관련 API 함수
     import { getBidsByAuctionId } from '@/api/bid';  //입찰 관련 API 함수
     import { useUserStore } from '@/stores/userStore';
-    import { subscribe, unsubscribe, publish } from '@/services/websocketService';
+    import { subscribe, unsubscribe, publish, disconnect, connect } from '@/services/websocketService';
     const route = useRoute();
     const userStore = useUserStore();
     const auctionId = route.params.id;
 
-
-    /* =============================================
-    * 2. 상태 (State)
-    * - API 데이터, 실시간 데이터, UI 제어용 데이터를 명확히 분리
-    * ============================================= */
+/* =============================================
+* 2. 상태 (State)
+* - API 데이터, 실시간 데이터, UI 제어용 데이터를 명확히 분리
+* ============================================= */
     // --- API 데이터 상태 ---
     const auction = ref(null);
     const isLoading = ref(true);
@@ -193,29 +229,31 @@
     const bidAmount = ref('');
     const isBidSuccess = ref(false);
     const isBidHistoryVisible = ref(false);
+    const userAuctionState = ref('USER'); // 경매 종료 후 유저 상태: PENDING_PAYMENT, PAID, USER
+    const isAuctionEnded = ref(false); // 경매 종료 여부
 
     //썸네일 이미지 데이터
     const productImages = ref([
         { id: 1, src: '/images/ww.png' },
-        { id: 2, src: '/images/654.png' }, 
-        { id: 3, src: '/images/hy.png' }, 
-        { id: 4, src: '/images/hye.png' },  
-        { id: 5, src: '/images/kr.png' },  
+        { id: 2, src: '/images/654.png' },
+        { id: 3, src: '/images/hy.png' },
+        { id: 4, src: '/images/hye.png' },
+        { id: 5, src: '/images/kr.png' },
         { id: 6, src: '/images/sy.png' },
-        { id: 7, src: '/images/wt.png' } 
+        { id: 7, src: '/images/wt.png' }
     ]);
-    
+
     //메인 썸네일 이미지 경로
     const mainImageSrc = ref(productImages.value[0].src);
 
-    /* =============================================
-    * 3. 계산된 속성 (Computed)
-    * - 상태를 기반으로 동적인 값을 계산
-    * ============================================= */
+/* =============================================
+* 3. 계산된 속성 (Computed)
+* - 상태를 기반으로 동적인 값을 계산
+* ============================================= */
     const isAuction = computed(() => auction.value?.saleType === 'AUCTION');
     const isInstantBuy = computed(() => auction.value?.saleType === 'INSTANT_BUY');
 
-    const hasBids = computed(()=>{
+    const hasBids = computed(()=> {
         if (!auction.value) return false;
         // 현재 입찰가와 시작가가 다르면 입찰이 진행된 것으로 간주
         return currentBidPrice.value !== auction.value.startPrice;
@@ -229,11 +267,11 @@
         return dateObj ? dateObj.getTime() : null;
     });
 
-    const formattedCurrentPrice = computed(() =>{
+    const formattedCurrentPrice = computed(() => {
         if (!auction.value) {
             return '';
         }
-        
+
         // 1. 현재 입찰가(currentBidPrice)와 시작가(startPrice)가 같은지 비교.
         //    (백엔드에서 입찰이 없으면 currentPrice를 startPrice로 보내줌)
         if (currentBidPrice.value === auction.value.startPrice) {
@@ -248,10 +286,9 @@
     const formattedStartTime = computed(() => formatDate(parseJavaLocalDateTime(auction.value?.startTime)));
     const formattedEndTime = computed(() => formatDate(parseJavaLocalDateTime(auction.value?.endTime)));
 
-
-    /* =============================================
-    * 4. 메서드 (Methods) 영역
-    * ============================================= */
+/* =============================================
+* 4. 메서드 (Methods) 영역
+* ============================================= */
 
     /**
      *  API를 호출하여 경매/판매 상세 정보를 가져오고, 후속 작업을 시작
@@ -262,14 +299,36 @@
             const response = await getAuctionDetails(auctionId);
             auction.value = response.data;
             console.log(response.data);
-            
-            // 경매 상품일 경우에만 WebSocket 구독 및 초기 가격 설정
-            if (isAuction.value) {
-                currentBidPrice.value = auction.value.currentPrice; 
-                setupWebSocketSubscription();
-                fetchBidHistory(auctionId);
+
+            // 경매 종료 여부 초기 확인
+            const endTime = parseJavaLocalDateTime(auction.value.endTime);
+            if (endTime && new Date() > endTime) {
+                isAuctionEnded.value = true;
             }
-            startCountdown(); // 경매/판매 모두 카운트다운 시작
+
+            if (isAuctionEnded.value) {
+                // 경매가 종료된 경우, 유저의 낙찰 상태를 확인합니다.
+                if (userStore.isLoggedIn && isAuction.value) {
+                    try {
+                        const statusResponse = await getAuctionWinnerStatus(auctionId, userStore.currentUser.memberId);
+                        userAuctionState.value = getKoreanAuctionStatus(statusResponse.data); // 'PENDING_PAYMENT', 'PAID', 'USER'
+                    } catch (e) {
+                        console.error("낙찰자 상태 조회에 실패했습니다:", e);
+                        userAuctionState.value = 'USER'; // 실패 시 기본값
+                    }
+                } else {
+                    userAuctionState.value = 'USER'; // 비로그인 또는 경매 상품이 아님
+                }
+            } else {
+                // 경매가 진행 중인 경우에만 WebSocket 구독 및 관련 데이터 로드
+                if (isAuction.value) {
+                    currentBidPrice.value = auction.value.currentPrice;
+                    setupWebSocketSubscription();
+                    fetchBidHistory(auctionId);
+                }
+            }
+            
+            startCountdown(); // 카운트다운은 항상 시작
         } catch (err) {
             error.value = "상품 정보를 불러오는 데 실패했습니다. 페이지를 새로고침해주세요.";
             console.error("Fetch auction data failed:", err);
@@ -278,8 +337,37 @@
             console.log("fetchAuctionData 완료");
         }
     };
-    
-    
+
+    function getKoreanAuctionStatus(status) {
+        switch (status) {
+            case 'PENDING_PAYMENT':
+            return '결제 대기중';
+            case 'PAID':
+            return '결제 완료';
+            case 'PREPARING_SHIPMENT':
+            return '배송 준비중'; // '배송 대기중' 대신 더 명확한 표현을 사용했습니다.
+            case 'SHIPPED':
+            return '배송 중';
+            case 'DELIVERED':
+            return '배송 완료';
+            case 'CONFIRMED':
+            return '구매 확정';
+            case 'CANCEL_REQUESTED':
+            return '취소 요청';
+            case 'CANCELLED':
+            return '취소 완료';
+            case 'REFUND_REQUESTED':
+            return '환불 요청';
+            case 'REFUNDED':
+            return '환불 완료';
+            case 'USER':
+            return 'USER';
+            default: 'USER';
+            // 정의되지 않은 상태값이 들어올 경우를 대비해 기본값을 설정합니다.
+            return status;
+        }
+    }
+
     // WebSocket을 통해 현재 경매의 실시간 입찰 토픽을 구독
     const setupWebSocketSubscription = () => {
         subscribe(`/topic/auctions/${auctionId}`, (message) => {
@@ -296,6 +384,32 @@
             setTimeout(() => { isBidSuccess.value = false; }, 500);
         });
     };
+
+    //watch 로 로그인 여부 감지
+    // userStore의 'authToken' 상태를 감시(watch).
+    // 로그인/로그아웃으로 인해 이 값이 변경될 때마다, 이 로직이 자동으로 실행.
+    watch(
+    () => userStore.authToken,
+    (newToken) => {
+        // [디버깅 로그] 토큰 변경 감지 시 로그를 출력하여 흐름 파악. 필요시 매개변수 newToken 옆에 oldToken 추가한다음 주석 해제
+        //console.log(`Authentication token changed. Re-establishing WebSocket connection. Old token exists: ${!!oldToken}, New token exists: ${!!newToken}`);
+
+        // 1. 기존 연결이 있다면 우선 안전하게 연결 종료.
+        disconnect();
+
+        // 2. 새로운 토큰 상태로 재연결.
+        //    - 로그인 성공 시: newToken에 JWT가 담겨 '인증된' 연결.
+        //    - 로그아웃 시: newToken은 null이 되어 '익명' 연결.
+        connect(newToken);
+    },
+    {
+        // immediate: true 옵션은 watch를 설정하는 즉시,
+        // (컴포넌트가 로드될 때) 현재 값으로 한번 실행
+        // 이를 통해 사용자가 페이지를 새로고침했을 때, localStorage에 남아있는
+        // 토큰으로 초기 WebSocket 연결을 맺을 수 있습니다.
+        immediate: true
+    }
+    );
 
     /**
      * 현재 경매의 지난 입찰 기록을 API로 조회
@@ -318,12 +432,12 @@
             alert("로그인이 필요한 기능입니다.");
             return;
         }
-        
+
         const bidData = {
-            memberId: userStore.currentUser.memberId, 
+            memberId: userStore.currentUser.memberId,
             bidAmount: parseInt(bidAmount.value, 10),
         };
-        
+
         // 중앙 websocketService의 발행 함수를 사용.
         publish({
             destination: `/app/auctions/${auctionId}/bids`,
@@ -346,6 +460,12 @@
         console.log("즉시 구매 시도");
     };
 
+    /**
+     * 낙찰 후 결제하기 버튼 클릭 시 동작
+     */
+    const goToPayment = () => {
+        alert('Todo : 결제 페이지 이동');
+    };
 
     const validateAndConfirmBid = () => {
         const newBid = parseInt(bidAmount.value, 10);
@@ -357,7 +477,7 @@
             alert("입찰 금액을 100원 단위의 올바른 숫자로 입력해주세요.");
             return;
         }
-        
+
         // 2. 입찰가 비교
         // 입찰 기록이 없을 때 (첫 입찰)
         if (numericCurrentPrice === numericStartPrice) {
@@ -378,8 +498,7 @@
         if (isConfirmed) {
             sendBid();
         }
-    };
-
+ 	  };
 
     //썸네일 이미지 호버 효과
     const changeMainImage = (newSrc) => {
@@ -399,7 +518,7 @@
     // 경매 마감까지 남은 시간 계산 및 표시
     const startCountdown = () => {
         if (!endTimeMs.value) return;
-        
+
         countdownInterval = setInterval(() => {
             const now = new Date().getTime();
             const distance = endTimeMs.value - now;
@@ -407,6 +526,7 @@
             if (distance < 0) {
                 clearInterval(countdownInterval);
                 timeRemaining.value = isAuction.value ? "경매 종료" : "판매 종료";
+                isAuctionEnded.value = true; // 실시간으로 경매 종료 상태 업데이트
                 return;
             }
 
@@ -422,28 +542,27 @@
         }, 1000);
     };
 
-
     //모달 ui 영역
     const openBidModal = () => {
-        isBidModalVisible.value = true;
-    };
+ 	    isBidModalVisible.value = true;
+ 	  };
 
-    const closeBidModal = () => {
-        isBidModalVisible.value = false;
-        isBidHistoryVisible.value = false; // 모달 닫을 때 기록도 닫기
-    };
+ 	  const closeBidModal = () => {
+ 	    isBidModalVisible.value = false;
+ 	 	 isBidHistoryVisible.value = false; // 모달 닫을 때 기록도 닫기
+ 	  };
 
-    const toggleBidHistory = () => {
-        isBidHistoryVisible.value = !isBidHistoryVisible.value;
-    };
+ 	 	const toggleBidHistory = () => {
+ 	 	 	isBidHistoryVisible.value = !isBidHistoryVisible.value;
+ 	  };
 
     const quickBid = (amountToAdd) => {
-        bidAmount.value = currentBidPrice.value + amountToAdd;
-    };
+ 		 	bidAmount.value = currentBidPrice.value + amountToAdd;
+ 	  };
 
-    /* =============================================
-    * 5. 라이프사이클 훅 (Lifecycle Hooks)
-    * ============================================= */
+/* =============================================
+* 5. 라이프사이클 훅 (Lifecycle Hooks)
+* ============================================= */
     onMounted(() => {
         fetchAuctionData();
         console.log("페이지 마운트 됨");
@@ -452,16 +571,18 @@
     // 컴포넌트가 언마운트되면 WebSocket 및 카운트다운 타이머 연결 해제
     onUnmounted(() => {
         // 컴포넌트를 떠날 때, 해당 페이지의 구독만 안전하게 취소합니다.
-        if (isAuction.value) { //isAuction.value를 확인하여 경매 상품일 때만 구독 취소
+        // 경매가 진행 중인 상태에서만 구독을 취소합니다.
+        if (isAuction.value && !isAuctionEnded.value) {
             unsubscribe(`/topic/auctions/${auctionId}`);
         }
         // 메모리 누수를 방지하기 위해 인터벌 정리
         if (countdownInterval) {
             clearInterval(countdownInterval);
         }
+
+        disconnect(); // 컴포넌트 언마운트 시 WebSocket 연결 종료
     });
 </script>
-
 <style lang="scss" scoped>
 
     /* =============================================

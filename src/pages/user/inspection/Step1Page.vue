@@ -58,9 +58,8 @@ const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.va
 // 상품명 미리보기 텍스트
 const previewText = computed(() => {
   const ak = selectedArtist.value?.nameKo || '[아티스트]'
-  const at = selectedAlbum.value?.title || '[앨범]'
   const nm = itemName.value || '[상품명]'
-  return `${ak} ${at} ${nm}`
+  return `${ak} ${nm}`
 })
 
 // 체크리스트 필드 파싱
@@ -218,7 +217,6 @@ const onFetchMarketAvg = async () => {
 
   try {
     const res = await getMarketAvgPrice(selectedCategory.value, selectedArtist.value.artistId, selectedAlbum.value?.albumId)
-    console.log(res)
 
     marketAvgPrice.value = res.marketAvgPrice
     marketAvgCount.value = res.count
@@ -271,10 +269,6 @@ const validateAll = () => {
     return false
   }
   if (!isMarketAvgCalculated.value) {
-    alert('평균 시세를 조회해주세요.')
-    return false
-  }
-  if (marketAvgPrice.value === null) {
     alert('평균 시세를 조회해주세요.')
     return false
   }
@@ -529,7 +523,6 @@ watch(
                 <label class="font-weight-medium"> 판매 희망가 <span class="text-danger">*</span> </label>
                 <input type="number" class="form-control" v-model="sellerHopePrice" />
                 <small class="form-text text-muted"> 희망가와 예상가가 다를 수 있으며, 최종 가격은 검수 후 확정됩니다. </small>
-                <small class="form-text text-info font-weight-bold mt-2"> ※ 참고: 희망가가 시스템 예상가의 150%를 초과할 경우, 상품은 48시간 동안 경매 방식으로 우선 판매됩니다. </small>
               </div>
             </div>
           </div>

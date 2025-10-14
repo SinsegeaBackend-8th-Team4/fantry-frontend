@@ -34,7 +34,6 @@ const OnlineInspectionListPage = () => import('@/pages/admin/inspection/OnlineIn
 const OnlineInspectionDetailPage = () => import('@/pages/admin/inspection/OnlineInspectionDetailPage.vue')
 const OfflineInspectionListPage = () => import('@/pages/admin/inspection/OfflineInspectionListPage.vue')
 const OfflineInspectionDetailPage = () => import('@/pages/admin/inspection/OfflineInspectionDetailPage.vue')
-const InspectionHistoryPage = () => import('@/pages/admin/inspection/InspectionHistoryPage.vue')
 
 // 재고 관리
 const InventoryDashboardPage = () => import('@/pages/admin/inventory/InventoryDashboardPage.vue')
@@ -134,7 +133,6 @@ const adminRoutes = {
             { path: 'online/:id', name: 'AdminOnlineInspectionDetail', component: OnlineInspectionDetailPage, meta: { title: '온라인 1차 상세', hidden: true } },
             { path: 'offline', name: 'AdminOfflineInspectionList', component: OfflineInspectionListPage, meta: { title: '오프라인 2차 검수' } },
             { path: 'offline/:id', name: 'AdminOfflineInspectionDetail', component: OfflineInspectionDetailPage, meta: { title: '오프라인 2차 상세', hidden: true } },
-            { path: 'history', name: 'AdminInspectionHistory', component: InspectionHistoryPage, meta: { title: '검수 이력' } },
           ],
         },
         // --- 재고 관리 ---
@@ -158,11 +156,11 @@ const adminRoutes = {
             { path: 'create', name: 'AdminMemberCreate', component: MemberCreatePage, meta: { title: '회원등록' } },
             { path: 'reportList', name: 'AdminReportList', component: ReportListPage, meta: { title: '신고관리' } },
             { path: 'reportReceiveList', name: 'AdminReportReceiveList', component: ReportReceiveListPage, meta: { title: '접수된 신고' } },
-            { path: 'detail/:memberId', name: 'AdminMemberDetail', component: MemberDetailPage, props: true, meta: { menu: false } },
-            { path: 'edit/:memberId', name: 'AdminMemberEdit', component: MemberEditPage, props: true, meta: { menu: false } },
-            { path: 'reportDetail/:reportId', name: 'AdminReportDetail', component: ReportDetailPage, props: true, meta: { menu: false } },
-            { path: 'reportCreate', name: 'AdminReportCreate', component: ReportCreatePage, meta: { menu: false } },
-            { path: 'reportReceiveEdit/:reportId', name: 'AdminReportReceiveEdit', component: ReportReceiveEditPage, props: true, meta: { menu: false } },
+            { path: 'detail/:memberId', name: 'AdminMemberDetail', component: MemberDetailPage, props: true, meta: { menu: false, hidden: true } },
+            { path: 'edit/:memberId', name: 'AdminMemberEdit', component: MemberEditPage, props: true, meta: { menu: false, hidden: true } },
+            { path: 'reportDetail/:reportId', name: 'AdminReportDetail', component: ReportDetailPage, props: true, meta: { menu: false, hidden: true } },
+            { path: 'reportCreate', name: 'AdminReportCreate', component: ReportCreatePage, meta: { menu: false, hidden: true } },
+            { path: 'reportReceiveEdit/:reportId', name: 'AdminReportReceiveEdit', component: ReportReceiveEditPage, props: true, meta: { menu: false, hidden: true } },
           ],
         },
         // --- 경매 관리 ---
@@ -173,6 +171,42 @@ const adminRoutes = {
           children: [
             { path: 'dashboard', name: 'AdminAuctionDashboard', component: AuctionDashboardPage },
             { path: 'list', name: 'AdminAuctionList', component: AuctionListPage },
+          ],
+        },
+        // --- 주문 관리 (추가) ---
+        {
+          path: 'order',
+          redirect: { name: 'AdminOrderList' },
+          meta: { title: '주문관리', icon: 'fas fa-fw fa-receipt', menu: true },
+          children: [
+            { 
+              path: 'list', 
+              name: 'AdminOrderList', 
+              component: () => import('@/pages/admin/order/OrderListPage.vue'), 
+              meta: { title: '주문 목록' } 
+            },
+            { 
+              path: 'detail/:orderId', 
+              name: 'AdminOrderDetail', 
+              component: () => import('@/pages/admin/order/OrderDetailPage.vue'), 
+              props: true, 
+              meta: { menu: false, hidden: true, title: '주문 상세' } 
+            },
+          ],
+        },
+
+        // --- 입찰 관리 (추가) ---
+        {
+          path: 'bid',
+          redirect: { name: 'AdminBidList' },
+          meta: { title: '입찰관리', icon: 'fas fa-fw fa-hand-paper', menu: true },
+          children: [
+            {
+              path: 'list',
+              name: 'AdminBidList',
+              component: () => import('@/pages/admin/bid/BidListPage.vue'),
+              meta: { title: '입찰 목록' }
+            },
           ],
         },
       ],

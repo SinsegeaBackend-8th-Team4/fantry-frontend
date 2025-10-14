@@ -262,7 +262,7 @@
             console.log(error);
             alert(error.code + ": "+ error.message);
             console.log("관리자 회원가입 실패: ", error.response.data || error.message);
-            router.push('/admin/signup/fail');
+            router.push('/admin/login');
         }
     };
 

@@ -11,7 +11,7 @@ const adminStore = useAdminInspectionStore()
 const loading = ref(false) // 로딩 상태
 const keyword = ref('')
 const tableKey = ref(0) // 필터 변경 시 테이블을 강제로 리로드하기 위한 키
-const currentFilter = ref(['ONLINE_APPROVED', 'OFFLINE_INSPECTING', 'OFFLINE_REJECTED', 'COMPLETED']) // 기본값: 전체
+const currentFilter = ref(['OFFLINE_INSPECTING']) // 기본값: 진행 중
 
 // 필터 목록
 const filters = [
