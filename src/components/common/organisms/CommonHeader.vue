@@ -3,6 +3,16 @@ import IconCountChip from '../atoms/IconCountChip.vue'
 import SearchBar from '../molecules/SearchBar.vue'
 import NavigationBar from '../molecules/NavigationBar.vue'
 import BrandLogo from '../atoms/BrandLogo.vue'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/userStore'
+
+const router = useRouter()
+const userStore = useUserStore()
+
+// 판매하기 페이지 이동
+const goToInspection = () => {
+  router.push('/inspection/step1')
+}
 </script>
 <template>
   <div class="container-fluid">
@@ -26,10 +36,16 @@ import BrandLogo from '../atoms/BrandLogo.vue'
         <slot name="saerchBar"></slot>
       </div>
       <div class="col-lg-3 col-6 text-right">
-        <IconCountChip count="30">
+        <template v-if="userStore.isLoggedIn">
+          <a href="#" class="btn border" @click.prevent="goToInspection" style="margin-right: 0.5rem;">
+            <i class="fas fa-tags text-primary"></i>
+            <span class="badge">판매하기</span>
+          </a>
+        </template>
+        <IconCountChip count="30" style="margin-right: 0.5rem;">
           <i class="fas fa-heart text-primary"></i>
         </IconCountChip>
-        <IconCountChip count="10">
+        <IconCountChip count="10" style="margin-right: 0.5rem;">
           <i class="fas fa-shopping-cart text-primary"></i>
         </IconCountChip>
       </div>
