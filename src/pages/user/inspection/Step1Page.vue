@@ -523,7 +523,6 @@ watch(
                 <label class="font-weight-medium"> 판매 희망가 <span class="text-danger">*</span> </label>
                 <input type="number" class="form-control" v-model="sellerHopePrice" />
                 <small class="form-text text-muted"> 희망가와 예상가가 다를 수 있으며, 최종 가격은 검수 후 확정됩니다. </small>
-                <small class="form-text text-info font-weight-bold mt-2"> ※ 참고: 희망가가 시스템 예상가의 150%를 초과할 경우, 상품은 48시간 동안 경매 방식으로 우선 판매됩니다. </small>
               </div>
             </div>
           </div>
