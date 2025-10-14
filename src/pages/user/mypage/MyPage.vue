@@ -10,11 +10,9 @@ import WithdrawalPage from './member/WithdrawalPage.vue'
 import MyProducts from './selling/MyProducts.vue'
 import Inspection from './selling/Inspection.vue'
 import SalesHistory from './selling/SalesHistory.vue'
-import SellerRequest from './selling/SellerRequest.vue'
 //구매 관리
 import AuctionHistory from './buying/AuctionHistory.vue'
 import PurchaseHistory from './buying/PurchaseHistory.vue'
-import DeliveryHistory from './buying/DeliveryHistory.vue'
 //고객 센터
 import MypageInquiry from './support/MypageInquiry.vue'
 
@@ -33,11 +31,9 @@ const componentMap = {
   'my-products': MyProducts,
   'inspection': Inspection,
   'sales-history': SalesHistory,
-  'seller-request': SellerRequest,
   //구매 관리===========================
   'auction-history': AuctionHistory,
   'purchase-history': PurchaseHistory,
-  'delivery': DeliveryHistory,
   //고객 센터===========================
   'inquiry': MypageInquiry,
 }
@@ -77,8 +73,7 @@ const menuItems = [
     icon: '🛒',
     subMenus: [
       { id: 'auction-history', title: '경매/입찰 내역' },
-      { id: 'purchase-history', title: '구매 완료 내역' },
-      { id: 'delivery', title: '배송 현황' }
+      { id: 'purchase-history', title: '구매 완료 내역' }
     ]
   },
   {

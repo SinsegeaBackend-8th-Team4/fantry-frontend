@@ -55,7 +55,7 @@ const startAddAddress = () => {
         alias: '',
         recipientName: '',
         recipientTel: '',
-        isDefault: addresses.value.length === 0? '1': '0',
+        isDefault: addresses.value.length === 0? 1: 0,
         memberId: currentMemberId.value,
     };
     isAddingOrEditing.value = true;
@@ -85,12 +85,42 @@ const handleAddOrUpdateAddress = async () => {
     }
 
     isLoading.value = true;
+    // payload.isDefault = payload.isDefault ? '1' : '0';
     try {
+        const apiPayload = {
+            ...payload,
+            isDefault: payload.isDefault === 1 || payload.isDefault === '1' ? '1' : '0',
+        }
+        // 신규 추가 모드일 때만 기본 배송지 처리
+        if(!editingAddressId.value && apiPayload.isDefault === '1') {
+            //현재 등록된 기본 배송지를 찾음
+            const existingDefault = addresses.value.find(addr => addr.isDefault == 1 || addr.isDefault === '1');
+
+            if(existingDefault) {
+                await editAddress(existingDefault.addressId, {
+                    ...existingDefault,
+                    isDefault: "0"
+                });
+            }
+            
+        }
+
+        if (editingAddressId.value && apiPayload.isDefault === '1') {
+            const existingDefault = addresses.value.find(addr => (addr.isDefault === 1 || addr.isDefault === '1') && addr.addressId !== editingAddressId.value);
+            
+            if (existingDefault) {
+                await editAddress(existingDefault.addressId, {
+                    ...existingDefault,
+                    isDefault: "0"
+                });
+            }
+        }
+
         if (editingAddressId.value) {
-            await editAddress(editingAddressId.value, payload);
+            await editAddress(editingAddressId.value, apiPayload);
             alert('✅ 배송지가 성공적으로 수정되었습니다.');
         } else {
-            await addAddress(payload);
+            await addAddress(apiPayload);
             alert('✅ 새로운 배송지가 등록되었습니다.');
         }
         isAddingOrEditing.value = false;
@@ -101,7 +131,7 @@ const handleAddOrUpdateAddress = async () => {
             alias: '',
             recipientName: '',
             recipientTel: '',
-            isDefault: false,
+            isDefault: '0',
             memberId: currentMemberId.value,
         };
         await fetchAddresses();
@@ -258,14 +288,6 @@ onMounted(fetchAddresses);
                 <div class="form-group">
                     <label for="detailAddress">상세 주소</label>
                     <input type="text" id="detailAddress" v-model="addressPayload.detailAddress" placeholder="아파트/동/호수 등">
-                </div>
-
-                <div class="form-group">
-                    <label class="checkbox-container">
-                        <input type="checkbox" v-model="addressPayload.isDefault">
-                        <span class="checkmark"></span>
-                        이 주소를 기본 배송지로 설정
-                    </label>
                 </div>
 
                 <div class="form-actions">
