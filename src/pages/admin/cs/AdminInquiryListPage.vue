@@ -1,0 +1,226 @@
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
+import { searchInquiries } from '@/api/adminInquiry.js';
+
+const router = useRouter();
+const route = useRoute(); // useRoute 초기화
+const table = ref(null); // ServerDataTable 참조
+
+// --- 필터링 & 검색 관련 상태 ---
+const tableKey = ref(0); // 필터 변경 시 테이블 리로드용 키
+const keyword = ref(''); // 검색어
+const currentStatusFilter = ref(null); // 현재 선택된 상태 필터
+const currentTypeFilter = ref(null); // 현재 선택된 유형 필터
+
+// 상태 필터 버튼 목록 정의
+const statusFilters = [
+  { label: '전체', value: null },
+  { label: '답변 대기', value: 'PENDING' },
+  { label: '처리 중', value: 'IN_PROGRESS' },
+  { label: '답변 완료', value: 'ANSWERED' },
+];
+
+// 유형 필터 버튼 목록 정의
+const typeFilters = [
+  { label: '전체', value: null },
+  { label: '배송문의', value: 1 },
+  { label: '결제문의', value: 2 },
+  { label: '기타문의', value: 3 },
+  { label: '상품문의', value: 4 },
+  { label: '환불/반품 문의', value: 5 },
+  { label: '판매 문의', value: 6 },
+];
+
+// --- API --- 
+async function fetcher({ page, size, sort, keyword }) {
+  const unwrappedResponse = await searchInquiries({
+    page: page,
+    size: size,
+    sort: sort,
+    status: currentStatusFilter.value,
+    csTypeId: currentTypeFilter.value,
+    memberName: keyword || null,
+  });
+  return {
+    rows: unwrappedResponse.content,
+    total: unwrappedResponse.totalElements,
+  };
+}
+
+// --- 테이블 컬럼, 이벤트 핸들러 ---
+
+const columns = [
+  { data: 'inquiryId', title: '#', className: 'text-center' },
+  {
+    data: 'csType',
+    title: '문의 유형',
+    className: 'text-center',
+    render: (data) => {
+      let badgeClass = 'bg-secondary'; // 기본값: 기타문의
+      switch (data) {
+        case '배송문의':
+          badgeClass = 'bg-primary';
+          break;
+        case '결제문의':
+          badgeClass = 'bg-success';
+          break;
+        case '상품문의':
+          badgeClass = 'bg-info';
+          break;
+        case '환불/반품 문의':
+          badgeClass = 'bg-danger';
+          break;
+        case '판매 문의':
+          badgeClass = 'bg-dark';
+          break;
+      }
+      return `<span class="badge ${badgeClass}">${data}</span>`;
+    },
+  },
+  { 
+    data: 'title', 
+    title: '제목', 
+    className: 'text-left',
+    render: (data, type, row) => {
+      // 행 전체에 클릭 이벤트가 이미 걸려 있으므로, 여기서는 스타일만 링크처럼 보이게 처리
+      return `<a href="javascript:void(0)" class="text-primary">${data}</a>`;
+    }
+  }, // 제목만 왼쪽 정렬
+  { data: 'inquiredByName', title: '작성자', className: 'text-center' },
+  {
+    data: 'status',
+    title: '상태',
+    className: 'text-center',
+    render: (data) => {
+      let badgeClass = 'bg-light text-dark'; // 기본값
+      let koreanText = data; // 기본값
+
+      switch (data) {
+        case 'PENDING':
+          badgeClass = 'bg-warning';
+          koreanText = '답변 대기';
+          break;
+        case 'IN_PROGRESS':
+          badgeClass = 'bg-info';
+          koreanText = '처리 중';
+          break;
+        case 'ANSWERED':
+          badgeClass = 'bg-success';
+          koreanText = '답변 완료';
+          break;
+        case 'REJECTED':
+          badgeClass = 'bg-danger';
+          koreanText = '거절';
+          break;
+        case 'ON_HOLD':
+          badgeClass = 'bg-secondary';
+          koreanText = '보류';
+          break;
+      }
+      return `<span class="badge ${badgeClass}">${koreanText}</span>`;
+    },
+  },
+  { // 등록일 컬럼 수정
+    data: 'inquiredAt',
+    title: '등록일',
+    className: 'text-center',
+    render: (val) => {
+      if (!val || !Array.isArray(val)) return '-';
+      const dt = new Date(val[0], val[1] - 1, val[2], val[3], val[4], val[5] || 0);
+      
+      const year = dt.getFullYear();
+      const month = String(dt.getMonth() + 1).padStart(2, '0');
+      const day = String(dt.getDate()).padStart(2, '0');
+      const hours = String(dt.getHours()).padStart(2, '0');
+      const minutes = String(dt.getMinutes()).padStart(2, '0');
+      const seconds = String(dt.getSeconds()).padStart(2, '0');
+
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+  },
+];
+
+// 상세 페이지로 이동
+function goToDetail(inquiryId) {
+  router.push(`/admin/cs/inquiry/${inquiryId}`);
+}
+
+onMounted(() => {
+  // URL 쿼리 파라미터에서 상태 값 읽어오기
+  if (route.query.status) {
+    const initialStatus = route.query.status.toString();
+    const isValidStatus = statusFilters.some(f => f.value === initialStatus);
+    if (isValidStatus) {
+      currentStatusFilter.value = initialStatus;
+      // tableKey를 변경하여 ServerDataTable이 데이터를 다시 불러오도록 트리거
+      tableKey.value++;
+    }
+  }
+});
+</script>
+
+<template>
+  <main class="container-fluid p-4">
+    <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+      <!-- 헤더 -->
+      <div class="card-header bg-white border-bottom-0 pt-4 px-4 pb-2">
+        <h4 class="fw-semibold text-dark mb-1">1:1 문의 목록</h4>
+        <p class="text-muted small">사용자들이 등록한 1:1 문의를 확인하고 답변을 관리합니다.</p>
+      </div>
+
+      <!-- 필터 버튼 -->
+      <div class="card-body p-4">
+        <div class="d-flex flex-column gap-3 mb-4">
+          <!-- 상태 필터 -->
+          <div class="input-group input-group-sm">
+            <span class="input-group-text fw-bold">상태</span>
+            <div class="btn-group" role="group">
+              <button
+                v-for="filter in statusFilters"
+                :key="filter.label"
+                type="button"
+                class="btn btn-outline-secondary"
+                :class="{ active: currentStatusFilter === filter.value }"
+                @click="currentStatusFilter = filter.value; tableKey++; console.log('Status Filter Changed:', currentStatusFilter.value, 'Table Key:', tableKey.value)"
+              >
+                {{ filter.label }}
+              </button>
+            </div>
+          </div>
+          <!-- 유형 필터 -->
+          <div class="input-group input-group-sm">
+            <span class="input-group-text fw-bold">유형</span>
+            <div class="btn-group" role="group">
+              <button
+                v-for="filter in typeFilters"
+                :key="filter.label"
+                type="button"
+                class="btn btn-outline-secondary"
+                :class="{ active: currentTypeFilter === filter.value }"
+                @click="currentTypeFilter = filter.value; tableKey++; console.log('Type Filter Changed:', currentTypeFilter.value, 'Table Key:', tableKey.value)"
+              >
+                {{ filter.label }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 테이블 -->
+        <ServerDataTable
+          ref="table"
+          :key="tableKey"
+          v-model:keyword="keyword"
+          :columns="columns"
+          :fetcher="fetcher"
+          @row-click="row => goToDetail(row.inquiryId)"
+        >
+          <template #empty>현재 조건에 해당하는 문의 내역이 없습니다.</template>
+        </ServerDataTable>
+      </div>
+    </div>
+  </main>
+</template>
+
+

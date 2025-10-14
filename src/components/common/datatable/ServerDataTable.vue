@@ -86,6 +86,9 @@ function sortIndicator(col) {
           style="width:200px"
           :value="keyword"
           placeholder="검색어"
+          id="datatable-search-input"
+          name="datatable-search-input"
+          aria-label="테이블 검색"
           @input="$emit('update:keyword', $event.target.value)" />
       </div>
     </div>
