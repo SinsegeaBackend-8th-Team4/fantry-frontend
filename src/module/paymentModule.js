@@ -6,6 +6,7 @@ import {
   requestPaymentCancelVerify,
   requestPaymentCancel,
   requestPaymentReturnVerify,
+  requestPaymentVoid,
 } from '@/api/payment'
 
 const PAYMENT_APP_ID = import.meta.env.VITE_BOOTPAY_APPLICATION_ID
@@ -103,14 +104,18 @@ const requestPayment = async (member, item, price, onSuccess, onError) => {
       item,
       price,
     )
-
-    const responseSendReceipt = await requestPaymentApprove(resultReceipt.order_id, {
-      receiptData: JSON.stringify(resultReceipt),
-    })
-    if (!responseSendReceipt.data.success) {
-      throw {
-        errorMessage: responseSendReceipt.data.errorMessage || '영수증 전송에 실패했습니다.',
+    try {
+      const responseSendReceipt = await requestPaymentApprove(resultReceipt.order_id, {
+        receiptData: JSON.stringify(resultReceipt),
+      })
+      if (!responseSendReceipt.data.success) {
+        throw {
+          errorMessage: responseSendReceipt.data.errorMessage || '영수증 전송에 실패했습니다.',
+        }
       }
+    } catch (error) {
+      await requestPaymentVoid(resultReceipt.receipt_id)
+      throw error
     }
     await confirmPayment(async () => {
       return await requestPaymentApproveVerify(resultReceipt.order_id, {

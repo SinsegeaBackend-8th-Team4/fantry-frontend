@@ -12,6 +12,10 @@ export const requestPaymentCancel = (orderId, payload) => {
   return apiClient.post('/payments/' + orderId + '/cancel', payload)
 }
 
+export const requestPaymentVoid = (receiptId) => {
+  return apiClient.post('/payments/' + receiptId + '/void')
+}
+
 export const requestPaymentApproveVerify = (orderId, payload) => {
   return requestPaymentVerify(orderId, payload)
 }
