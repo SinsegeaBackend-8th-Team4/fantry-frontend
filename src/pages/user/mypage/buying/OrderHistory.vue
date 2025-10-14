@@ -2,7 +2,7 @@
 <template>
   <div class="content-page">
     <h1 class="page-title">
-    <i class="fa-solid fa-wallet"></i> 구매 완료 내역</h1>
+    <i class="fa-solid fa-wallet"></i> 주문 내역</h1>
     <p class="page-description">내가 구매한 상품의 내역을 확인할 수 있습니다.</p>
   </div>
 </template>
