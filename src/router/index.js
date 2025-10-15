@@ -10,7 +10,7 @@ import adminRoutes from './adminRoutes';
  * - 전역 네비게이션 가드를 설정하여 인증 및 권한을 검사합니다.
  * - 페이지 전환 시 스크롤 동작을 제어합니다.
  */
-const routes = [userRoutes, adminRoutes];
+const routes = [userRoutes, ...adminRoutes];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,11 +27,14 @@ router.beforeEach((to, from, next) => {
   uiStore.startLoading();
 
   // --- 개발 편의성을 위해 로그인 및 권한 검사 임시 비활성화 ---
+  
   /*
   // 2. 인증이 필요한 페이지에 비로그인 상태로 접근하는 경우를 처리합니다.
   if (to.meta.requiresAuth && !userStore.isLoggedIn) {
     alert('로그인이 필요한 서비스입니다.');
-    return next('/login'); // 로그인 페이지로 리디렉션합니다.
+    // return next('/login'); // 로그인 페이지로 리디렉션합니다.
+    const loginPath = to.path.startsWith('/admin') ? '/admin/login' : '/login';
+    return next(loginPath);
   }
 
   // 3. 관리자 페이지에 일반 사용자가 접근하는 경우를 처리합니다.
