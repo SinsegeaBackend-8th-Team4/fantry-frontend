@@ -44,21 +44,21 @@ export const getInquiryById = (inquiryId) => {
 };
 
 /**
- * 특정 1:1 문의에 답변을 등록하거나 수정합니다.
+ * 특정 1:1 문의에 답변을 등록하거나 수정하고 처리 상태를 변경합니다.
  * @param {number} inquiryId - 답변할 문의의 ID
- * @param {object} answerData - { answer }
+ * @param {object} answerRequest - { answerContent: string, reqStatus: string, comment?: string }
  * @returns {Promise<InquiryDetailAdminResponse>}
  */
-export const answerInquiry = (inquiryId, answerData) => {
-  return apiClient.patch(`/admin/cs/inquiry/${inquiryId}/answer`, answerData);
+export const answerInquiry = (inquiryId, answerRequest) => {
+  return apiClient.patch(`/admin/cs/inquiry/${inquiryId}/answer`, answerRequest);
 };
 
 /**
- * 특정 1:1 문의의 상태를 변경합니다.
- * @param {number} inquiryId - 상태를 변경할 문의의 ID
- * @param {object} statusData - { status }
- * @returns {Promise<InquiryDetailAdminResponse>}
+ * 1:1 문의 상태별 통계를 조회합니다. (어드민 대시보드용)
+ * @returns {Promise<InquiryStatsAdminResponse>}
  */
-export const updateInquiryStatus = (inquiryId, statusData) => {
-  return apiClient.patch(`/admin/cs/inquiry/${inquiryId}/status`, statusData);
+export const getInquiryStats = () => {
+  return unwrap(apiClient.get('/admin/cs/inquiry/stats'));
 };
+
+

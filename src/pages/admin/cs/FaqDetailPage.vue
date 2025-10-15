@@ -43,23 +43,34 @@ function goToList() {
 }
 
 function goToEdit() {
+  console.log('Navigating to AdminFaqEdit with faqId:', faqId);
   router.push({ name: 'AdminFaqEdit', params: { faqId } });
 }
 
-function formatDate(dateString) {
-  if (!dateString) return 'N/A';
-  try {
-    const dt = new Date(dateString);
-    const year = dt.getFullYear();
-    const month = String(dt.getMonth() + 1).padStart(2, '0');
-    const day = String(dt.getDate()).padStart(2, '0');
-    const hours = String(dt.getHours()).padStart(2, '0');
-    const minutes = String(dt.getMinutes()).padStart(2, '0');
-    const seconds = String(dt.getSeconds()).padStart(2, '0');
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  } catch (e) {
-    return dateString; // 파싱 실패 시 원본 값 반환
+function formatDate(dateValue) {
+  if (!dateValue) return 'N/A';
+
+  let dt;
+  if (Array.isArray(dateValue)) {
+    // Assuming format [year, month, day, hour, minute, second]
+    // Month is 0-indexed in Date constructor
+    dt = new Date(dateValue[0], dateValue[1] - 1, dateValue[2], dateValue[3], dateValue[4], dateValue[5] || 0);
+  } else {
+    // Assuming it's a date string
+    dt = new Date(dateValue);
   }
+
+  if (isNaN(dt.getTime())) {
+    return 'Invalid Date'; // Handle invalid date values
+  }
+
+  const year = dt.getFullYear();
+  const month = String(dt.getMonth() + 1).padStart(2, '0');
+  const day = String(dt.getDate()).padStart(2, '0');
+  const hours = String(dt.getHours()).padStart(2, '0');
+  const minutes = String(dt.getMinutes()).padStart(2, '0');
+  const seconds = String(dt.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
 onMounted(fetchFaq);
@@ -82,10 +93,10 @@ onMounted(fetchFaq);
           <div class="col-md-6">
             <p><strong>#ID:</strong> {{ faq.faqId }}</p>
             <p><strong>제목:</strong> {{ faq.title }}</p>
-            <p><strong>작성자:</strong> {{ faq.authorName || 'N/A' }}</p>
+            <p><strong>작성자:</strong> {{ faq.createdBy || 'N/A' }}</p>
           </div>
           <div class="col-md-6">
-            <p><strong>문의 유형:</strong> {{ faq.csType ? faq.csType.name : 'N/A' }}</p>
+            <p><strong>문의 유형:</strong> {{ faq.csType || 'N/A' }}</p>
             <p><strong>상태:</strong> 
               <span class="badge" :class="faq.status === 'ACTIVE' ? 'bg-success' : 'bg-danger'">
                 {{ faq.status === 'ACTIVE' ? '활성' : '비활성' }}

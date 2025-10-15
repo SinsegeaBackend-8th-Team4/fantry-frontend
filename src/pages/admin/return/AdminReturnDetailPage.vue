@@ -7,7 +7,7 @@ import { formatDate } from '@/utils/tableFormatters';
 const route = useRoute();
 const router = useRouter();
 
-const returnRequestId = ref(route.params.returnRequestId);
+const returnRequestId = ref(route.params.id);
 const returnRequest = ref(null);
 const loading = ref(false);
 const error = ref(null);
@@ -71,7 +71,7 @@ const statusInfo = computed(() => {
 
 
 function goBack() {
-  router.push('/admin/return/list');
+  router.push('/admin/return');
 }
 
 onMounted(fetchReturnDetail);

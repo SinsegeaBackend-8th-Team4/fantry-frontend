@@ -9,7 +9,7 @@ const router = useRouter();
 const newNotice = ref({
   title: '',
   content: '',
-  status: 'ACTIVE', // 기본값
+  status: 'DRAFT', // 기본값을 'DRAFT'로 변경
   csTypeId: 3, // 기본값 '기타문의'
 });
 
@@ -22,11 +22,19 @@ const typeOptions = [
   { id: 6, name: '판매 문의' },
 ];
 
+// 상태 옵션 추가
+const statusOptions = ref([
+  { value: 'ACTIVE', text: '활성' },
+  { value: 'INACTIVE', text: '비활성' },
+  { value: 'PINNED', text: '고정' },
+  { value: 'DRAFT', text: '초안' },
+]);
+
 const error = ref(null);
 
 async function handleSubmit() {
-  if (!newNotice.value.title || !newNotice.value.content) {
-    alert('제목과 내용을 모두 입력해주세요.');
+  if (!newNotice.value.title || !newNotice.value.content || !newNotice.value.status) {
+    alert('제목, 내용, 상태를 모두 입력해주세요.');
     return;
   }
 
@@ -59,16 +67,24 @@ function goToList() {
             <input type="text" id="notice-title" class="form-control" v-model="newNotice.title" required>
           </div>
 
-          <div class="mb-3">
-            <label for="notice-type" class="form-label">유형</label>
-            <select id="notice-type" class="form-select" v-model="newNotice.csTypeId" required>
-              <option v-for="type in typeOptions" :key="type.id" :value="type.id">{{ type.name }}</option>
-            </select>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="notice-type" class="form-label">유형</label>
+              <select id="notice-type" class="form-select" v-model="newNotice.csTypeId" required>
+                <option v-for="type in typeOptions" :key="type.id" :value="type.id">{{ type.name }}</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="notice-status" class="form-label">상태</label>
+              <select id="notice-status" class="form-select" v-model="newNotice.status" required>
+                <option v-for="option in statusOptions" :key="option.value" :value="option.value">{{ option.text }}</option>
+              </select>
+            </div>
           </div>
 
           <div class="mb-3">
             <label class="form-label">내용</label>
-            <CommonEditor v-model:content="newNotice.content" />
+            <CommonEditor v-model="newNotice.content" />
           </div>
 
           <div class="d-flex justify-content-between">

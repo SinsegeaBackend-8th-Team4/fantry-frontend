@@ -20,9 +20,10 @@ const SettlementListPage = () => import('@/pages/admin/settlement/SettlementList
 const SettlementListSamplePage = () => import('@/pages/admin/settlement/SettlementListSamplePage.vue')
 
 // 반품 관리
-const ReturnDashboardPage = () => import('@/pages/admin/return/ReturnDashboardPage.vue')
-const ReturnListPage = () => import('@/pages/admin/return/ReturnListPage.vue')
-const ReturnDetailPage = () => import('@/pages/admin/return/ReturnDetailPage.vue')
+const AdminReturnListPage = () => import('@/pages/admin/return/AdminReturnListPage.vue');
+const AdminReturnDetailPage = () => import('@/pages/admin/return/AdminReturnDetailPage.vue');
+
+
 
 // CS 관리
 const InquiryDashboardPage = () => import('@/pages/admin/cs/InquiryDashboardPage.vue')
@@ -40,6 +41,9 @@ const NoticeDetailPage = () => import('@/pages/admin/cs/NoticeDetailPage.vue')
 const NoticeCreatePage = () => import('@/pages/admin/cs/NoticeCreatePage.vue')
 const NoticeEditPage = () => import('@/pages/admin/cs/NoticeEditPage.vue')
 const NoticeDashboardPage = () => import('@/pages/admin/cs/NoticeDashboardPage.vue')
+const CsWritePage = () => import('@/pages/admin/cs/CsWritePage.vue')
+
+
 
 const FaqDashboardPage = () => import('@/pages/admin/cs/FaqDashboardPage.vue')
 
@@ -118,17 +122,7 @@ const adminRoutes = [
             { path: 'sample', name: 'AdminSettlementListSample', component: SettlementListSamplePage, meta: { title: '샘플 목록' } },
           ],
         },
-        // --- 반품 관리 ---
-        {
-          path: 'return',
-          redirect: { name: 'AdminReturnDashboard' },
-          meta: { title: '반품관리', icon: 'fas fa-fw fa-undo', menu: true },
-          children: [
-            { path: 'dashboard', name: 'AdminReturnDashboard', component: ReturnDashboardPage, meta: { title: '반품 현황' } },
-            { path: 'list', name: 'AdminReturnList', component: ReturnListPage, meta: { title: '반품 목록' } },
-            { path: 'detail/:returnRequestId', name: 'AdminReturnDetail', component: ReturnDetailPage, props: true, meta: { title: '반품 상세', hidden: true } },
-          ],
-        },
+
         // --- 문의 관리 ---
         {
           path: 'inquiry',
@@ -149,7 +143,7 @@ const adminRoutes = [
             { path: 'dashboard', name: 'AdminFaqDashboard', component: FaqDashboardPage, meta: { title: 'FAQ 현황' } },
             { path: 'list', name: 'AdminFaqList', component: FaqListPage, meta: { title: 'FAQ 목록' } },
             { path: 'detail/:faqId', name: 'AdminFaqDetail', component: FaqDetailPage, props: true, meta: { title: 'FAQ 상세', hidden: true } },
-            { path: 'create', name: 'AdminFaqCreate', component: FaqCreatePage, meta: { title: 'FAQ 작성', hidden: true } },
+            { path: 'create', name: 'AdminFaqCreate', component: FaqCreatePage, meta: { title: 'FAQ 등록', menu: true } },
             { path: 'edit/:faqId', name: 'AdminFaqEdit', component: FaqEditPage, props: true, meta: { title: 'FAQ 수정', hidden: true } },
           ],
         },
@@ -162,9 +156,10 @@ const adminRoutes = [
             { path: 'dashboard', name: 'AdminNoticeDashboard', component: NoticeDashboardPage, meta: { title: '공지사항 현황' } },
             { path: 'list', name: 'AdminNoticeList', component: NoticeListPage, meta: { title: '공지사항 목록' } },
             { path: 'detail/:noticeId', name: 'AdminNoticeDetail', component: NoticeDetailPage, props: true, meta: { title: '공지사항 상세', hidden: true } },
-            { path: 'create', name: 'AdminNoticeCreate', component: NoticeCreatePage, meta: { title: '공지사항 작성', hidden: true } },
+            { path: 'create', name: 'AdminNoticeCreate', component: NoticeCreatePage, meta: { title: '공지 등록', menu: true } },
             { path: 'edit/:noticeId', name: 'AdminNoticeEdit', component: NoticeEditPage, props: true, meta: { title: '공지사항 수정', hidden: true } },
-          ],
+            { path: 'write', name: 'AdminCsWrite', component: CsWritePage, props: true, meta: { title: '새 글 작성', hidden: true } },
+          ]
         },
 
         // --- 검수 관리 ---

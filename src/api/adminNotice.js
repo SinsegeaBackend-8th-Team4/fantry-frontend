@@ -1,5 +1,6 @@
 // src/api/adminNotice.js
 import { apiClient } from './index';
+import { unwrap } from './InspectionHelper';
 
 /**
  * 공지사항 목록을 검색 조건에 따라 페이징하여 조회합니다.
@@ -16,7 +17,7 @@ export const searchNotices = (params) => {
     keyword: params.keyword,
   };
 
-  return apiClient.get('/admin/cs/notices', {
+  return unwrap(apiClient.get('/admin/cs/notices', {
     params: queryParams,
     paramsSerializer: (p) => {
       const qs = new URLSearchParams();
@@ -27,7 +28,7 @@ export const searchNotices = (params) => {
       }
       return qs.toString();
     },
-  });
+  }));
 };
 
 /**
@@ -36,7 +37,7 @@ export const searchNotices = (params) => {
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const getNoticeById = (noticeId) => {
-  return apiClient.get(`/admin/cs/notice/${noticeId}`);
+  return apiClient.get(`/admin/cs/notices/${noticeId}`);
 };
 
 /**
@@ -45,7 +46,7 @@ export const getNoticeById = (noticeId) => {
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const createNotice = (noticeData) => {
-  return apiClient.post('/admin/cs/notice', noticeData);
+  return apiClient.post('/admin/cs/notices', noticeData);
 };
 
 /**
@@ -55,7 +56,7 @@ export const createNotice = (noticeData) => {
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const updateNotice = (noticeId, noticeData) => {
-  return apiClient.patch(`/admin/cs/notice/${noticeId}`, noticeData);
+  return apiClient.patch(`/admin/cs/notices/${noticeId}`, noticeData);
 };
 
 /**
@@ -64,5 +65,13 @@ export const updateNotice = (noticeId, noticeData) => {
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const deleteNotice = (noticeId) => {
-  return apiClient.delete(`/admin/cs/notice/${noticeId}`);
+  return apiClient.delete(`/admin/cs/notices/${noticeId}`);
+};
+
+/**
+ * 공지사항 상태별 통계를 조회합니다.
+ * @returns {Promise<NoticeStatsResponse>}
+ */
+export const getNoticeStats = () => {
+  return unwrap(apiClient.get('/admin/cs/notices/stats'));
 };

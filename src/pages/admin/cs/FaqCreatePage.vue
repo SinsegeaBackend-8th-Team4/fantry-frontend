@@ -69,7 +69,7 @@ function goToList() {
 
           <div class="mb-3">
             <label class="form-label">내용</label>
-            <CommonEditor v-model:content="newFaq.content" />
+            <CommonEditor v-model="newFaq.content" />
           </div>
 
           <div class="d-flex justify-content-between">

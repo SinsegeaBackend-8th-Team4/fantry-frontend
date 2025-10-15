@@ -1,13 +1,24 @@
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted, nextTick } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
 import { searchFaqs } from '@/api/adminFaq.js';
 
 const router = useRouter();
+const route = useRoute();
 const table = ref(null);
 const keyword = ref('');
 const tableKey = ref(0);
+
+onMounted(() => {
+  const statusFromQuery = route.query.status;
+  if (statusFromQuery) {
+    const foundFilter = statusFilters.find(f => f.value === statusFromQuery);
+    if (foundFilter) {
+      currentStatusFilter.value = foundFilter.value;
+    }
+  }
+});
 
 const statusFilters = [
   { label: '전체', value: null },
@@ -38,10 +49,9 @@ async function fetcher({ page, size, sort, keyword }) {
     csTypeId: currentTypeFilter.value,
     keyword: keyword,
   });
-  const data = response.data;
   return {
-    rows: data.content,
-    total: data.totalElements,
+    rows: response.content,
+    total: response.totalElements,
   };
 }
 
@@ -67,9 +77,9 @@ const columns = [
   {
     data: 'title',
     title: '제목',
-    className: 'text-left',
+    className: 'text-left clickable-title-cell',
     render: (data, type, row) => {
-      return `<a href="javascript:void(0)" class="text-primary" data-id="${row.faqId}">${data}</a>`;
+      return `<span class="faq-title" data-faq-id="${row.faqId}" style="color: blue; cursor: pointer; text-decoration: underline;">${data}</span>`;
     }
   },
   { data: 'createdBy', title: '작성자', className: 'text-center' },
@@ -121,19 +131,47 @@ const columns = [
   },
 ];
 
-function goToDetail(faqId) {
-  router.push({ name: 'AdminFaqDetail', params: { faqId } });
-}
-
 function goToCreate() {
   router.push({ name: 'AdminFaqCreate' });
 }
 
 function handleRowClick(row) {
-  if (row && row.faqId) {
-    goToDetail(row.faqId);
-  }
+  // This function is now redundant as click handling is done via attachClickHandlers
+  // but kept for reference or if other parts of the row need to be clickable.
+  console.log("handleRowClick (redundant for title click):", row);
 }
+
+function attachClickHandlers() {
+  nextTick(() => {
+    const titleElements = document.querySelectorAll('.faq-title');
+    titleElements.forEach(el => {
+      // 중복 바인딩 방지
+      if (el.dataset.bound) return;
+      el.dataset.bound = 'true';
+      
+      el.addEventListener('click', (e) => {
+        const faqId = e.target.dataset.faqId;
+        console.log('Navigating to AdminFaqDetail with faqId:', faqId);
+        router.push({
+          name: 'AdminFaqDetail',
+          params: { faqId }
+        });
+      });
+    });
+  });
+}
+
+onMounted(() => {
+  const statusFromQuery = route.query.status;
+  if (statusFromQuery) {
+    const foundFilter = statusFilters.find(f => f.value === statusFromQuery);
+    if (foundFilter) {
+      currentStatusFilter.value = foundFilter.value;
+    }
+  }
+  // 초기 로드 후에도 바인딩
+  setTimeout(attachClickHandlers, 500);
+});
 </script>
 
 <template>
@@ -191,7 +229,7 @@ function handleRowClick(row) {
           v-model:keyword="keyword"
           :columns="columns"
           :fetcher="fetcher"
-          @row-click="handleRowClick"
+          @loaded="attachClickHandlers"
         >
           <template #empty>현재 조건에 해당하는 FAQ가 없습니다.</template>
         </ServerDataTable>
@@ -199,3 +237,18 @@ function handleRowClick(row) {
     </div>
   </main>
 </template>
+
+<style scoped>
+:deep(table td){
+  pointer-events: none;
+}
+
+:deep(table td .faq-title){
+  pointer-events: auto;
+}
+
+:deep(table tbody tr:hover) {
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+</style>

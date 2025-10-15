@@ -1,43 +1,103 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { searchNotices } from '@/api/adminNotice.js';
+import { searchNotices, getNoticeStats } from '@/api/adminNotice.js';
 import LoadingSpinner from '@/components/common/atoms/LoadingSpinner.vue';
 import DashboardSummaryCard from '@/components/common/dashboard/DashboardSummaryCard.vue';
+import BaseChart from '@/components/common/chart/BaseChart.vue';
+import { useChartPalette } from '@/composables/useChartConfig';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+// Chart.js 컴포넌트 로컬 등록
+import { Chart, ArcElement, DoughnutController, Legend, Tooltip } from 'chart.js';
+Chart.register(ArcElement, DoughnutController, Legend, Tooltip, ChartDataLabels);
 
 const router = useRouter();
+const palette = useChartPalette();
+
 const loading = ref(true);
 const error = ref(null);
-const notices = ref([]);
-const totalNotices = ref(0);
+const stats = ref(null);
+const recentNotices = ref([]);
 
-const activeNotices = computed(() => notices.value.filter(n => n.status === 'ACTIVE').length);
-const recentNotices = computed(() => notices.value.slice(0, 5));
-
-const summaryCards = computed(() => [
-  {
-    key: 'totalNotices',
-    title: '총 공지사항 수',
-    color: 'primary',
-    icon: 'fas fa-bullhorn',
-    value: totalNotices.value,
-  },
-  {
-    key: 'activeNotices',
-    title: '활성 공지사항',
-    color: 'success',
-    icon: 'fas fa-check-circle',
-    value: activeNotices.value,
-  },
+const summaryCards = ref([
+  { key: 'total', title: '총 공지사항', color: 'primary', icon: 'fas fa-bullhorn', statusValue: null },
+  { key: 'active', title: '활성', color: 'success', icon: 'fas fa-check-circle', statusValue: 'ACTIVE' },
+  { key: 'pinned', title: '고정', color: 'info', icon: 'fas fa-thumbtack', statusValue: 'PINNED' },
+  { key: 'draft', title: '임시저장', color: 'secondary', icon: 'fas fa-pencil-alt', statusValue: 'DRAFT' },
+  { key: 'inactive', title: '비활성', color: 'danger', icon: 'fas fa-minus-circle', statusValue: 'INACTIVE' },
 ]);
+
+const chartData = ref({
+  labels: [],
+  datasets: [],
+});
+
+const chartOptions = ref({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { position: 'bottom' },
+    datalabels: {
+      color: '#fff',
+      textAlign: 'center',
+      font: { weight: 'bold', size: 16 },
+      formatter: (value) => value > 0 ? `${value}건` : '',
+      textStrokeColor: 'black',
+      textStrokeWidth: 2,
+    },
+    tooltip: {
+      callbacks: {
+        label: (context) => `${context.label}: ${context.parsed}건`,
+      },
+    },
+  },
+});
+
+const statusMap = {
+  ACTIVE: { text: '활성', class: 'bg-success' },
+  INACTIVE: { text: '비활성', class: 'bg-danger' },
+  PINNED: { text: '고정', class: 'bg-info' },
+  DRAFT: { text: '초안', class: 'bg-secondary' },
+};
+
+function getStatusDisplay(status) {
+  return statusMap[status] || { text: status, class: 'bg-light text-dark' };
+}
 
 async function fetchData() {
   try {
     loading.value = true;
-    // 최신순으로 모든 공지사항을 가져옴
-    const response = await searchNotices({ page: 0, size: 9999, sort: 'createdAt,desc' });
-    notices.value = response.data.content;
-    totalNotices.value = response.data.totalElements;
+    const [statsData, noticesResponse] = await Promise.all([
+      getNoticeStats(),
+      searchNotices({ page: 1, size: 5, sort: 'createdAt,desc' })
+    ]);
+
+    stats.value = statsData;
+    recentNotices.value = noticesResponse.content;
+
+    // 차트 데이터 구성
+    if (stats.value) {
+      const labels = ['활성', '고정', '임시저장', '비활성'];
+      const data = [
+        stats.value.active,
+        stats.value.pinned,
+        stats.value.draft,
+        stats.value.inactive,
+      ];
+      const backgroundColors = [
+        palette.success,
+        palette.info,
+        palette.secondary,
+        palette.danger,
+      ];
+
+      chartData.value = {
+        labels,
+        datasets: [{ backgroundColor: backgroundColors, data }],
+      };
+    }
+
   } catch (e) {
     console.error('공지사항 대시보드 데이터 조회 실패:', e);
     error.value = '데이터를 불러오는 중 오류가 발생했습니다.';
@@ -46,12 +106,18 @@ async function fetchData() {
   }
 }
 
-function goToList() {
-  router.push({ name: 'AdminNoticeList' });
+function goToList(status = null) {
+  const query = status ? { status } : {};
+  router.push({ name: 'AdminNoticeList', query });
 }
 
 function goToDetail(noticeId) {
   router.push({ name: 'AdminNoticeDetail', params: { noticeId } });
+}
+
+function handleCardClick(cardKey) {
+  const card = summaryCards.value.find(c => c.key === cardKey);
+  goToList(card ? card.statusValue : null);
 }
 
 function formatDate(dateArray) {
@@ -74,49 +140,72 @@ onMounted(fetchData);
 
     <div v-if="error" class="alert alert-danger">{{ error }}</div>
 
-    <div v-if="!loading && !error">
+    <div v-if="!loading && !error && stats">
       <!-- Summary Cards -->
       <div class="row">
-        <div v-for="card in summaryCards" :key="card.key" class="col-xl-3 col-md-6 mb-4">
-          <DashboardSummaryCard :card="card" :value="card.value" />
+        <div v-for="card in summaryCards" :key="card.key" class="col-xl col-md-6 mb-4">
+          <DashboardSummaryCard
+            :card="card"
+            :value="stats[card.key] || 0"
+            @click="handleCardClick(card.key)"
+          />
         </div>
       </div>
 
-      <!-- Recent Notices Table -->
-      <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-          <h6 class="m-0 font-weight-bold text-primary">최근 공지사항</h6>
-          <button class="btn btn-sm btn-outline-primary" @click="goToList">전체 보기</button>
+      <div class="row">
+        <!-- Chart Section -->
+        <div class="col-xl-6 col-lg-7 mb-4">
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary">공지사항 상태 분포</h6>
+            </div>
+            <div class="card-body">
+              <div class="chart-pie pt-4 pb-2">
+                <BaseChart
+                  type="doughnut"
+                  :data="chartData"
+                  :options="chartOptions"
+                  height="200"
+                />
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>제목</th>
-                  <th>작성자</th>
-                  <th>등록일</th>
-                  <th>상태</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-if="recentNotices.length === 0">
-                  <td colspan="5" class="text-center">최근 공지사항이 없습니다.</td>
-                </tr>
-                <tr v-for="notice in recentNotices" :key="notice.noticeId" @click="goToDetail(notice.noticeId)" style="cursor: pointer;">
-                  <td>{{ notice.noticeId }}</td>
-                  <td>{{ notice.title }}</td>
-                  <td>{{ notice.authorName }}</td>
-                  <td>{{ formatDate(notice.createdAt) }}</td>
-                  <td>
-                    <span class="badge" :class="notice.status === 'ACTIVE' ? 'bg-success' : 'bg-secondary'">
-                      {{ notice.status === 'ACTIVE' ? '활성' : '비활성' }}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+
+        <!-- Recent Notices Table -->
+        <div class="col-xl-6 col-lg-5 mb-4">
+          <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+              <h6 class="m-0 font-weight-bold text-primary">최근 공지사항</h6>
+              <button class="btn btn-sm btn-outline-primary" @click="goToList()">전체 보기</button>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>제목</th>
+                      <th>상태</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-if="recentNotices.length === 0">
+                      <td colspan="3" class="text-center">최근 공지사항이 없습니다.</td>
+                    </tr>
+                    <tr v-for="notice in recentNotices" :key="notice.noticeId" @click="goToDetail(notice.noticeId)" style="cursor: pointer;">
+                      <td>{{ notice.noticeId }}</td>
+                      <td>{{ notice.title }}</td>
+                      <td>
+                        <span class="badge" :class="getStatusDisplay(notice.status).class">
+                          {{ getStatusDisplay(notice.status).text }}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>

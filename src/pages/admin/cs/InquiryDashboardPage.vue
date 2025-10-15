@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { getDashboardSummary } from '@/api/adminDashboard.js';
+import { getInquiryStats } from '@/api/adminInquiry.js'; // 올바른 API 함수 임포트
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import LoadingSpinner from '@/components/common/atoms/LoadingSpinner.vue';
 import DashboardSummaryCard from '@/components/common/dashboard/DashboardSummaryCard.vue';
@@ -22,21 +22,14 @@ const palette = useChartPalette(); // 색상 팔레트 초기화
 
 const summaryCards = ref([
   {
-    key: 'todayNew',
-    title: '오늘 접수 문의',
-    color: 'primary',
-    icon: 'fas fa-calendar-plus',
-    statusValue: null, // 오늘 접수 문의는 특정 상태값이 없을 수 있음
-  },
-  {
-    key: 'pending',
+    key: 'pending', // API 응답 필드 이름에 맞게 수정
     title: '답변 대기',
     color: 'warning',
     icon: 'fas fa-hourglass-half',
     statusValue: 'PENDING',
   },
   {
-    key: 'inProgress',
+    key: 'inProgress', // API 응답 필드 이름에 맞게 수정
     title: '처리 중',
     color: 'info',
     icon: 'fas fa-tasks',
@@ -91,20 +84,17 @@ const chartOptions = ref({
 
 onMounted(async () => {
   try {
-    const response = await getDashboardSummary();
-    stats.value = response.inquiryStats;
+    stats.value = await getInquiryStats(); // 문의 통계 전용 API 호출
 
     // 차트 데이터 구성
     if (stats.value) {
       const labels = [
-        '오늘 접수 문의',
         '답변 대기',
         '처리 중',
       ];
       const data = [
-        stats.value.todayNew,
-        stats.value.pending,
-        stats.value.inProgress,
+        stats.value.pending,     // API 응답 필드 이름에 맞게 수정
+        stats.value.inProgress,  // API 응답 필드 이름에 맞게 수정
       ];
       const backgroundColors = [
         palette.primary,
@@ -131,22 +121,8 @@ onMounted(async () => {
 });
 
 function goToInquiryList(cardKey) {
-  let statusParam = null;
-  // cardKey가 statusValue를 직접 포함하는 경우를 대비
   const card = summaryCards.value.find(c => c.key === cardKey);
-  if (card && card.statusValue) {
-    statusParam = card.statusValue;
-  } else {
-    // 기존 로직 유지 (todayNew 등)
-    switch (cardKey) {
-      case 'pending':
-        statusParam = 'PENDING';
-        break;
-      case 'inProgress':
-        statusParam = 'IN_PROGRESS';
-        break;
-    }
-  }
+  const statusParam = card ? card.statusValue : null;
 
   router.push({
     name: 'AdminInquiryList',
@@ -169,13 +145,13 @@ function goToInquiryList(cardKey) {
     <div v-if="stats">
       <!-- Summary Cards Section -->
       <div class="row">
-        <DashboardSummaryCard
-          v-for="card in summaryCards"
-          :key="card.key"
-          :card="card"
-          :value="stats ? stats[card.key] : 0"
-          @click="goToInquiryList(card.key)"
-        />
+        <div v-for="card in summaryCards" :key="card.key" class="col-xl-4 col-md-6 mb-4">
+          <DashboardSummaryCard
+            :card="card"
+            :value="stats ? stats[card.key] : 0"
+            @click="goToInquiryList(card.key)"
+          />
+        </div>
       </div>
 
       <!-- Chart Section -->
@@ -204,12 +180,4 @@ function goToInquiryList(cardKey) {
 
 <style scoped>
 /* 필요한 경우 여기에 스타일 추가 */
-</style>
-<style scoped>
-/* 임시 디버그 CSS: 카드 강제 표시 */
-.col-xl-3.col-md-6.mb-4 {
-  display: block !important;
-  visibility: visible !important;
-  background-color: rgba(255, 0, 0, 0.1); /* 디버그용 배경색 */
-}
 </style>

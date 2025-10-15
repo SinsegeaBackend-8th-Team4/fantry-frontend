@@ -86,7 +86,7 @@ const columns = [
 
 // 상세 페이지로 이동
 function goToDetail(returnRequestId) {
-  router.push(`/admin/return/detail/${returnRequestId}`);
+  router.push(`/admin/return/${returnRequestId}`);
 }
 </script>
 

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
 import { searchInquiries } from '@/api/adminInquiry.js';
@@ -49,8 +49,6 @@ async function fetcher({ page, size, sort, keyword }) {
   };
 }
 
-// --- 테이블 컬럼, 이벤트 핸들러 ---
-
 const columns = [
   { data: 'inquiryId', title: '#', className: 'text-center' },
   {
@@ -58,71 +56,53 @@ const columns = [
     title: '문의 유형',
     className: 'text-center',
     render: (data) => {
-      let badgeClass = 'bg-secondary'; // 기본값: 기타문의
-      switch (data) {
-        case '배송문의':
-          badgeClass = 'bg-primary';
-          break;
-        case '결제문의':
-          badgeClass = 'bg-success';
-          break;
-        case '상품문의':
-          badgeClass = 'bg-info';
-          break;
-        case '환불/반품 문의':
-          badgeClass = 'bg-danger';
-          break;
-        case '판매 문의':
-          badgeClass = 'bg-dark';
-          break;
+      const typeName = data || 'N/A';
+      let badgeClass = 'bg-secondary';
+      switch (typeName) {
+        case '배송문의': badgeClass = 'bg-primary'; break;
+        case '결제문의': badgeClass = 'bg-success'; break;
+        case '상품문의': badgeClass = 'bg-info'; break;
+        case '환불/반품 문의': badgeClass = 'bg-danger'; break;
+        case '판매 문의': badgeClass = 'bg-dark'; break;
+        default: badgeClass = 'bg-secondary'; break;
       }
-      return `<span class="badge ${badgeClass}">${data}</span>`;
+      return `<span class="badge ${badgeClass}">${typeName}</span>`;
     },
   },
-  { 
-    data: 'title', 
-    title: '제목', 
-    className: 'text-left',
+  {
+    data: 'title',
+    title: '제목',
+    className: 'text-left clickable-title-cell',
     render: (data, type, row) => {
-      // 행 전체에 클릭 이벤트가 이미 걸려 있으므로, 여기서는 스타일만 링크처럼 보이게 처리
-      return `<a href="javascript:void(0)" class="text-primary">${data}</a>`;
+      return `<span class="inquiry-title" data-inquiry-id="${row.inquiryId}" style="color: blue; cursor: pointer; text-decoration: underline;">${data}</span>`;
     }
-  }, // 제목만 왼쪽 정렬
+  },
   { data: 'inquiredByName', title: '작성자', className: 'text-center' },
   {
     data: 'status',
     title: '상태',
     className: 'text-center',
     render: (data) => {
-      let badgeClass = 'bg-light text-dark'; // 기본값
-      let koreanText = data; // 기본값
-
+      let badgeClass = 'bg-light text-dark';
+      let text = data;
       switch (data) {
         case 'PENDING':
           badgeClass = 'bg-warning';
-          koreanText = '답변 대기';
+          text = '답변 대기';
           break;
         case 'IN_PROGRESS':
           badgeClass = 'bg-info';
-          koreanText = '처리 중';
+          text = '처리 중';
           break;
         case 'ANSWERED':
           badgeClass = 'bg-success';
-          koreanText = '답변 완료';
-          break;
-        case 'REJECTED':
-          badgeClass = 'bg-danger';
-          koreanText = '거절';
-          break;
-        case 'ON_HOLD':
-          badgeClass = 'bg-secondary';
-          koreanText = '보류';
+          text = '답변 완료';
           break;
       }
-      return `<span class="badge ${badgeClass}">${koreanText}</span>`;
+      return `<span class="badge ${badgeClass}">${text}</span>`;
     },
   },
-  { // 등록일 컬럼 수정
+  {
     data: 'inquiredAt',
     title: '등록일',
     className: 'text-center',
@@ -142,9 +122,29 @@ const columns = [
   },
 ];
 
-// 상세 페이지로 이동
-function goToDetail(inquiryId) {
-  router.push(`/admin/cs/inquiry/${inquiryId}`);
+function handleRowClick(row) {
+  // This function is now redundant as click handling is done via attachClickHandlers
+  // but kept for reference or if other parts of the row need to be clickable.
+  console.log("handleRowClick (redundant for title click):", row);
+}
+
+function attachClickHandlers() {
+  nextTick(() => {
+    const titleElements = document.querySelectorAll('.inquiry-title');
+    titleElements.forEach(el => {
+      // 중복 바인딩 방지
+      if (el.dataset.bound) return;
+      el.dataset.bound = 'true';
+      
+      el.addEventListener('click', (e) => {
+        const inquiryId = e.target.dataset.inquiryId;
+        router.push({
+          name: 'AdminInquiryDetail',
+          params: { inquiryId }
+        });
+      });
+    });
+  });
 }
 
 onMounted(() => {
@@ -158,6 +158,8 @@ onMounted(() => {
       tableKey.value++;
     }
   }
+  // 초기 로드 후에도 바인딩
+  setTimeout(attachClickHandlers, 500);
 });
 </script>
 
@@ -214,7 +216,7 @@ onMounted(() => {
           v-model:keyword="keyword"
           :columns="columns"
           :fetcher="fetcher"
-          @row-click="row => goToDetail(row.inquiryId)"
+          @loaded="attachClickHandlers"
         >
           <template #empty>현재 조건에 해당하는 문의 내역이 없습니다.</template>
         </ServerDataTable>
@@ -223,4 +225,17 @@ onMounted(() => {
   </main>
 </template>
 
+<style scoped>
+:deep(table td){
+  pointer-events: none;
+}
 
+:deep(table td .inquiry-title){
+  pointer-events: auto;
+}
+
+:deep(table tbody tr:hover) {
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+</style>

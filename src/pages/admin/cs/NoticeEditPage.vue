@@ -106,7 +106,7 @@ onMounted(fetchNotice);
 
           <div class="mb-3">
             <label class="form-label">내용</label>
-            <CommonEditor v-model:content="notice.content" />
+            <CommonEditor v-model="notice.content" />
           </div>
 
           <div class="d-flex justify-content-between">
