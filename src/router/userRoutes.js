@@ -25,10 +25,12 @@ const SignupFail = () => import('@/pages/user/access/SignupFail.vue');
 const ProductListPage = () => import('@/pages/product/ProductListPage.vue');
 const ProductDetailPage = () => import('@/pages/product/ProductDetailPage.vue');
 const ProductAuctionPage = () => import('@/pages/product/ProductAuctionPage.vue');
+const ProductAuctionPolicyPage = () => import('@/pages/product/ProductAuctionPolicyPage.vue');
 // 검수 페이지 컴포넌트
 const InspectionStep1Page = () => import('@/pages/user/inspection/Step1Page.vue')
 const InspectionStep2Page = () => import('@/pages/user/inspection/Step2Page.vue')
 const InspectionStep3Page = () => import('@/pages/user/inspection/Step3Page.vue')
+const InspectionPolicyPage = () => import('@/pages/user/inspection/InspectionPolicyPage.vue'); 
 // 마이페이지
 const MyPageLayout = () => import('@/pages/user/mypage/MyPage.vue')
 
@@ -123,6 +125,12 @@ const userRoutes = {
       component: ProductAuctionPage,
       meta: { requiresAuth: false },
     },
+    {
+      path: 'product/auction-policy',
+      name: 'ProductAuctionPolicy',
+      component: ProductAuctionPolicyPage,
+      meta: { requiresAuth: false },
+    },
     // 검수
     {
       path: 'inspection/step1',
@@ -141,6 +149,12 @@ const userRoutes = {
       name: 'InspectionStep3',
       component: InspectionStep3Page,
       meta: { requiresAuth: true },
+    },
+    {
+      path: 'inspection/policy',
+      name: 'InspectionPolicy',
+      component: InspectionPolicyPage,
+      meta: { requiresAuth: false },
     },
     // 마이페이지
     {

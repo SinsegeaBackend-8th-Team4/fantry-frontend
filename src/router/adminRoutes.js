@@ -49,7 +49,6 @@ const OnlineInspectionListPage = () => import('@/pages/admin/inspection/OnlineIn
 const OnlineInspectionDetailPage = () => import('@/pages/admin/inspection/OnlineInspectionDetailPage.vue')
 const OfflineInspectionListPage = () => import('@/pages/admin/inspection/OfflineInspectionListPage.vue')
 const OfflineInspectionDetailPage = () => import('@/pages/admin/inspection/OfflineInspectionDetailPage.vue')
-const InspectionHistoryPage = () => import('@/pages/admin/inspection/InspectionHistoryPage.vue')
 
 // 재고 관리
 const InventoryDashboardPage = () => import('@/pages/admin/inventory/InventoryDashboardPage.vue')
@@ -76,30 +75,31 @@ const AuctionListPage = () => import('@/pages/admin/auction/AuctionListPage.vue'
 const AdminLogin = () => import('@/pages/admin/access/AdminLogin.vue')
 const AdminSignUp = () => import('@/pages/admin/access/AdminSignup.vue')
 
-const adminRoutes = {
-  path: '/admin',
-  component: AdminLayout,
-  meta: { requiresAuth: true, isAdmin: true },
-  children: [
-    {
-      path: '',
-      component: AdminContentLayout, // 모든 관리자 컨텐츠 페이지의 상위 레이아웃
-      children: [
-        // --- 로그인 ---
-        {
-          path: 'login',
-          name: 'AdminLogin',
-          component: AdminLogin,
-          meta: { requiredLogin: false, isAdmin: false, menu: false },
-        },
-        // --- 회원가입 ---
-        {
-          path: 'signup',
-          name: 'AdminSignUp',
-          component: AdminSignUp,
-          meta: { requiredLogin: false, isAdmin: false, menu: false },
-        },
-
+const adminRoutes = [
+  // 1. 로그인/회원가입 페이지 (인증이 필요 없는 페이지)
+  {
+    path: '/admin/login',
+    name: 'AdminLogin',
+    component: AdminLogin,
+    meta: { requiresAuth: false, isAdmin: false },
+  },
+  {
+    path: '/admin/signup',
+    name: 'AdminSignUp',
+    component: AdminSignUp,
+    meta: { requiresAuth: false, isAdmin: false },
+  },
+  // 2. 관리자 전용 페이지 (인증이 필요한 페이지)
+  {
+    path: '/admin',
+    component: AdminLayout,
+    meta: { requiresAuth: true, isAdmin: true },
+    children: [
+      {
+        path: '', // '/admin' 경로에 대한 기본 페이지
+        component: AdminContentLayout,
+        redirect: { name: 'AdminDashboard' }, // 대시보드로 리디렉션
+        children: [
         // --- 대시보드 ---
         {
           path: '',
@@ -178,7 +178,6 @@ const adminRoutes = {
             { path: 'online/:id', name: 'AdminOnlineInspectionDetail', component: OnlineInspectionDetailPage, meta: { title: '온라인 1차 상세', hidden: true } },
             { path: 'offline', name: 'AdminOfflineInspectionList', component: OfflineInspectionListPage, meta: { title: '오프라인 2차 검수' } },
             { path: 'offline/:id', name: 'AdminOfflineInspectionDetail', component: OfflineInspectionDetailPage, meta: { title: '오프라인 2차 상세', hidden: true } },
-            { path: 'history', name: 'AdminInspectionHistory', component: InspectionHistoryPage, meta: { title: '검수 이력' } },
           ],
         },
         // --- 재고 관리 ---
@@ -219,9 +218,46 @@ const adminRoutes = {
             { path: 'list', name: 'AdminAuctionList', component: AuctionListPage },
           ],
         },
+        // --- 주문 관리 (추가) ---
+        {
+          path: 'order',
+          redirect: { name: 'AdminOrderList' },
+          meta: { title: '주문관리', icon: 'fas fa-fw fa-receipt', menu: true },
+          children: [
+            { 
+              path: 'list', 
+              name: 'AdminOrderList', 
+              component: () => import('@/pages/admin/order/OrderListPage.vue'), 
+              meta: { title: '주문 목록' } 
+            },
+            { 
+              path: 'detail/:orderId', 
+              name: 'AdminOrderDetail', 
+              component: () => import('@/pages/admin/order/OrderDetailPage.vue'), 
+              props: true, 
+              meta: { menu: false, hidden: true, title: '주문 상세' } 
+            },
+          ],
+        },
+
+        // --- 입찰 관리 (추가) ---
+        {
+          path: 'bid',
+          redirect: { name: 'AdminBidList' },
+          meta: { title: '입찰관리', icon: 'fas fa-fw fa-hand-paper', menu: true },
+          children: [
+            {
+              path: 'list',
+              name: 'AdminBidList',
+              component: () => import('@/pages/admin/bid/BidListPage.vue'),
+              meta: { title: '입찰 목록' }
+            },
+          ],
+        },
       ],
-    },
-  ],
-}
+    }
+  ]
+  }
+];
 
 export default adminRoutes

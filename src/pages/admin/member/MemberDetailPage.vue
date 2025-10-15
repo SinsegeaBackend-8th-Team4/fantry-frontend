@@ -2,7 +2,7 @@
   <div>
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h1 class="h3 mb-0 text-gray-800">회원 상세 정보</h1>
-      <button class="btn btn-secondary" @click="router.back()">
+      <button class="btn btn-secondary" @click="gotoList">
         목록으로
       </button>
     </div>
@@ -97,6 +97,10 @@
             loading.value = false;
         }
     });
+
+    const gotoList = () => {
+      router.push("/admin/member/list");
+    }
 
     function formatDate(dateString) {
         if (!dateString) return '';

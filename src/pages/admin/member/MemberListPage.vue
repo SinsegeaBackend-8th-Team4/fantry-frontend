@@ -9,6 +9,7 @@
       :columns="columns"
       :fetcher="fetchMembers"
       :page-size="10"
+      @loaded="attachClickHandlers"
     >
       <!-- 커스텀 셀: 가입일 포맷 -->
       <template #cell-createAt="{ row }">
@@ -38,7 +39,7 @@
         return meta.row + 1 + (meta.settings._iDisplayStart || 0);
       }
      },
-    { data: 'name', title: '이름', sortable: true, 
+    { data: 'name', title: '이름', sortable: false, 
       className: 'text-center clickable-cell',
       render: (data, type, row) => {
         // data 속성에 memberId 저장
@@ -69,7 +70,6 @@
         
         el.addEventListener('click', (e) => {
           const memberId = e.target.dataset.memberId;
-          console.log('클릭됨!', memberId);
           router.push({ 
             name: 'AdminMemberDetail', 
             params: { memberId }
