@@ -73,11 +73,16 @@ export const useUserStore = defineStore('user', () => {
     // TODO: localStorage에 저장된 토큰도 삭제
     localStorage.removeItem('accessToken');
 
-    const isLoggingOut = window.location.pathname === '/login';
-    if(!isLoggingOut){
-      // alert('세션이 만료되었습니다. 다시 로그인해주세요.'); 
-      window.location.href = '/login'; 
+    const currentPath = window.location.pathname;
+
+    // 이미 로그인 페이지에 있는 경우 리디렉션 방지
+    if (currentPath === '/login' || currentPath === '/admin/login') {
+      return;
     }
+
+    // 관리자 페이지에서 로그아웃 시 관리자 로그인 페이지로, 그 외에는 일반 로그인 페이지로 이동
+    const isAdminPath = currentPath.startsWith('/admin/');
+    window.location.href = isAdminPath ? '/admin/login' : '/login';
   }
 
   /**

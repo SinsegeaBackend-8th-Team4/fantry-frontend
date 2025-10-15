@@ -1,4 +1,16 @@
-<script setup></script>
+<script setup>
+  import { useRouter } from 'vue-router';
+
+  const router = useRouter();
+
+  const gotoMain=()=>{
+    router.push('/');
+  }
+
+  const gotoSignup=()=>{
+    router.push('/signup/terms');
+  }
+</script>
 <template>
   <div class="content-page">
     <!--Banner Start-->
@@ -40,8 +52,8 @@
             <h5>고객센터: 010-1234-5678 | 담당자: 홍길동</h5>
         </div>
         <div class="group-btn">
-            <button type="button">메인으로 이동하기</button>
-            <button type="button">회원가입</button>
+            <button type="button" @click="gotoMain">메인으로 이동하기</button>
+            <button type="button" @click="gotoSignup">회원가입</button>
         </div>
     </div>
     <!--Content End-->
