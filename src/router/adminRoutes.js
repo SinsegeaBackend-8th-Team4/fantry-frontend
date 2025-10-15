@@ -60,6 +60,10 @@ const AuctionListPage = () => import('@/pages/admin/auction/AuctionListPage.vue'
 const AdminLogin = () => import('@/pages/admin/access/AdminLogin.vue')
 const AdminSignUp = () => import('@/pages/admin/access/AdminSignup.vue')
 
+// 카탈로그 관리
+const CategoryListPage = () => import('@/pages/admin/catalog/CategoryListPage.vue')
+const ArtistListPage = () => import('@/pages/admin/catalog/ArtistListPage.vue')
+
 const adminRoutes = {
   path: '/admin',
   component: AdminLayout,
@@ -209,7 +213,17 @@ const adminRoutes = {
             },
           ],
         },
-      ],
+        // --- 카탈로그 관리 ---
+        {
+          path: 'catalog',
+          redirect: { name: 'AdminCategoryList' },
+          meta: { title: '카탈로그관리', icon: 'fas fa-fw fa-book', menu: true },
+          children: [
+            { path: 'categories', name: 'AdminCategoryList', component: CategoryListPage, meta: { title: '카테고리 관리' } },
+            { path: 'artists', name: 'AdminArtistList', component: ArtistListPage, meta: { title: '아티스트 관리' } },
+          ]
+        }
+      ]
     },
   ],
 }
