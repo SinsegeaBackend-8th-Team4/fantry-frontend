@@ -31,87 +31,106 @@
                 
                 <h2 class="product-title-main mb-5"><strong>{{ auction.itemName }}</strong></h2>
 
-                <!-- saleType에 따른 조건부 렌더링 -->
-                <!-- Case 1: 경매 상품일 경우 ('AUCTION') -->
-                <template v-if="isAuction">
-                    <div class="countdown-timer mb-5">
-                        <span class="countdown-label">경매 마감까지 남은 시간</span>
-                        <span class="countdown-time">{{ timeRemaining }}</span>
-                    </div>
-
-                    <!-- 경매 진행 중일 때 UI -->
-                    <template v-if="!isAuctionEnded">
-                        <div class="bid-section-main text-center mb-5">
-                            <h5 class="mb-3">현재 입찰가</h5>
-                            <p v-if="hasBids" id="current-bid-price" :class="['current-bid-price-main', { 'bid-success-effect': isBidSuccess }]">
-                                {{ formattedCurrentPrice }}
-                            </p>
-                            <div v-else class="no-bids-info">
-                                <p class="no-bids-text">현재 입찰자가 없습니다.</p>
-                                <p class="start-price-info">(시작가: {{ formattedStartPrice }})</p>
-                            </div>
+                <!-- ====================================================== -->
+                <!-- 1. saleStatus가 ACTIVE일 때만 기존 경매/판매 로직 표시 -->
+                <!-- ====================================================== -->
+                <template v-if="auction.saleStatus === 'ACTIVE'">
+                    <!-- Case 1: 경매 상품일 경우 ('AUCTION') -->
+                    <template v-if="isAuction">
+                        <div class="countdown-timer mb-5">
+                            <span class="countdown-label">경매 마감까지 남은 시간</span>
+                            <span class="countdown-time">{{ timeRemaining }}</span>
                         </div>
-                        <button class="btn btn-danger btn-lg w-100" @click="openBidModal" :disabled="!userStore.isLoggedIn"
-                            :title="!userStore.isLoggedIn ? '로그인이 필요합니다.' : '입찰에 참여하세요'">
-                            {{ userStore.isLoggedIn ? '경매 참여하기' : '로그인 후 참여 가능' }}
-                        </button>
+
+                        <!-- 경매 진행 중일 때 UI -->
+                        <template v-if="!isAuctionEnded">
+                            <div class="bid-section-main text-center mb-5">
+                                <h5 class="mb-3">현재 입찰가</h5>
+                                <p v-if="hasBids" id="current-bid-price" :class="['current-bid-price-main', { 'bid-success-effect': isBidSuccess }]">
+                                    <span v-if="isMyBidHighest" style="font-size: 1.5rem; color: #28a745; font-weight: 600;">내 입찰금 </span>
+                                    {{ formatPrice(currentBidPrice) }}
+                                </p>
+                                <div v-else class="no-bids-info">
+                                    <p class="no-bids-text">현재 입찰자가 없습니다.</p>
+                                    <p class="start-price-info">(시작가: {{ formattedStartPrice }})</p>
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                                <button class="btn btn-danger btn-lg flex-grow-1" @click="openBidModal" :disabled="!userStore.isLoggedIn"
+                                    :title="!userStore.isLoggedIn ? '로그인이 필요합니다.' : '입찰에 참여하세요'">
+                                    {{ userStore.isLoggedIn ? '경매 참여하기' : '로그인 후 참여 가능' }}
+                                </button>
+                                <button class="btn btn-outline-secondary btn-lg" @click="isPolicyModalVisible = true">경매 이용 가이드</button>
+                            </div>
+                        </template>
+
+                        <!-- 경매 종료 후 UI -->
+                        <template v-else>
+                            <!-- Case 1-1: 낙찰자이며, 결제 대기 중 (PENDING_PAYMENT) -->
+                            <div v-if="userAuctionState === '결제 대기중'" class="text-center">
+                                <div class="bid-section-main text-center mb-5">
+                                    <h5 class="mb-3" style="font-size: 1.5rem; color: #28a745;">🎉 축하드립니다! 🎉</h5>
+                                    <p class="current-bid-price-main" style="font-size: 1.8rem;">회원님이 낙찰하셨습니다.</p>
+                                </div>
+                                <button class="btn btn-primary btn-lg w-100" @click="goToPayment">
+                                    결제하기
+                                </button>
+                            </div>
+
+                            <!-- Case 1-2: 미로그인 또는 미낙찰자 (USER) -->
+                            <div v-else-if ="userAuctionState === 'USER'" class="text-center">
+                                <div class="bid-section-main text-center mb-5">
+                                    <h5 class="mb-3">경매 종료</h5>
+                                    <p class="current-bid-price-main" style="font-size: 2rem;">경매가 마감되었습니다.</p>
+                                </div>
+                                <button class="btn btn-secondary btn-lg w-100" disabled>
+                                    경매에 참여할 수 없습니다
+                                </button>
+                            </div>
+                            
+                            <!-- Case 1-3: 낙찰자이며, 결제 완료 이후 (PAID, SHIPPED 등) -->
+                            <div v-else class="text-center">
+                                <div class="bid-section-main text-center mb-5">
+                                    <h5 class="mb-3" style="font-size: 1.5rem; color: #28a745;">🎉 축하드립니다! 🎉</h5>
+                                    <p class="current-bid-price-main" style="font-size: 1.8rem;">회원님이 낙찰하셨습니다.</p>
+                                </div>
+                                <button class="btn btn-success btn-lg w-100" disabled>
+                                    {{userAuctionState}}
+                                </button>
+                            </div>
+                        </template>
                     </template>
 
-                    <!-- 경매 종료 후 UI -->
-                    <template v-else>
-                        <!-- Case 1-2: 낙찰자이며, 결제 대기 중 (PENDING_PAYMENT) -->
-                        <div v-if="userAuctionState === '결제 대기중'" class="text-center">
-                            <div class="bid-section-main text-center mb-5">
-                                <h5 class="mb-3" style="font-size: 1.5rem; color: #28a745;">🎉 축하드립니다! 🎉</h5>
-                                <p class="current-bid-price-main" style="font-size: 1.8rem;">회원님이 낙찰하셨습니다.</p>
-                            </div>
-                            <button class="btn btn-primary btn-lg w-100" @click="goToPayment">
-                                결제하기
-                            </button>
+                    <!-- Case 2: 즉시 구매 상품일 경우 ('INSTANT_BUY') -->
+                    <template v-else-if="isInstantBuy">
+                        <div class="countdown-timer mb-5">
+                            <span class="countdown-label">판매 마감까지 남은 시간</span>
+                            <span class="countdown-time">{{ timeRemaining }}</span>
                         </div>
-
-                        <!-- Case 1-2: 미로그인 또는 미낙찰자 (USER) -->
-                        <div v-else-if ="userAuctionState === 'USER'" class="text-center">
-                             <div class="bid-section-main text-center mb-5">
-                                <h5 class="mb-3">경매 종료</h5>
-                                <p class="current-bid-price-main" style="font-size: 2rem;">낙찰에 실패하셨습니다.</p>
-                            </div>
-                            <button class="btn btn-secondary btn-lg w-100" disabled>
-                                경매에 참여할 수 없습니다
-                            </button>
+                        <div class="bid-section-main text-center mb-5">
+                            <h5 class="mb-3">즉시 구매가</h5>
+                            <p class="current-bid-price-main">{{ formattedStartPrice }}</p>
                         </div>
-
-                        
-                        <!-- Case 1-3: 낙찰자이며, 결제 완료 이후  -->
-                        <div v-else class="text-center">
-                            <div class="bid-section-main text-center mb-5">
-                                <h5 class="mb-3" style="font-size: 1.5rem; color: #28a745;">🎉 축하드립니다! 🎉</h5>
-                                <p class="current-bid-price-main" style="font-size: 1.8rem;">회원님이 낙찰하셨습니다.</p>
-                            </div>
-                            <button class="btn btn-success btn-lg w-100" disabled>
-                                {{userAuctionState}}
-                            </button>
-                        </div>
-
+                        <button class="btn btn-primary btn-lg w-100" @click="purchaseNow" :disabled="!userStore.isLoggedIn"
+                            :title="!userStore.isLoggedIn ? '로그인이 필요합니다.' : '즉시 구매하세요'">
+                            {{ userStore.isLoggedIn ? '즉시 구매하기' : '로그인 후 구매 가능' }}
+                        </button>
                     </template>
                 </template>
 
-                <!-- Case 2: 즉시 구매 상품일 경우 ('INSTANT_BUY') -->
-                <template v-else-if="isInstantBuy">
-                    <div class="countdown-timer mb-5">
-                        <span class="countdown-label">판매 마감까지 남은 시간</span>
-                        <span class="countdown-time">{{ timeRemaining }}</span>
+                <!-- ====================================================== -->
+                <!-- 2. saleStatus가 ACTIVE가 아닐 때 상태 표시 화면 -->
+                <!-- ====================================================== -->
+                <template v-else>
+                    <div class="auction-status-overlay text-center">
+                        <div class="bid-section-main text-center mb-5">
+                            <h5 class="mb-3">{{ auctionStatusTitle }}</h5>
+                            <p class="current-bid-price-main" style="font-size: 1.5rem;">{{ auctionStatusMessage }}</p>
+                        </div>
+                        <button class="btn btn-secondary btn-lg w-100" disabled>
+                            {{ auctionStatusButtonText }}
+                        </button>
                     </div>
-                    <div class="bid-section-main text-center mb-5">
-                        <h5 class="mb-3">즉시 구매가</h5>
-                        <!-- 판매가 데이터 바인딩 -->
-                        <p class="current-bid-price-main">{{ formattedStartPrice }}</p>
-                    </div>
-                    <!-- 로그인 상태에 따라 버튼 활성화/비활성화 -->
-                    <button class="btn btn-primary btn-lg w-100" @click="purchaseNow" :disabled="!userStore.isLoggedIn"
-                        :title="!userStore.isLoggedIn ? '로그인이 필요합니다.' : '즉시 구매하세요'">
-                        {{ userStore.isLoggedIn ? '즉시 구매하기' : '로그인 후 구매 가능' }}
-                    </button>
                 </template>
             </div>
         </div>
@@ -192,6 +211,14 @@
                 </form>
             </div>
         </div>
+
+        <!-- 경매 이용 가이드 모달 -->
+        <div v-if="isPolicyModalVisible" class="modal-overlay" @click.self="isPolicyModalVisible = false">
+            <div class="modal-content policy-modal-content">
+                <button class="modal-close-btn" @click="isPolicyModalVisible = false">&times;</button>
+                <ProductAuctionPolicy />
+            </div>
+        </div>
     </div>
 </template>
 
@@ -205,6 +232,8 @@
     import { getBidsByAuctionId } from '@/api/bid';  //입찰 관련 API 함수
     import { useUserStore } from '@/stores/userStore';
     import { subscribe, unsubscribe, publish, disconnect, connect } from '@/services/websocketService';
+    import ProductAuctionPolicy from '@/components/product/ProductAuctionPolicy.vue'; // 경매 이용 안내 컴포넌트
+
     const route = useRoute();
     const userStore = useUserStore();
     const auctionId = route.params.id;
@@ -221,6 +250,7 @@
 
     // --- 실시간 데이터 상태 ---
     const currentBidPrice = ref(0);
+    const highestBidderId = ref(null); // 최고 입찰자 ID 설정
     const timeRemaining = ref('');
     let countdownInterval = null;
 
@@ -231,6 +261,7 @@
     const isBidHistoryVisible = ref(false);
     const userAuctionState = ref('USER'); // 경매 종료 후 유저 상태: PENDING_PAYMENT, PAID, USER
     const isAuctionEnded = ref(false); // 경매 종료 여부
+    const isPolicyModalVisible = ref(false); // 경매 이용 안내 모달 표시 여부
 
     //썸네일 이미지 데이터
     const productImages = ref([
@@ -267,24 +298,49 @@
         return dateObj ? dateObj.getTime() : null;
     });
 
-    const formattedCurrentPrice = computed(() => {
-        if (!auction.value) {
-            return '';
-        }
-
-        // 1. 현재 입찰가(currentBidPrice)와 시작가(startPrice)가 같은지 비교.
-        //    (백엔드에서 입찰이 없으면 currentPrice를 startPrice로 보내줌)
-        if (currentBidPrice.value === auction.value.startPrice) {
-            // 2. 같다면, 아직 입찰자가 없는 것이므로 안내 문구 반환.
-            return `현재 입찰자가 없습니다. (시작가: ${formatPrice(auction.value.startPrice)})`;
-        } else {
-            // 3. 다르다면, 입찰이 진행된 것이므로 현재 입찰가를 포맷팅하여 반환합니다.
-            return formatPrice(currentBidPrice.value);
-        }
-    });
+    const formattedCurrentPrice = computed(() => formatPrice(currentBidPrice.value));
     const formattedStartPrice = computed(() => formatPrice(auction.value?.startPrice));
     const formattedStartTime = computed(() => formatDate(parseJavaLocalDateTime(auction.value?.startTime)));
     const formattedEndTime = computed(() => formatDate(parseJavaLocalDateTime(auction.value?.endTime)));
+
+    const isMyBidHighest = computed(() => {
+        if (!userStore.isLoggedIn || !highestBidderId.value) {
+            return false;
+        }
+        return userStore.currentUser.memberId === highestBidderId.value;
+    });
+
+    const auctionStatusTitle = computed(() => {
+        if (!auction.value) return '';
+        switch(auction.value.saleStatus) {
+            case 'PREPARING': return '판매 준비 중';
+            case 'SOLD': return '판매 완료';
+            case 'NOT_SOLD': return '유찰';
+            case 'CANCELLED': return '판매 취소';
+            default: return '안내';
+        }
+    });
+
+    const auctionStatusMessage = computed(() => {
+        if (!auction.value) return '';
+        switch(auction.value.saleStatus) {
+            case 'PREPARING': return '판매가 곧 시작될 예정입니다.';
+            case 'SOLD': return '이 상품은 판매가 완료되었습니다.';
+            case 'NOT_SOLD': return '이 상품은 유찰되었습니다.';
+            case 'CANCELLED': return '이 상품은 판매가 취소되었습니다.';
+            default: return '현재 이 상품에 참여할 수 없습니다.';
+        }
+    });
+
+    const auctionStatusButtonText = computed(() => {
+        if (!auction.value) return '참여 불가';
+        switch(auction.value.saleStatus) {
+            case 'SOLD': return '판매 완료';
+            case 'NOT_SOLD': return '유찰됨';
+            case 'CANCELLED': return '판매 취소됨';
+            default: return '참여 불가';
+        }
+    });
 
 /* =============================================
 * 4. 메서드 (Methods) 영역
@@ -298,37 +354,41 @@
             isLoading.value = true;
             const response = await getAuctionDetails(auctionId);
             auction.value = response.data;
+            highestBidderId.value = auction.value.highestBidderId; // 최고 입찰자 ID 설정
             console.log(response.data);
 
-            // 경매 종료 여부 초기 확인
-            const endTime = parseJavaLocalDateTime(auction.value.endTime);
-            if (endTime && new Date() > endTime) {
-                isAuctionEnded.value = true;
-            }
+            // saleStatus가 ACTIVE일 때만 경매 관련 로직 수행
+            if (auction.value.saleStatus === 'ACTIVE') {
+                // 경매 종료 여부 초기 확인
+                const endTime = parseJavaLocalDateTime(auction.value.endTime);
+                if (endTime && new Date() > endTime) {
+                    isAuctionEnded.value = true;
+                }
 
-            if (isAuctionEnded.value) {
-                // 경매가 종료된 경우, 유저의 낙찰 상태를 확인합니다.
-                if (userStore.isLoggedIn && isAuction.value) {
-                    try {
-                        const statusResponse = await getAuctionWinnerStatus(auctionId, userStore.currentUser.memberId);
-                        userAuctionState.value = getKoreanAuctionStatus(statusResponse.data); // 'PENDING_PAYMENT', 'PAID', 'USER'
-                    } catch (e) {
-                        console.error("낙찰자 상태 조회에 실패했습니다:", e);
-                        userAuctionState.value = 'USER'; // 실패 시 기본값
+                if (isAuctionEnded.value) {
+                    // 경매가 종료된 경우, 유저의 낙찰 상태를 확인합니다.
+                    if (userStore.isLoggedIn && isAuction.value) {
+                        try {
+                            const statusResponse = await getAuctionWinnerStatus(auctionId, userStore.currentUser.memberId);
+                            userAuctionState.value = getKoreanAuctionStatus(statusResponse.data);
+                        } catch (e) {
+                            console.error("낙찰자 상태 조회에 실패했습니다:", e);
+                            userAuctionState.value = 'USER'; // 실패 시 기본값
+                        }
+                    } else {
+                        userAuctionState.value = 'USER'; // 비로그인 또는 경매 상품이 아님
                     }
                 } else {
-                    userAuctionState.value = 'USER'; // 비로그인 또는 경매 상품이 아님
+                    // 경매가 진행 중인 경우에만 WebSocket 구독 및 관련 데이터 로드
+                    if (isAuction.value) {
+                        currentBidPrice.value = auction.value.currentPrice;
+                        setupWebSocketSubscription();
+                        fetchBidHistory(auctionId);
+                    }
                 }
-            } else {
-                // 경매가 진행 중인 경우에만 WebSocket 구독 및 관련 데이터 로드
-                if (isAuction.value) {
-                    currentBidPrice.value = auction.value.currentPrice;
-                    setupWebSocketSubscription();
-                    fetchBidHistory(auctionId);
-                }
+                
+                startCountdown(); // 카운트다운은 ACTIVE 상태에서만 시작
             }
-            
-            startCountdown(); // 카운트다운은 항상 시작
         } catch (err) {
             error.value = "상품 정보를 불러오는 데 실패했습니다. 페이지를 새로고침해주세요.";
             console.error("Fetch auction data failed:", err);
@@ -345,7 +405,7 @@
             case 'PAID':
             return '결제 완료';
             case 'PREPARING_SHIPMENT':
-            return '배송 준비중'; // '배송 대기중' 대신 더 명확한 표현을 사용했습니다.
+            return '배송 준비중';
             case 'SHIPPED':
             return '배송 중';
             case 'DELIVERED':
@@ -362,8 +422,7 @@
             return '환불 완료';
             case 'USER':
             return 'USER';
-            default: 'USER';
-            // 정의되지 않은 상태값이 들어올 경우를 대비해 기본값을 설정합니다.
+            default:
             return status;
         }
     }
@@ -373,12 +432,14 @@
         subscribe(`/topic/auctions/${auctionId}`, (message) => {
             const broadcast = JSON.parse(message.body);
             currentBidPrice.value = broadcast.newPrice;
+            highestBidderId.value = broadcast.memberId; // 실시간으로 최고 입찰자 ID 갱신
+
             //새로운 입찰이 생기면 입찰 기록 갱신
-        const newHistoryEntry = {
-            bidAmount: broadcast.newPrice,
-            bidAt: new Date()
-        };
-        bidHistory.value.unshift(newHistoryEntry);
+            const newHistoryEntry = {
+                bidAmount: broadcast.newPrice,
+                bidAt: new Date()
+            };
+            bidHistory.value.unshift(newHistoryEntry);
 
             isBidSuccess.value = true;
             setTimeout(() => { isBidSuccess.value = false; }, 500);
@@ -386,27 +447,13 @@
     };
 
     //watch 로 로그인 여부 감지
-    // userStore의 'authToken' 상태를 감시(watch).
-    // 로그인/로그아웃으로 인해 이 값이 변경될 때마다, 이 로직이 자동으로 실행.
     watch(
     () => userStore.authToken,
     (newToken) => {
-        // [디버깅 로그] 토큰 변경 감지 시 로그를 출력하여 흐름 파악. 필요시 매개변수 newToken 옆에 oldToken 추가한다음 주석 해제
-        //console.log(`Authentication token changed. Re-establishing WebSocket connection. Old token exists: ${!!oldToken}, New token exists: ${!!newToken}`);
-
-        // 1. 기존 연결이 있다면 우선 안전하게 연결 종료.
         disconnect();
-
-        // 2. 새로운 토큰 상태로 재연결.
-        //    - 로그인 성공 시: newToken에 JWT가 담겨 '인증된' 연결.
-        //    - 로그아웃 시: newToken은 null이 되어 '익명' 연결.
         connect(newToken);
     },
     {
-        // immediate: true 옵션은 watch를 설정하는 즉시,
-        // (컴포넌트가 로드될 때) 현재 값으로 한번 실행
-        // 이를 통해 사용자가 페이지를 새로고침했을 때, localStorage에 남아있는
-        // 토큰으로 초기 WebSocket 연결을 맺을 수 있습니다.
         immediate: true
     }
     );
@@ -438,7 +485,6 @@
             bidAmount: parseInt(bidAmount.value, 10),
         };
 
-        // 중앙 websocketService의 발행 함수를 사용.
         publish({
             destination: `/app/auctions/${auctionId}/bids`,
             body: JSON.stringify(bidData)
@@ -472,27 +518,28 @@
         const numericCurrentPrice = currentBidPrice.value;
         const numericStartPrice = auction.value.price;
 
-        // 1. 빈 값 및 100원단위 확인
         if (isNaN(newBid) || newBid <= 0 || newBid % 100 !== 0) {
             alert("입찰 금액을 100원 단위의 올바른 숫자로 입력해주세요.");
             return;
         }
 
-        // 2. 입찰가 비교
-        // 입찰 기록이 없을 때 (첫 입찰)
+        if(newBid > 200000000){
+            alert("입찰 금액은 최대 2억원까지만 가능합니다.");
+            return;
+        }
+        
         if (numericCurrentPrice === numericStartPrice) {
             if (newBid <= numericStartPrice) {
                 alert(`입찰 금액은 시작가(${formattedStartPrice.value})보다 높아야 합니다.`);
                 return;
             }
-        } else { // 입찰 기록이 있을 때
+        } else {
             if (newBid < numericCurrentPrice + 1000) {
                 alert(`입찰 금액은 현재가(${formattedCurrentPrice.value})보다 1,000원 이상 높아야 합니다.`);
                 return;
             }
         }
 
-        // 4. 최종 입찰 확인
         const isConfirmed = confirm(`${newBid.toLocaleString()}원 입찰하시겠습니까?`);
 
         if (isConfirmed) {
@@ -508,9 +555,8 @@
     //Java LocalDateTime 배열을 JS Date 객체로 변환
     const parseJavaLocalDateTime = (dt) => {
         if (!Array.isArray(dt) || dt.length < 5) {
-            return null; // 잘못된 형식의 데이터일 경우 null 반환
+            return null;
         }
-        // [핵심] JavaScript의 Date 생성자는 월(month)을 0부터 시작하므로(0=1월), -1을 해줘야 함
         const [year, month, day, hour, minute, second = 0] = dt;
         return new Date(year, month - 1, day, hour, minute, second);
     };
@@ -526,7 +572,7 @@
             if (distance < 0) {
                 clearInterval(countdownInterval);
                 timeRemaining.value = isAuction.value ? "경매 종료" : "판매 종료";
-                isAuctionEnded.value = true; // 실시간으로 경매 종료 상태 업데이트
+                isAuctionEnded.value = true;
                 return;
             }
 
@@ -544,6 +590,13 @@
 
     //모달 ui 영역
     const openBidModal = () => {
+        // 경매 상태 선제적 확인
+        if (auction.value.saleStatus !== 'ACTIVE' || isAuctionEnded.value) {
+            alert("경매가 진행중인 상품이 아닙니다.");
+            // 최신 상태를 보여주기 위해 데이터 갱신
+            fetchAuctionData();
+            return;
+        }
  	    isBidModalVisible.value = true;
  	  };
 
@@ -557,7 +610,7 @@
  	  };
 
     const quickBid = (amountToAdd) => {
- 		 	bidAmount.value = currentBidPrice.value + amountToAdd;
+ 	 	 	bidAmount.value = currentBidPrice.value + amountToAdd;
  	  };
 
 /* =============================================
@@ -570,20 +623,16 @@
 
     // 컴포넌트가 언마운트되면 WebSocket 및 카운트다운 타이머 연결 해제
     onUnmounted(() => {
-        // 컴포넌트를 떠날 때, 해당 페이지의 구독만 안전하게 취소합니다.
-        // 경매가 진행 중인 상태에서만 구독을 취소합니다.
         if (isAuction.value && !isAuctionEnded.value) {
             unsubscribe(`/topic/auctions/${auctionId}`);
         }
-        // 메모리 누수를 방지하기 위해 인터벌 정리
         if (countdownInterval) {
             clearInterval(countdownInterval);
         }
 
-        disconnect(); // 컴포넌트 언마운트 시 WebSocket 연결 종료
+        disconnect();
     });
-</script>
-<style lang="scss" scoped>
+</script><style lang="scss" scoped>
 
     /* =============================================
     1. 기본 레이아웃 및 공통 스타일
@@ -914,6 +963,12 @@
         display: flex;
         gap: 10px; /* 버튼 사이 간격 */
         justify-content: flex-end; /* 버튼을 오른쪽으로 정렬 */
+    }
+
+    .policy-modal-content {
+        max-width: 700px; /* 가이드 모달은 조금 더 넓게 */
+        max-height: 80vh; /* 화면 높이의 80%로 최대 높이 제한 */
+        overflow-y: auto; /* 내용이 길어지면 스크롤 생성 */
     }
 
 </style>
