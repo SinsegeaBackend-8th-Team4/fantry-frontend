@@ -34,7 +34,6 @@ const OnlineInspectionListPage = () => import('@/pages/admin/inspection/OnlineIn
 const OnlineInspectionDetailPage = () => import('@/pages/admin/inspection/OnlineInspectionDetailPage.vue')
 const OfflineInspectionListPage = () => import('@/pages/admin/inspection/OfflineInspectionListPage.vue')
 const OfflineInspectionDetailPage = () => import('@/pages/admin/inspection/OfflineInspectionDetailPage.vue')
-const InspectionHistoryPage = () => import('@/pages/admin/inspection/InspectionHistoryPage.vue')
 
 // 재고 관리
 const InventoryDashboardPage = () => import('@/pages/admin/inventory/InventoryDashboardPage.vue')
@@ -134,7 +133,6 @@ const adminRoutes = {
             { path: 'online/:id', name: 'AdminOnlineInspectionDetail', component: OnlineInspectionDetailPage, meta: { title: '온라인 1차 상세', hidden: true } },
             { path: 'offline', name: 'AdminOfflineInspectionList', component: OfflineInspectionListPage, meta: { title: '오프라인 2차 검수' } },
             { path: 'offline/:id', name: 'AdminOfflineInspectionDetail', component: OfflineInspectionDetailPage, meta: { title: '오프라인 2차 상세', hidden: true } },
-            { path: 'history', name: 'AdminInspectionHistory', component: InspectionHistoryPage, meta: { title: '검수 이력' } },
           ],
         },
         // --- 재고 관리 ---

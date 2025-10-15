@@ -1,16 +1,26 @@
 <script setup>
+import { onMounted } from 'vue'
 import IconCountChip from '../atoms/IconCountChip.vue'
 import SearchBar from '../molecules/SearchBar.vue'
 import NavigationBar from '../molecules/NavigationBar.vue'
 import BrandLogo from '../atoms/BrandLogo.vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
+import { useModal } from '@/composables/useModal'
 
 const router = useRouter()
 const userStore = useUserStore()
 
+// 검수 기준 확인 모달을 위한 로직 추가
+const { initModal: initPolicyModal, show: showPolicyModal, hide: hidePolicyModal } = useModal('#policyCheckModal')
+
+onMounted(() => {
+  initPolicyModal()
+})
+
 // 판매하기 페이지 이동
 const goToInspection = () => {
+  hidePolicyModal()
   router.push('/inspection/step1')
 }
 </script>
@@ -19,13 +29,15 @@ const goToInspection = () => {
     <!-- 상단 얇은 정보 바: 기존 bg-secondary 대신 커스텀 .top-bar 적용 -->
     <div class="row top-bar py-2 px-xl-5">
       <div class="col-lg-6 d-none d-lg-block">
+        <div class="col-lg-6 d-none d-lg-block">
         <div class="d-inline-flex align-items-center">
           <a class="text-dark" href="">FAQs</a>
           <span class="text-muted px-2">|</span>
-          <a class="text-dark" href="">Help</a>
+          <a class="text-dark" href="/inspection/policy">검수 기준</a>
           <span class="text-muted px-2">|</span>
-          <a class="text-dark" href="">Support</a>
+          <a class="text-dark" href="">고객 지원</a>
         </div>
+      </div>
       </div>
     </div>
     <div class="row align-items-center py-3 px-xl-5">
@@ -37,7 +49,7 @@ const goToInspection = () => {
       </div>
       <div class="col-lg-3 col-6 text-right">
         <template v-if="userStore.isLoggedIn">
-          <a href="#" class="btn border" @click.prevent="goToInspection" style="margin-right: 0.5rem;">
+          <a href="#" class="btn border" @click.prevent="showPolicyModal" style="margin-right: 0.5rem;">
             <i class="fas fa-tags text-primary"></i>
             <span class="badge">판매하기</span>
           </a>
@@ -55,6 +67,25 @@ const goToInspection = () => {
     <div class="row main-nav-bar px-xl-5">
       <div class="col-lg-12">
         <NavigationBar />
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="policyCheckModal" tabindex="-1" aria-labelledby="policyCheckModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="policyCheckModalLabel">검수 기준 확인</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <p>정확하고 원활한 검수 진행을 위해, Fantry의 검수 기준을 먼저 확인해주세요.</p>
+          <p class="text-muted small">검수 기준에 동의하지 않으실 경우, 검수 신청이 반려될 수 있습니다.</p>
+        </div>
+        <div class="modal-footer">
+           <a href="/inspection/policy" class="btn btn-outline-secondary" data-dismiss="modal">검수 기준 보기</a>
+          <button type="button" class="btn btn-primary" data-dismiss="modal" @click="goToInspection">신청 계속하기</button>
+        </div>
       </div>
     </div>
   </div>
