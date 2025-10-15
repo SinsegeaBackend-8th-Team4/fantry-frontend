@@ -67,7 +67,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import {
   getOrderById,
   prepareShipment,
@@ -80,18 +80,27 @@ import {
   completeRefund
 } from '@/api/order';
 
-const route = useRoute();
+const props = defineProps({
+  orderId: {
+    type: String,
+    required: true
+  }
+});
+
 const router = useRouter();
 
 const order = ref(null);
 const loading = ref(true);
-const orderId = route.params.orderId;
 
 async function fetchOrderDetails() {
   try {
     loading.value = true;
-    const response = await getOrderById(orderId);
-    order.value = response.data; // API 응답 구조에 따라 조정
+    const response = await getOrderById(props.orderId);
+    const responseData = response.data;
+    if (responseData && responseData.orderId && !responseData.ordersId) {
+      responseData.ordersId = responseData.orderId;
+    }
+    order.value = responseData; // API 응답 구조에 따라 조정
   } catch (error) {
     console.error('주문 상세 정보 조회 실패:', error);
     order.value = null;
@@ -120,7 +129,7 @@ async function updateStatus(statusKey) {
   }
 
   try {
-    const response = await action(orderId);
+    const response = await action(props.orderId);
     alert('주문 상태가 성공적으로 변경되었습니다.');
     await fetchOrderDetails(); // 상태 변경 후 데이터 다시 불러오기
   } catch (error) {
