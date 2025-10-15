@@ -71,3 +71,21 @@ export const deleteFaq = (faqId) => {
 export const updateFaq = (faqId, faqData) => {
   return apiClient.patch(`/admin/cs/faq/${faqId}`, faqData);
 };
+
+/**
+ * 특정 FAQ에 파일을 첨부합니다.
+ * @param {number} faqId - 파일을 첨부할 FAQ의 ID
+ * @param {File[]} files - 첨부할 파일 목록
+ * @returns {Promise<axios.AxiosResponse<any>>}
+ */
+export const addFaqAttachments = (faqId, files) => {
+  const formData = new FormData();
+  files.forEach(file => {
+    formData.append('files', file);
+  });
+  return apiClient.post(`/admin/cs/faq/${faqId}/attachments`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};

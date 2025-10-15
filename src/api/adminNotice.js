@@ -75,3 +75,21 @@ export const deleteNotice = (noticeId) => {
 export const getNoticeStats = () => {
   return unwrap(apiClient.get('/admin/cs/notices/stats'));
 };
+
+/**
+ * 특정 공지사항에 파일을 첨부합니다.
+ * @param {number} noticeId - 파일을 첨부할 공지사항의 ID
+ * @param {File[]} files - 첨부할 파일 목록
+ * @returns {Promise<axios.AxiosResponse<any>>}
+ */
+export const addNoticeAttachments = (noticeId, files) => {
+  const formData = new FormData();
+  files.forEach(file => {
+    formData.append('files', file);
+  });
+  return apiClient.post(`/admin/cs/notices/${noticeId}/attachments`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
