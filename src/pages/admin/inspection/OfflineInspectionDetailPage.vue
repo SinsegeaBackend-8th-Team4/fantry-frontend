@@ -246,15 +246,8 @@ const parseOptions = (raw) => {
   }
 }
 
-const goToAuction = () => {
-  alert('TODO: 판매 등록 페이지로 이동합니다.')
-  //router.push('')
-}
-
 // 승인/반려 버튼 활성화 조건
 const canDecide = computed(() => online.value?.inspectionStatus === 'OFFLINE_INSPECTING')
-// 판매등록 버튼 활성화 조건
-const canAuction = computed(() => online.value?.inspectionStatus === 'COMPLETED')
 </script>
 
 <template>
@@ -271,9 +264,6 @@ const canAuction = computed(() => online.value?.inspectionStatus === 'COMPLETED'
             <div v-if="canDecide" class="ml-2">
               <button class="btn btn-sm btn-danger fw-medium px-3" @click="openRejectModal">반려</button>
               <button class="btn btn-sm btn-primary fw-medium px-3 ml-2" @click="openApproveModal">승인</button>
-            </div>
-            <div v-if="canAuction" class="ml-2">
-              <button class="btn btn-sm btn-primary fw-medium px-3" @click="goToAuction">판매 등록</button>
             </div>
           </div>
         </div>

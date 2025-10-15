@@ -137,43 +137,57 @@ onMounted(() => {
             <h5 class="modal-title">검수 신청 상세 정보</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>
-          <div class="modal-body">
-            <dl class="row mb-0" v-if="detail">
-              <dt class="col-sm-4">검수 ID</dt><dd class="col-sm-8">{{ detail.productInspectionId }}</dd>
-              <dt class="col-sm-4">상품명</dt><dd class="col-sm-8 text-truncate">{{ detail.itemName }}</dd>
-              <dt class="col-sm-4">카테고리</dt><dd class="col-sm-8">{{ detail.goodsCategoryName }}</dd>
-              <dt class="col-sm-4">아티스트</dt><dd class="col-sm-8">{{ detail.artistName }}</dd>
-              <dt class="col-sm-4">상품 설명</dt><dd class="col-sm-8">{{ detail.itemDescription || '-' }}</dd>
-              <hr class="my-2"/>
-              <dt class="col-sm-4">판매 희망가</dt><dd class="col-sm-8">{{ formatPrice(detail.sellerHopePrice) }}</dd>
-              
-              <template v-if="detail.inspectionStatus === 'COMPLETED'">
-                <dt class="col-sm-4 text-primary">최종 매입가</dt>
-                <dd class="col-sm-8 fw-bold text-primary">{{ formatPrice(detail.finalBuyPrice) }}</dd>
-                <dt class="col-sm-4">감가 사유</dt>
-                <dd class="col-sm-8">{{ detail.priceDeductionReason || '-' }}</dd>
-              </template>
+          <div class="modal-body" v-if="detail">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <h5 class="mb-0 fw-bold">{{ detail.itemName }}</h5>
+              <span class="badge fs-6" :class="adminStore.getStatusBadge(detail.inspectionStatus)">
+                {{ adminStore.getStatusLabel(detail.inspectionStatus) }}
+              </span>
+            </div>
 
-              <hr class="my-2"/>
-              <dt class="col-sm-4">상태</dt>
-              <dd class="col-sm-8">
-                <span class="badge" :class="adminStore.getStatusBadge(detail.inspectionStatus)">
-                  {{ adminStore.getStatusLabel(detail.inspectionStatus) }}
-                </span>
-              </dd>
-              
-              <template v-if="detail.inspectionStatus === 'ONLINE_REJECTED'">
-                  <dt class="col-sm-4 text-danger">1차 반려 사유</dt>
-                  <dd class="col-sm-8 text-danger">{{ detail.firstRejectionReason || '사유 없음' }}</dd>
-              </template>
+            <div class="info-section">
+              <h6>상품 정보</h6>
+              <dl class="row">
+                <dt class="col-sm-3">검수 ID</dt><dd class="col-sm-9">{{ detail.productInspectionId }}</dd>
+                <dt class="col-sm-3">카테고리</dt><dd class="col-sm-9">{{ detail.goodsCategoryName }}</dd>
+                <dt class="col-sm-3">아티스트</dt><dd class="col-sm-9">{{ detail.artistName }}</dd>
+                <dt class="col-sm-3">상품 설명</dt><dd class="col-sm-9">{{ detail.itemDescription || '-' }}</dd>
+              </dl>
+            </div>
 
-              <template v-if="detail.inspectionStatus === 'OFFLINE_REJECTED'">
-                  <dt class="col-sm-4 text-danger">최종 반려 사유</dt>
-                  <dd class="col-sm-8 text-danger">{{ detail.secondRejectionReason || '사유 없음' }}</dd>
-              </template>
+            <div class="info-section">
+              <h6>가격 정보</h6>
+              <dl class="row">
+                <dt class="col-sm-3">판매 희망가</dt><dd class="col-sm-9">{{ formatPrice(detail.sellerHopePrice) }}</dd>
+                <template v-if="detail.inspectionStatus === 'COMPLETED'">
+                  <dt class="col-sm-3 text-primary">최종 매입가</dt>
+                  <dd class="col-sm-9 fw-bold text-primary">{{ formatPrice(detail.finalBuyPrice) }}</dd>
+                </template>
+              </dl>
+            </div>
 
-              <dt class="col-sm-4">제출일</dt><dd class="col-sm-8">{{ formatDate(detail.submittedAt) }}</dd>
-            </dl>
+            <div class="info-section">
+                <h6>검수 상태 및 일자</h6>
+                <dl class="row">
+                    <dt class="col-sm-3">제출일</dt><dd class="col-sm-9">{{ formatDate(detail.submittedAt) || '-' }}</dd>
+                    <dt class="col-sm-3">1차 검수일</dt><dd class="col-sm-9">{{ formatDate(detail.onlineInspectedAt) || '-' }}</dd>
+                    <dt class="col-sm-3">2차 검수일</dt><dd class="col-sm-9">{{ formatDate(detail.offlineInspectedAt) || '-' }}</dd>
+                    <template v-if="detail.inspectionStatus === 'COMPLETED'">
+                        <dt class="col-sm-3">최종 승인일</dt><dd class="col-sm-9">{{ formatDate(detail.completedAt) || '-' }}</dd>
+                    </template>
+                </dl>
+            </div>
+            
+            <div v-if="detail.inspectionStatus === 'ONLINE_REJECTED'" class="alert alert-danger mt-3">
+              <strong>1차 반려 사유:</strong> {{ detail.firstRejectionReason || '사유 없음' }}
+            </div>
+            <div v-if="detail.inspectionStatus === 'OFFLINE_REJECTED'" class="alert alert-danger mt-3">
+              <strong>최종 반려 사유:</strong> {{ detail.secondRejectionReason || '사유 없음' }}
+            </div>
+            <div v-if="detail.inspectionStatus === 'COMPLETED' && detail.priceDeductionReason" class="alert alert-info mt-3">
+              <strong>감가 사유:</strong> {{ detail.priceDeductionReason }}
+            </div>
+
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
@@ -241,4 +255,44 @@ onMounted(() => {
   background-color: rgba(255, 255, 255, 0.6);
   z-index: 10;
 }
+<<<<<<< HEAD
+
+/* 모달 스타일 개선 */
+.modal-body {
+  padding: 1.5rem;
+}
+.modal-title {
+  font-weight: 600;
+}
+.info-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+.info-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+.info-section h6 {
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+.modal-body dl {
+  font-size: 0.9rem;
+}
+.modal-body dt {
+  color: #6c757d;
+  font-weight: 500;
+}
+.modal-body dd {
+  color: #212529;
+}
+.alert {
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+}
+=======
+>>>>>>> upstream/develop
 </style>
