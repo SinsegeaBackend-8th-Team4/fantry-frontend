@@ -55,10 +55,13 @@
                                     <p class="start-price-info">(시작가: {{ formattedStartPrice }})</p>
                                 </div>
                             </div>
-                            <button class="btn btn-danger btn-lg w-100" @click="openBidModal" :disabled="!userStore.isLoggedIn"
-                                :title="!userStore.isLoggedIn ? '로그인이 필요합니다.' : '입찰에 참여하세요'">
-                                {{ userStore.isLoggedIn ? '경매 참여하기' : '로그인 후 참여 가능' }}
-                            </button>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                                <button class="btn btn-danger btn-lg flex-grow-1" @click="openBidModal" :disabled="!userStore.isLoggedIn"
+                                    :title="!userStore.isLoggedIn ? '로그인이 필요합니다.' : '입찰에 참여하세요'">
+                                    {{ userStore.isLoggedIn ? '경매 참여하기' : '로그인 후 참여 가능' }}
+                                </button>
+                                <button class="btn btn-outline-secondary btn-lg" @click="isPolicyModalVisible = true">경매 이용 가이드</button>
+                            </div>
                         </template>
 
                         <!-- 경매 종료 후 UI -->
@@ -208,6 +211,14 @@
                 </form>
             </div>
         </div>
+
+        <!-- 경매 이용 가이드 모달 -->
+        <div v-if="isPolicyModalVisible" class="modal-overlay" @click.self="isPolicyModalVisible = false">
+            <div class="modal-content policy-modal-content">
+                <button class="modal-close-btn" @click="isPolicyModalVisible = false">&times;</button>
+                <ProductAuctionPolicy />
+            </div>
+        </div>
     </div>
 </template>
 
@@ -221,6 +232,8 @@
     import { getBidsByAuctionId } from '@/api/bid';  //입찰 관련 API 함수
     import { useUserStore } from '@/stores/userStore';
     import { subscribe, unsubscribe, publish, disconnect, connect } from '@/services/websocketService';
+    import ProductAuctionPolicy from '@/components/product/ProductAuctionPolicy.vue'; // 경매 이용 안내 컴포넌트
+
     const route = useRoute();
     const userStore = useUserStore();
     const auctionId = route.params.id;
@@ -248,6 +261,7 @@
     const isBidHistoryVisible = ref(false);
     const userAuctionState = ref('USER'); // 경매 종료 후 유저 상태: PENDING_PAYMENT, PAID, USER
     const isAuctionEnded = ref(false); // 경매 종료 여부
+    const isPolicyModalVisible = ref(false); // 경매 이용 안내 모달 표시 여부
 
     //썸네일 이미지 데이터
     const productImages = ref([
@@ -949,6 +963,12 @@
         display: flex;
         gap: 10px; /* 버튼 사이 간격 */
         justify-content: flex-end; /* 버튼을 오른쪽으로 정렬 */
+    }
+
+    .policy-modal-content {
+        max-width: 700px; /* 가이드 모달은 조금 더 넓게 */
+        max-height: 80vh; /* 화면 높이의 80%로 최대 높이 제한 */
+        overflow-y: auto; /* 내용이 길어지면 스크롤 생성 */
     }
 
 </style>

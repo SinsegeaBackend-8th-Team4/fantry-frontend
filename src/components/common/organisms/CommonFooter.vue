@@ -20,7 +20,7 @@ const router = useRouter()
           <div class="col-md-4 mb-5">
             <h5 class="font-weight-bold text-dark mb-4">이용 안내</h5>
             <div class="d-flex flex-column justify-content-start">
-              <FooterQuickLink text="경매 이용 방법" @click="router.push('/')" />
+              <FooterQuickLink text="경매 이용 방법" @click="router.push('/product/auction-policy')" />
               <FooterQuickLink text="검수 기준 안내" @click="router.push('/inspection/policy')" />
               <FooterQuickLink text="공지사항" @click="router.push('/')" />
             </div>
