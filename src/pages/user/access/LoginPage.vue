@@ -21,6 +21,7 @@
       userStore.setLoginInfo(response.data.tokenMemberResponse, response.data.accessToken);
       router.push('/');
     } catch (error) {
+      alert(error.response.data.message);
       console.log("로그인결과: ", error);
       router.push('/login/fail');
     }
@@ -279,10 +280,10 @@
   }
 
   .sns-btn.naver {
-    background-image: url("../../public/images/login_naver_btn.png");
+    background-image: url("/images/login_naver_btn.png");
   }
 
   .sns-btn.kakao {
-    background-image: url("../../public/images/login_kakao_btn.png");
+    background-image: url("/images/login_kakao_btn.png");
   }
 </style>
