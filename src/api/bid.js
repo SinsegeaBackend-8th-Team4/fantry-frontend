@@ -15,7 +15,7 @@ export const getBidsByAuctionId = (auctionId) => {
  * @returns {Promise<List<Bid>>}
  */
 export const getBidsByMemberId = (bidderId) => {
-    return apiClient.get(`/bids/members/${bidderId}`);
+    return apiClient.get(`/bids/member/${bidderId}`);
 };
 
 /**

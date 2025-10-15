@@ -13,7 +13,6 @@ import SalesHistory from './selling/SalesHistory.vue'
 //구매 관리
 import AuctionHistory from './buying/AuctionHistory.vue'
 import OrderHistory from './buying/OrderHistory.vue'
-import BidHistory from './buying/BidHistory.vue'
 //고객 센터
 import MypageInquiry from './support/MypageInquiry.vue'
 
@@ -35,8 +34,6 @@ const componentMap = {
   //구매 관리===========================
   'auction-history': AuctionHistory,
   'order-history': OrderHistory,
-  'bid-history': BidHistory,
-  //
   //고객 센터===========================
   'inquiry': MypageInquiry,
 }
@@ -76,8 +73,7 @@ const menuItems = [
     icon: '🛒',
     subMenus: [
       { id: 'auction-history', title: '경매/입찰 내역' },
-      { id: 'order-history', title: '주문 내역' },
-      { id: 'bid-history', title: '낙찰 내역' }
+      { id: 'order-history', title: '주문 내역' }
     ]
   },
   {

@@ -351,7 +351,6 @@
     <!-- 상세 모달 -->
     <div v-if="showDetail" class="inquiry-modal-backdrop" @click.self="closeDetail">
       <div class="inquiry-modal">
-        <button class="modal-close btn btn-sm btn-light" @click="closeDetail">닫기 ×</button>
         <MypageInquiryDetail
           v-if="selectedInquiryId !== null"
           :inquiryId="selectedInquiryId" 
