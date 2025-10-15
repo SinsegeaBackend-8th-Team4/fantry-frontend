@@ -20,9 +20,19 @@ export const getAuctionDetails = (auctionId) => {
  * @returns {Promise<string>}
  */
 export const getAuctionWinnerStatus = (auctionId, memberId) => {
-    return publicClient.get(`/auctions/${auctionId}/winner-status`, {
+    return publicApiClient.get(`/auctions/${auctionId}/winner-status`, {
         params: { memberId }
     });
+}
+
+/**
+ * 특정 회원이 입찰에 참여한 현재 진행중인 경매 목록을 조회합니다.
+ * @param memberId 조회할 회원의 ID
+ * @return 해당 회원이 입찰한 활성 경매 목록. (pk list)
+ */
+
+export const getActiveAuctionsByBidder = (memberId) => {
+    return apiClient.get(`/auctions/member/${memberId}/bids`);
 }
 
 /**
