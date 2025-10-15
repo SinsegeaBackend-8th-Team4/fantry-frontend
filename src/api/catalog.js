@@ -14,6 +14,12 @@ export const deleteGoodsCategory = (categoryId) => unwrap(apiClient.delete(`/adm
 /* === 아티스트 API === */
 // 아티스트 전체 목록 조회
 export const getArtists = () => unwrap(apiClient.get('/catalog/artists')).catch(rethrow)
+// 신규 아티스트 등록
+export const createArtist = (artist) => unwrap(apiClient.post('/admin/catalog/artists', artist)).catch(rethrow)
+// 아티스트 수정
+export const updateArtist = (artistId, artist) => unwrap(apiClient.put(`/admin/catalog/artists/${artistId}`, artist)).catch(rethrow)
+// 아티스트 삭제
+export const deleteArtist = (artistId) => unwrap(apiClient.delete(`/admin/catalog/artists/${artistId}`)).catch(rethrow)
 /* =================== */
 
 /* === 앨범 API === */

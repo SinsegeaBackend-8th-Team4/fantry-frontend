@@ -1,138 +1,249 @@
 <script setup>
-import { ref } from 'vue'
-import { getInspectionsByStatus } from '@/api/adminInspection'
-import { useAdminInspectionStore } from '@/stores/adminInspectionStore'
-import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue'
-import { currencyCol, dateCol } from '@/composables/useDataTableColumns'
+import { ref, onMounted, computed } from 'vue'
+import BaseDataTable from '@/components/common/datatable/BaseDataTable.vue'
+import { getArtists, createArtist, updateArtist, deleteArtist } from '@/api/catalog'
+import { useModal } from '@/composables/useModal'
 
-const adminStore = useAdminInspectionStore()
-
-// 상태 변수
-const loading = ref(false) // 로딩 상태
+// --- 상태 관리 ---
 const keyword = ref('')
-const tableKey = ref(0) // 필터 변경 시 테이블을 강제로 리로드하기 위한 키
-const currentFilter = ref(['SUBMITTED']) // 필터 상태 관리 (기본값 : 1차 제출)
+const loading = ref(false)
+const allArtists = ref([])
+const pageRef = ref(null) // 페이지 최상위 엘리먼트 참조
 
-// 필터 목록
-const filters = [
-  { label: '전체', value: ['SUBMITTED', 'ONLINE_APPROVED', 'ONLINE_REJECTED'] },
-  { label: '대기', value: ['SUBMITTED'] },
-  { label: '승인', value: ['ONLINE_APPROVED'] },
-  { label: '반려', value: ['ONLINE_REJECTED'] },
-]
+// --- 모달 관련 ---
+const isEditMode = ref(false)
+const selectedArtist = ref({
+  artistId: null,
+  nameKo: '',
+  nameEn: '',
+  groupType: ''
+})
+const { initModal, show, hide } = useModal('#artistModal')
 
-// fetcher : 1차 검수 신청 목록 조회
-async function fetchInspections({ page, size, sort, keyword }) {
+// --- 유틸리티 함수 ---
+const formatDateTime = (dt) => {
+  if (!dt || !Array.isArray(dt) || dt.length < 5) return '-'
+  const [year, month, day, hour, minute] = dt
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')} ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+}
+
+// --- 데이터 로딩 ---
+const loadArtists = async () => {
   loading.value = true
   try {
-    const res = await getInspectionsByStatus({
-      statuses: currentFilter.value,
-      page: page,
-      size,
-      sort,
-      keyword,
-    })
-
-    return {
-      rows: res?.items || [],
-      total: res?.meta?.totalElements || 0,
-    }
-  } catch (err) {
-    console.error('1차 검수 목록 조회 실패:', err)
-    alert(err.message || '데이터를 불러오는 데 실패했습니다.')
-    return { rows: [], total: 0 }
+    allArtists.value = await getArtists()
+  } catch (e) {
+    alert(e.message || '아티스트 목록 조회에 실패했습니다.')
+    allArtists.value = []
   } finally {
     loading.value = false
   }
 }
 
-// 테이블 컬럼 정의
+// --- 모달 및 CRUD 핸들러 ---
+const openAddModal = () => {
+  isEditMode.value = false
+  selectedArtist.value = { artistId: null, nameKo: '', nameEn: '', groupType: 'MALE_GROUP' } // 기본값 설정
+  show()
+}
+
+const openEditModal = (artist) => {
+  isEditMode.value = true
+  selectedArtist.value = { ...artist }
+  show()
+}
+
+const handleDelete = async (artist) => {
+  if (!confirm(`'${artist.nameKo}' 아티스트를 정말 삭제하시겠습니까?`)) return
+
+  try {
+    await deleteArtist(artist.artistId)
+    alert(`'${artist.nameKo}' 아티스트가 삭제되었습니다.`)
+    await loadArtists()
+  } catch (e) {
+    alert(e.message || '삭제 처리 중 오류가 발생했습니다.')
+  }
+}
+
+const saveArtist = async () => {
+  if (!selectedArtist.value.nameKo || !selectedArtist.value.nameEn || !selectedArtist.value.groupType) {
+    alert('모든 필수 항목을 입력해주세요.')
+    return
+  }
+
+  try {
+    const payload = {
+      nameKo: selectedArtist.value.nameKo,
+      nameEn: selectedArtist.value.nameEn,
+      groupType: selectedArtist.value.groupType
+    }
+    if (isEditMode.value) {
+      await updateArtist(selectedArtist.value.artistId, payload)
+      alert(`'${payload.nameKo}' 아티스트가 수정되었습니다.`)
+    } else {
+      await createArtist(payload)
+      alert(`'${payload.nameKo}' 아티스트가 추가되었습니다.`)
+    }
+    hide()
+    await loadArtists()
+  } catch(e) {
+      alert(e.message || '저장 처리 중 오류가 발생했습니다.')
+  }
+}
+
+// --- 검색 기능 ---
+const filteredArtists = computed(() => {
+  if (!keyword.value) {
+    return allArtists.value
+  }
+  const lowerKeyword = keyword.value.toLowerCase()
+  return allArtists.value.filter(
+    (art) =>
+      art.nameKo.toLowerCase().includes(lowerKeyword) ||
+      art.nameEn.toLowerCase().includes(lowerKeyword)
+  )
+})
+
+// --- 테이블 컬럼 및 옵션 ---
+const groupTypes = [
+    { value: 'MALE_GROUP', text: '남자 그룹' },
+    { value: 'FEMALE_GROUP', text: '여자 그룹' },
+    { value: 'MALE_SOLO', text: '남자 솔로' },
+    { value: 'FEMALE_SOLO', text: '여자 솔로' },
+    { value: 'MIXED', text: '혼성 그룹' },
+    { value: 'OTHER', text: '기타' },
+]
+
 const columns = [
-  { data: 'productInspectionId', title: 'ID', className: 'text-center w-5' },
-  { data: 'memberName', title: '회원명', className: 'text-center' },
-  { data: 'goodsCategoryName', title: '카테고리', className: 'text-center' },
-  { data: 'artistName', title: '아티스트', className: 'text-center' },
-  { data: 'itemName', title: '상품명', className: 'text-center text-truncate' },
-  { ...currencyCol('expectedPrice', '예상가'), className: 'text-end' },
-  { ...currencyCol('sellerHopePrice', '희망가'), className: 'text-end' },
-  { ...dateCol('submittedAt', '제출일'), className: 'text-center' },
+  { data: 'artistId', title: 'ID', className: 'text-center' },
+  { data: 'nameKo', title: '한글명' },
+  { data: 'nameEn', title: '영문명' },
+  { data: 'createdAt', title: '등록일', className: 'text-center', render: (data) => formatDateTime(data) },
+  { data: 'updatedAt', title: '수정일', className: 'text-center', render: (data) => formatDateTime(data) },
   {
-    data: 'inspectionStatus',
-    title: '상태',
-    className: 'text-center',
-    render: (data) => `<span class="badge ${adminStore.getStatusBadge(data)}">${adminStore.getStatusLabel(data)}</span>`,
-  },
-  {
-    data: null,
+    data: 'artistId',
     title: '관리',
     sortable: false,
     className: 'text-center',
-    render: (data, type, row) => `<a href="/admin/inspection/online/${row.productInspectionId}" class="btn btn-sm btn-outline-primary px-2">상세</a>`,
+    render: (id) => `
+        <button class="btn btn-sm btn-outline-primary px-2 btn-edit" data-id="${id}">수정</button>
+        <button class="btn btn-sm btn-outline-danger px-2 ml-2 btn-delete" data-id="${id}">삭제</button>
+      `
   },
 ]
 
-// 필터 변경 시 테이블 리로드
-function changeFilter(statuses) {
-  currentFilter.value = statuses
-  tableKey.value++
+const tableOptions = {
+  pageLength: 10,
+  lengthChange: false
 }
+
+// --- 생명주기 및 이벤트 핸들링 ---
+onMounted(() => {
+  initModal()
+  loadArtists()
+
+  pageRef.value.addEventListener('click', (event) => {
+    const button = event.target.closest('button[data-id]');
+    if (!button) return;
+
+    const id = parseInt(button.dataset.id, 10);
+    const artist = allArtists.value.find(a => a.artistId === id);
+    if (!artist) return;
+
+    if (button.classList.contains('btn-edit')) {
+        openEditModal(artist);
+    } else if (button.classList.contains('btn-delete')) {
+        handleDelete(artist);
+    }
+  });
+})
 </script>
 
 <template>
-  <main class="container-fluid p-4">
+  <main class="container-fluid p-4" ref="pageRef">
     <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
-      <!-- 헤더 -->
       <div class="card-header bg-white border-bottom-0 pt-4 px-4 pb-2">
-        <h4 class="fw-semibold text-dark mb-1">1차 온라인 검수 목록</h4>
-        <p class="text-muted small">판매자가 제출한 상품의 1차 온라인 검수 내역을 확인하고 상세 검수를 진행합니다.</p>
-      </div>
-
-      <!-- 필터 버튼 -->
-      <div class="card-body p-4">
-        <div class="btn-group mb-3" role="group">
-          <button
-            v-for="filter in filters"
-            :key="filter.label"
-            type="button"
-            class="btn btn-sm fw-medium px-3 py-1"
-            :class="JSON.stringify(currentFilter) === JSON.stringify(filter.value) ? 'btn-dark text-white' : 'btn-outline-secondary text-muted hover-btn'"
-            @click="changeFilter(filter.value)"
-          >
-            {{ filter.label }}
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h4 class="fw-semibold text-dark mb-1">아티스트 관리</h4>
+            <p class="text-muted small">상품 분류에 사용될 아티스트를 관리합니다.</p>
+          </div>
+          <button class="btn btn-primary" @click="openAddModal">
+            <i class="fas fa-plus fa-sm"></i> 추가
           </button>
         </div>
+      </div>
 
-        <!-- 테이블 -->
-        <div class="position-relative">
-          <ServerDataTable :key="tableKey" v-model:keyword="keyword" :columns="columns" :fetcher="fetchInspections" :page-size="10" :loading="loading">
-            <template #empty>현재 조건에 해당하는 검수 내역이 없습니다.</template>
-          </ServerDataTable>
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="small text-muted">
+            총 {{ filteredArtists.length }}건
+          </div>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            style="width:250px"
+            v-model="keyword"
+            placeholder="한글명 또는 영문명으로 검색"
+          />
+        </div>
+        
+        <BaseDataTable
+            :columns="columns"
+            :data="filteredArtists"
+            :loading="loading"
+            :options="tableOptions"
+        >
+            <template #empty> 등록된 아티스트가 없습니다. </template>
+        </BaseDataTable>
+      </div>
+    </div>
 
-          <!-- 로딩 오버레이 -->
-          <transition name="fade">
-            <div v-if="loading" class="loading-overlay">
-              <div class="spinner-border text-primary" role="status"></div>
-            </div>
-          </transition>
+    <div class="modal fade" id="artistModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ isEditMode ? '아티스트 수정' : '아티스트 추가' }}</h5>
+            <button type="button" class="close" data-dismiss="modal">
+              <span>&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="saveArtist">
+              <div class="form-group">
+                <label for="artistNameKo">한글명 <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="artistNameKo" v-model="selectedArtist.nameKo" required />
+              </div>
+              <div class="form-group mt-3">
+                <label for="artistNameEn">영문명 <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="artistNameEn" v-model="selectedArtist.nameEn" required />
+              </div>
+              <div class="form-group mt-3">
+                <label for="artistGroupType">그룹 구분 <span class="text-danger">*</span></label>
+                <select class="form-control" id="artistGroupType" v-model="selectedArtist.groupType" required>
+                    <option value="" disabled>선택하세요</option>
+                    <option v-for="type in groupTypes" :key="type.value" :value="type.value">
+                        {{ type.text }}
+                    </option>
+                </select>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+            <button type="button" class="btn btn-primary" @click="saveArtist">저장</button>
+          </div>
         </div>
       </div>
     </div>
   </main>
 </template>
+
 <style scoped lang="scss">
-/* 카드 타이틀 */
 .card-header h4 {
   font-size: 1.25rem;
 }
 
-/* hover 버튼 */
-.hover-btn:hover {
-  background-color: #f3f3f3;
-  border-color: #bbb;
-  color: #222 !important;
-}
-
-/* 테이블 정렬/디자인 통일 */
 :deep(.datatable-wrapper) {
   th {
     background-color: #f9fafb;
@@ -142,47 +253,11 @@ function changeFilter(statuses) {
     vertical-align: middle;
   }
   td {
-    text-align: center !important;
     vertical-align: middle !important;
     padding: 0.9rem 0.75rem;
-    white-space: nowrap;
-  }
-  td.text-end {
-    text-align: right !important;
   }
   tr:hover td {
     background-color: #f8f9fa;
   }
-}
-
-/* 정렬 화살표 중앙 배치 */
-:deep(th.sorting),
-:deep(th.sorting_asc),
-:deep(th.sorting_desc) {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  gap: 4px;
-}
-
-/* 로딩 오버레이 */
-.loading-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(255, 255, 255, 0.6);
-  z-index: 10;
-}
-
-/* 페이드 전환 */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.25s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 </style>
