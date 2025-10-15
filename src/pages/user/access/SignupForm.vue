@@ -22,6 +22,7 @@
         phone: '',
         emailLocal: '',
         emailDomain: '',
+        customEmailDomain: '', // 직접 입력을 위한 상태 추가
         verificationCode: ''
     });
 
@@ -88,8 +89,16 @@
     }
 
     //이메일 유효성 검사
-    const validateEmail = (local, domain) => {
-        const fullEmail = `${local}@${domain}`;
+    const validateEmail = (local, domain, customDomain) => {
+        const finalDomain = domain === 'custom' ? customDomain : domain;
+
+        if (!local || !finalDomain) {
+            validation.email.isValid = false;
+            validation.email.message = '이메일 주소를 모두 입력해주세요.';
+            uiState.isEmailVerified = false;
+            return;
+        }
+        const fullEmail = `${local}@${finalDomain}`;
         const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         validation.email.isValid = regex.test(fullEmail);
         validation.email.message = validation.email.isValid ? '' : '유효한 이메일 주소를 입력해주세요.';
@@ -128,8 +137,11 @@
     });
 
     //이메일 검사
-    watch(()=>[formState.emailLocal, formState.emailDomain], ([local, domain])=>{
-        validateEmail(local, domain);
+    watch(()=>[formState.emailLocal, formState.emailDomain, formState.customEmailDomain], ([local, domain, customDomain])=>{
+        if (domain !== 'custom') {
+            formState.customEmailDomain = ''; // 다른 옵션 선택 시 직접입력 필드 초기화
+        }
+        validateEmail(local, domain, customDomain);
     });
 
     //아이디 중복 확인
@@ -179,6 +191,11 @@
         }, 1000);
     };
 
+    // 전체 이메일 주소 가져오기 헬퍼 함수
+    const getFullEmail = () => {
+        return formState.emailDomain === 'custom' ? `${formState.emailLocal}@${formState.customEmailDomain}` : `${formState.emailLocal}@${formState.emailDomain}`;
+    }
+
     //인증 코드 발송
     const sendVerificationCode = async()=>{
         if(!validation.email.isValid){
@@ -190,7 +207,7 @@
 
         try{
             //서버에 인증번호 발송 요청
-            const response = await sendAuthCode(formState.emailLocal + '@' + formState.emailDomain);
+            const response = await sendAuthCode(getFullEmail());
 
             //서버 응답에서 TTL(초) 받기
             const ttlSeconds = response.data.ttl;
@@ -210,7 +227,7 @@
     const verifyCode = async()=>{
         try{
             //서버에 인증 번호 확인 요청
-            const response = await verifyAuthCode(formState.emailLocal+"@"+formState.emailDomain, formState.verificationCode);
+            const response = await verifyAuthCode(getFullEmail(), formState.verificationCode);
             if(response) {
                 validation.verificationCode.isValid = true;
                 validation.verificationCode.message = "인증 성공";
@@ -249,7 +266,7 @@
                 username: formState.id,
                 password: formState.password,
                 name: formState.name,
-                email: formState.emailLocal + "@" + formState.emailDomain,
+                email: getFullEmail(),
                 phone: formState.phone
             };
 
@@ -257,7 +274,7 @@
             router.push('/signup/complete');
         }catch(error){
             console.log(error);
-            alert(error.code + ": "+ error.response.data.error);
+            alert(`[${error.response.data.code}] 회원가입 실패 : ${error.response.data.message}`);
             console.log("회원가입 실패: ", error.response.data || error.message);
             router.push('/signup/fail');
         }
@@ -268,7 +285,7 @@
   <div class="content-page">
     <!--Banner Start-->
     <div class="banner">
-      <img src="../../../../public/images/fantry_logo.png" />
+      <img src="/images/fantry_logo.png" />
     </div>
     <!--Banner End-->
     
@@ -327,12 +344,17 @@
             <div class="email">
                 <input type="text" placeholder="이메일 주소" v-model="formState.emailLocal" :disabled="uiState.isEmailVerified"/>
                 <label>@</label>
-                <select v-model="formState.emailDomain" :disabled="uiState.isEmailVerified">
+                <select v-model="formState.emailDomain" :disabled="uiState.isEmailVerified" class="form-select">
                     <option value="">선택하세요</option>
                     <option value="naver.com">naver.com</option>
                     <option value="gmail.com">gmail.com</option>
                     <option value="daum.net">daum.net</option>
+                    <option value="custom">직접입력</option>
                 </select>
+                <input 
+                    v-if="formState.emailDomain === 'custom'" 
+                    type="text" v-model="formState.customEmailDomain" 
+                    placeholder="도메인 입력" class="form-control custom-domain-input" :disabled="uiState.isEmailVerified"/>
             </div>
             <label class="input-error" v-if="!validation.email.isValid">{{ validation.email.message }}</label>
 
@@ -523,7 +545,7 @@
         color: #343a40;
     }
     .email select {
-        width: 150px;
+        width: auto;
         padding: 14px 16px;
         border: 1px solid #ced4da;
         border-radius: 8px;

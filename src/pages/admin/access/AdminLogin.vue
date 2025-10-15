@@ -18,24 +18,24 @@
 
     // 관리자 로그인 처리
     const gotoAdminLogin = async () => {
+      try{
         const response = await login(username.value, password.value);
 
         // 관리자 인증 성공 시 처리
-        if (response.status === 200) {
-            const userRole = response.data.tokenMemberResponse.role;
-            if (userRole !== 'ADMIN' && userRole !== 'SADMIN') {
-                alert('관리자 권한이 없습니다. 관리자 계정으로 로그인해주세요.');
-                return;
-            }
-            // 관리자 토큰 저장
-            localStorage.setItem("accessToken", response.data.accessToken); 
-            userStore.setLoginInfo(response.data.tokenMemberResponse, response.data.accessToken); 
-            
-            // 관리자 메인 페이지로 이동
-            router.push('/admin'); 
-        } else {
+        const userRole = response.data.tokenMemberResponse.role;
+        if (userRole !== 'ADMIN' && userRole !== 'SADMIN') {
+            alert('관리자 권한이 없습니다. 관리자 계정으로 로그인해주세요.');
+            return;
+        }
+        // 관리자 토큰 저장
+        localStorage.setItem("accessToken", response.data.accessToken); 
+        userStore.setLoginInfo(response.data.tokenMemberResponse, response.data.accessToken); 
+        
+        // 관리자 메인 페이지로 이동
+        router.push('/admin'); 
+      } catch(error) {
             // 로그인 실패 처리
-            console.log("로그인에 실패함: " + response);
+            console.log("로그인에 실패함: " + error);
             alert('관리자 로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.');
         }
     }
@@ -43,6 +43,7 @@
     // 관리자용 비밀번호 찾기 페이지로 이동
     const goToFind = () => {
         console.log("관리자 비밀번호 찾기 클릭됨");
+        alert("슈퍼 관리자에게 문의하세요.");
         //router.push('/admin/login/find');
     }
 
@@ -58,14 +59,14 @@
     <!-- Login Header End -->
 
     <!-- Login contenxt Start -->
-    <div class="login-form">
-      <input type="email" name="username" placeholder="관리자 이메일 (회사 내부 메일)" v-model="username" required>
+    <form class="login-form" @submit.prevent="gotoAdminLogin">
+      <input type="input" name="username" placeholder="관리자 아이디" v-model="username" required>
       <div class="password-wrapper">
         <input :type='isPwdVisible ? "password" : "text"' name="password" placeholder="비밀번호" v-model="password" required>
         <!-- 실제 이미지 경로에 맞게 수정해주세요 -->
         <img class="toggle-visibility" :src="isPwdVisible ? '/images/eyeSlash.png' : '/images/eyeView.png'" @click="pushShowPwd" alt="비밀번호 보이기/숨기기" />
       </div>
-      <button type="button" class="login-btn" name="login" @click="gotoAdminLogin">관리자 로그인</button>
+      <button type="submit" class="login-btn" name="login">관리자 로그인</button>
       
       <!-- 관리자용 비밀번호 찾기 -->
       <div class="forgot-wrap">
@@ -76,7 +77,7 @@
       <div class="signup-wrap" style="text-align: center; margin-top: 20px;">
         <span><router-link to="/admin/signup">관리자 계정이 없으신가요?</router-link></span>
       </div>
-    </div>
+    </form>
     <!-- Login contenxt End -->
     
   </div>

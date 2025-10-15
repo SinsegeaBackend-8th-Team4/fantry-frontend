@@ -60,30 +60,31 @@ const AuctionListPage = () => import('@/pages/admin/auction/AuctionListPage.vue'
 const AdminLogin = () => import('@/pages/admin/access/AdminLogin.vue')
 const AdminSignUp = () => import('@/pages/admin/access/AdminSignup.vue')
 
-const adminRoutes = {
-  path: '/admin',
-  component: AdminLayout,
-  meta: { requiresAuth: true, isAdmin: true },
-  children: [
-    {
-      path: '',
-      component: AdminContentLayout, // 모든 관리자 컨텐츠 페이지의 상위 레이아웃
-      children: [
-        // --- 로그인 ---
-        {
-          path: 'login',
-          name: 'AdminLogin',
-          component: AdminLogin,
-          meta: { requiredLogin: false, isAdmin: false, menu: false },
-        },
-        // --- 회원가입 ---
-        {
-          path: 'signup',
-          name: 'AdminSignUp',
-          component: AdminSignUp,
-          meta: { requiredLogin: false, isAdmin: false, menu: false },
-        },
-
+const adminRoutes = [
+  // 1. 로그인/회원가입 페이지 (인증이 필요 없는 페이지)
+  {
+    path: '/admin/login',
+    name: 'AdminLogin',
+    component: AdminLogin,
+    meta: { requiresAuth: false, isAdmin: false },
+  },
+  {
+    path: '/admin/signup',
+    name: 'AdminSignUp',
+    component: AdminSignUp,
+    meta: { requiresAuth: false, isAdmin: false },
+  },
+  // 2. 관리자 전용 페이지 (인증이 필요한 페이지)
+  {
+    path: '/admin',
+    component: AdminLayout,
+    meta: { requiresAuth: true, isAdmin: true },
+    children: [
+      {
+        path: '', // '/admin' 경로에 대한 기본 페이지
+        component: AdminContentLayout,
+        redirect: { name: 'AdminDashboard' }, // 대시보드로 리디렉션
+        children: [
         // --- 대시보드 ---
         {
           path: '',
@@ -211,8 +212,9 @@ const adminRoutes = {
           ],
         },
       ],
-    },
-  ],
-}
+    }
+  ]
+  }
+];
 
 export default adminRoutes
