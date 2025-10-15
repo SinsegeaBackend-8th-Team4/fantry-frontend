@@ -14,6 +14,18 @@ export const getAuctionDetails = (auctionId) => {
 };
 
 /**
+ * 특정 상품에 대한 회원의 낙찰 여부 및 결제 여부를 조회합니다.
+ * @param {number} auctionId 
+ * @param {number} memberId 
+ * @returns {Promise<string>}
+ */
+export const getAuctionWinnerStatus = (auctionId, memberId) => {
+    return publicClient.get(`/auctions/${auctionId}/winner-status`, {
+        params: { memberId }
+    });
+}
+
+/**
  * 상품 목록을 조건에 따라 페이징하여 조회합니다.
  * @param {object} params - 페이징 및 필터 정보
  * @param {number} params.page - 조회할 페이지 번호 (0부터 시작)

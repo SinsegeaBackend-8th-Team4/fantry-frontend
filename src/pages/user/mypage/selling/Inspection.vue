@@ -255,6 +255,7 @@ onMounted(() => {
   background-color: rgba(255, 255, 255, 0.6);
   z-index: 10;
 }
+<<<<<<< HEAD
 
 /* 모달 스타일 개선 */
 .modal-body {
@@ -292,4 +293,6 @@ onMounted(() => {
   padding: 0.75rem 1rem;
   font-size: 0.9rem;
 }
+=======
+>>>>>>> upstream/develop
 </style>
