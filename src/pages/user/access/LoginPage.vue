@@ -79,6 +79,11 @@
       </div>
     </div>
     <!--SNS Login End-->
+
+    <!-- 메인으로 돌아가기 -->
+    <div class="go-main-wrap">
+      <button class="go-main-btn" type="button" @click="router.push('/')">메인으로 돌아가기</button>
+    </div>
   </div>
 </template>
 <style scoped>
@@ -285,5 +290,30 @@
 
   .sns-btn.kakao {
     background-image: url("/images/login_kakao_btn.png");
+  }
+
+  /* 메인으로 돌아가기 버튼 */
+  .go-main-wrap {
+    margin-top: 30px;
+    width: 100%;
+    max-width: 320px;
+    text-align: center;
+  }
+
+  .go-main-btn {
+    background: transparent;
+    color: #3C4DFF;
+    padding: 10px 20px;
+    border: 1px solid #3C4DFF;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .go-main-btn:hover {
+    background: #5C7BFF;
+    color: #fff;
+    border-color: #3C4DFF;
   }
 </style>
