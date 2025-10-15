@@ -150,7 +150,6 @@
       // 판매 내역 리스트 요청 (SOLD 상태)
       const res = await getAuctionsByMemberAndStatus({ memberId: memberId, saleStatus: 'SOLD' });
       let allSales = res.data;
-      console.log("list: ", res);
 
       // 검색 필터링 (필요 시)
       if (keyword) {

@@ -180,7 +180,6 @@ const setPrimaryAddress = async (targetId) => {
 // --- 카카오 주소 검색 연동 ---
 const handleAddressSearch = () => {
     openAddressSearch((data) => {
-    console.log('[주소검색] API 콜백 실행:', data)
 
     // 즉시 업데이트 (nextTick 제거)
     addressPayload.value.roadAddress = data.roadAddress || data.jibunAddress || '';

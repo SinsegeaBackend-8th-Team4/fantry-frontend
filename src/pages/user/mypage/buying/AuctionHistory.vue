@@ -69,7 +69,6 @@
   //패치
   async function fetchBids({page, size, sort, keyword}) {
     const res = await getBidsByMemberId(currentMemberId.value);
-    console.log("가져온 모든 입찰 내역 리스트: ", res);
     let allBids = res.data;
 
     //검색 필터링

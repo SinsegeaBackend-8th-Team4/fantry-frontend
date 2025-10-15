@@ -150,7 +150,6 @@
   async function fetchAuction({page, size, sort, keyword}) {
     //여기에 모든 경매 리스트 요청
     const res = await getAuctionsByMember(currentMemberId.value);
-    console.log("가져온 모든 등록 상품 리스트: ", res);
     let allAuctions = res.data;
 
     //검색 필터링

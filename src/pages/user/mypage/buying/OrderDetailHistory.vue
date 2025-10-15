@@ -88,7 +88,6 @@ onMounted(async () => {
     loading.value = true;
     const response = await getOrderById(props.ordersId);
     orderData.value = response.data;
-    console.log("전달받은 데이터: ", orderData.value);
 
   } catch (err) {
     error.value = '주문 정보를 불러오는데 실패했습니다.';

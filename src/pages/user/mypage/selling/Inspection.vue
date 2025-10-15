@@ -24,7 +24,6 @@ async function fetchMyInspections({ page, size, sort }) {
     const res = await getMyInspections({ page, size, sort, keyword: keyword.value });
     const data = { rows: res?.items ?? [], total: res?.meta?.totalElements ?? 0 };
 
-    console.log('내 검수 목록 조회 결과:', data);
     localRows.value = data.rows;
     return data;
   } catch (e) {
