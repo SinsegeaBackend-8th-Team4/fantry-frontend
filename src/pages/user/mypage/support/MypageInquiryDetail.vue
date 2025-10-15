@@ -53,7 +53,6 @@ onMounted(async () => {
         // 실제 API가 있으면 사용:
         const res = await getMyInquiryDetail(props.inquiryId);
         detail.value = res.data;
-        console.log("detail 정보: " , detail.value);
     } catch (e) {
         console.error(e);
     } finally {
