@@ -101,19 +101,33 @@ const form = ref({
 
 // 현재 설정 불러오기
 const fetchSettings = async () => {
+  console.log('fetchSettings function called.');
   loading.value = true;
   error.value = false;
   try {
     const response = await getSettlementSettings();
-    currentSettings.value = response.data;
-    // 폼에 현재 설정값 채우기
-    form.value.commissionRate = currentSettings.value.commissionRate;
-    form.value.settlementCycleType = currentSettings.value.settlementCycleType;
-    form.value.settlementDay = currentSettings.value.settlementDay;
+    console.log('API Response for getSettlementSettings:', response);
+    // Check if response exists and has the expected property
+    if (response && response.commissionRate !== undefined) { // Corrected check
+      currentSettings.value = response; // Assign response directly
+      // 폼에 현재 설정값 채우기
+      form.value.commissionRate = currentSettings.value.commissionRate;
+      form.value.settlementCycleType = currentSettings.value.settlementCycleType;
+      form.value.settlementDay = currentSettings.value.settlementDay;
+    } else {
+      // If no data or data is malformed, treat as no settings found or an error
+      currentSettings.value = null;
+      showAlert('현재 설정된 정산 정보가 없거나 불러오는데 실패했습니다.', 'info');
+    }
   } catch (err) {
     console.error('Failed to fetch settlement settings:', err);
     error.value = true;
     showAlert('정산 설정 정보를 불러오는데 실패했습니다.', 'danger');
+    // Handle 401 specifically if needed, e.g., redirect to login
+    if (err.response && err.response.status === 401) {
+      showAlert('로그인이 필요합니다.', 'warning');
+      // router.push({ name: 'AdminLogin' }); // Example: redirect to login
+    }
   } finally {
     loading.value = false;
   }
@@ -135,10 +149,13 @@ const saveSettings = async () => {
 
     const response = await createOrUpdateSettlementSettings(form.value);
     currentSettings.value = response.data;
+    error.value = false; // Reset error state on successful save
     showAlert('정산 설정이 성공적으로 저장되었습니다.', 'success');
+    await fetchSettings(); // Re-fetch settings to update display and reset error state
   } catch (err) {
     console.error('Failed to save settlement settings:', err);
     showAlert('정산 설정 저장에 실패했습니다.', 'danger');
+    error.value = true; // Set error state on failed save
   } finally {
     isSaving.value = false;
   }
@@ -153,8 +170,9 @@ watch(() => form.value.settlementCycleType, (newVal, oldVal) => {
 
 // 날짜 포맷터
 const formatDate = (datetime) => {
-  if (!datetime) return '';
-  const date = new Date(datetime);
+  if (!datetime || !Array.isArray(datetime) || datetime.length < 6) return '';
+  // Month is 0-indexed in JavaScript Date constructor
+  const date = new Date(datetime[0], datetime[1] - 1, datetime[2], datetime[3], datetime[4], datetime[5]);
   return date.toLocaleString();
 };
 
