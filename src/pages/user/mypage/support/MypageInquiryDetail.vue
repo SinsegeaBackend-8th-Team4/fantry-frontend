@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, defineEmits, onMounted, ref } from 'vue'
+import { defineProps, onMounted, ref } from 'vue'
 import { getMyInquiryDetail } from '@/api/inquiry'
 
 const props = defineProps({

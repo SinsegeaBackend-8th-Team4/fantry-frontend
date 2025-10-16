@@ -1,7 +1,15 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+<<<<<<< HEAD
 import { getNoticeById, updateNotice, addNoticeAttachments } from '@/api/adminNotice.js'; // addNoticeAttachments 임포트
+=======
+<<<<<<< HEAD
+import { getNoticeById, updateNotice } from '@/api/adminNotice.js';
+=======
+import { getNoticeById, updateNotice, addNoticeAttachments } from '@/api/adminNotice.js'; // addNoticeAttachments 임포트
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 import CommonEditor from '@/components/common/organisms/CommonEditor.vue';
 import LoadingSpinner from '@/components/common/atoms/LoadingSpinner.vue';
 
@@ -12,13 +20,28 @@ const noticeId = Number(route.params.noticeId);
 const notice = ref(null);
 const loading = ref(true);
 const error = ref(null);
+<<<<<<< HEAD
 const selectedFiles = ref([]); // 새 파일 저장을 위한 ref
+=======
+<<<<<<< HEAD
+=======
+const selectedFiles = ref([]); // 새 파일 저장을 위한 ref
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 
 const statusOptions = ref([
   { value: 'ACTIVE', text: '활성' },
   { value: 'INACTIVE', text: '비활성' },
+<<<<<<< HEAD
   { value: 'PINNED', text: '고정' },
   { value: 'DRAFT', text: '초안' },
+=======
+<<<<<<< HEAD
+=======
+  { value: 'PINNED', text: '고정' },
+  { value: 'DRAFT', text: '초안' },
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 ]);
 
 const typeOptions = [
@@ -30,11 +53,20 @@ const typeOptions = [
   { id: 6, name: '판매 문의' },
 ];
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> develop
 // 파일 변경 핸들러
 function handleFileChange(event) {
   selectedFiles.value = Array.from(event.target.files);
 }
 
+<<<<<<< HEAD
+=======
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 async function fetchNotice() {
   try {
     loading.value = true;
@@ -64,12 +96,21 @@ async function handleSubmit() {
 
   try {
     await updateNotice(noticeId, payload);
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> develop
 
     // 새 파일이 선택된 경우에만 첨부 파일 업로드
     if (selectedFiles.value.length > 0) {
       await addNoticeAttachments(noticeId, selectedFiles.value);
     }
 
+<<<<<<< HEAD
+=======
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
     alert('공지사항이 성공적으로 수정되었습니다.');
     router.push({ name: 'AdminNoticeDetail', params: { noticeId } });
   } catch (e) {
@@ -120,6 +161,12 @@ onMounted(fetchNotice);
 
           <div class="mb-3">
             <label class="form-label">내용</label>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+            <CommonEditor v-model:content="notice.content" />
+=======
+>>>>>>> develop
             <CommonEditor v-model="notice.content" />
           </div>
 
@@ -138,6 +185,10 @@ onMounted(fetchNotice);
             <label for="notice-attachments" class="form-label">새 첨부 파일</label>
             <input type="file" id="notice-attachments" class="form-control" multiple @change="handleFileChange">
             <small class="form-text text-muted">새로운 파일을 추가합니다. 기존 파일은 유지됩니다.</small>
+<<<<<<< HEAD
+=======
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
           </div>
 
           <div class="d-flex justify-content-between">
@@ -148,4 +199,12 @@ onMounted(fetchNotice);
       </div>
     </div>
   </div>
+<<<<<<< HEAD
 </template>
+=======
+<<<<<<< HEAD
+</template>
+=======
+</template>
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop

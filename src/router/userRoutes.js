@@ -149,7 +149,7 @@ const userRoutes = {
       component: InspectionPolicyPage,
       meta: { requiresAuth: false },
     },
-    // 마이페이지
+     // 마이페이지
     {
       path: 'mypage',
       name: 'MyPageLayout',
@@ -176,6 +176,63 @@ const userRoutes = {
           name: 'Complete',
           component: PaymentCompletePage,
           meta: { requiredLogin: false },
+        },
+      ],
+    },
+    // CS (고객 서비스) 관련 페이지
+    {
+      path: 'cs',
+      name: 'CustomerService',
+      component: () => import('@/pages/user/cs/CustomerServiceHomePage.vue'), // Default component for /cs
+      meta: { title: '고객센터' },
+      children: [
+        // 공지사항
+        {
+          path: 'notice',
+          name: 'UserNoticeList',
+          component: () => import('@/pages/user/cs/UserNoticeListPage.vue'),
+          meta: { requiresAuth: false, title: '공지사항' },
+        },
+        {
+          path: 'notice/:noticeId',
+          name: 'UserNoticeDetail',
+          component: () => import('@/pages/user/cs/UserNoticeDetailPage.vue'),
+          props: true,
+          meta: { requiresAuth: false, hidden: true, title: '공지사항 상세' },
+        },
+        // 자주 묻는 질문 (FAQ)
+        {
+          path: 'faq',
+          name: 'UserFaqList',
+          component: () => import('@/pages/user/cs/UserFaqListPage.vue'),
+          meta: { requiresAuth: false, title: '자주 묻는 질문' },
+        },
+        {
+          path: 'faq/:faqId',
+          name: 'UserFaqDetail',
+          component: () => import('@/pages/user/cs/UserFaqDetailPage.vue'),
+          props: true,
+          meta: { requiresAuth: false, hidden: true, title: '자주 묻는 질문 상세' },
+        },
+        // 1:1 문의
+        {
+          path: 'inquiry',
+          name: 'UserInquiryList',
+          component: () => import('@/pages/user/cs/UserInquiryListPage.vue'),
+          meta: { requiresAuth: true, title: '나의 1:1 문의' },
+        },
+        {
+          path: 'inquiry/create',
+          name: 'UserInquiryCreate',
+          component: () => import('@/pages/user/cs/UserInquiryCreatePage.vue'),
+          meta: { requiresAuth: true, title: '1:1 문의하기' },
+        },
+        {
+          path: 'inquiry/:inquiryId',
+          name: 'UserInquiryDetail',
+          component: () => import('@/pages/user/cs/UserInquiryDetailPage.vue'),
+          props: true,
+          meta: { requiresAuth: true, hidden: true, title: '1:1 문의 상세' },
         },
       ],
     },

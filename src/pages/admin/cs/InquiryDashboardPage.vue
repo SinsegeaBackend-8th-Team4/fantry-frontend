@@ -1,7 +1,15 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+<<<<<<< HEAD
 import { getInquiryStats } from '@/api/adminInquiry.js'; // 올바른 API 함수 임포트
+=======
+<<<<<<< HEAD
+import { getDashboardSummary } from '@/api/adminDashboard.js';
+=======
+import { getInquiryStats } from '@/api/adminInquiry.js'; // 올바른 API 함수 임포트
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import LoadingSpinner from '@/components/common/atoms/LoadingSpinner.vue';
 import DashboardSummaryCard from '@/components/common/dashboard/DashboardSummaryCard.vue';
@@ -22,6 +30,19 @@ const palette = useChartPalette(); // 색상 팔레트 초기화
 
 const summaryCards = ref([
   {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    key: 'todayNew',
+    title: '오늘 접수 문의',
+    color: 'primary',
+    icon: 'fas fa-calendar-plus',
+    statusValue: null, // 오늘 접수 문의는 특정 상태값이 없을 수 있음
+  },
+  {
+=======
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
     key: 'pending',
     title: '답변 대기',
     color: 'warning',
@@ -35,6 +56,11 @@ const summaryCards = ref([
     icon: 'fas fa-tasks',
     statusValue: 'IN_PROGRESS',
   },
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> develop
   {
     key: 'onHold',
     title: '보류 중',
@@ -63,6 +89,10 @@ const summaryCards = ref([
     icon: 'fas fa-clipboard-list',
     statusValue: null, // 전체 목록은 특정 상태 없이 조회
   },
+<<<<<<< HEAD
+=======
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 ]);
 
 const stats = ref(null);
@@ -112,6 +142,38 @@ const chartOptions = ref({
 
 onMounted(async () => {
   try {
+<<<<<<< HEAD
+    stats.value = await getInquiryStats();
+=======
+<<<<<<< HEAD
+    const response = await getDashboardSummary();
+    stats.value = response.inquiryStats;
+>>>>>>> develop
+
+    if (stats.value) {
+      const labels = [
+        '답변 대기',
+        '처리 중',
+        '보류 중',
+        '답변 완료',
+        '거절됨',
+      ];
+      const data = [
+        stats.value.pending,
+        stats.value.inProgress,
+        stats.value.onHold,
+        stats.value.answered,
+        stats.value.rejected,
+      ];
+      const backgroundColors = [
+        palette.warning,
+        palette.info,
+<<<<<<< HEAD
+        palette.secondary,
+        palette.success,
+        palette.danger,
+=======
+=======
     stats.value = await getInquiryStats();
 
     if (stats.value) {
@@ -135,6 +197,8 @@ onMounted(async () => {
         palette.secondary,
         palette.success,
         palette.danger,
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
       ];
 
       chartData.value = {
@@ -156,15 +220,46 @@ onMounted(async () => {
 });
 
 function goToInquiryList(cardKey) {
+<<<<<<< HEAD
   const card = summaryCards.value.find(c => c.key === cardKey);
   const statusParam = card ? card.statusValue : null;
+=======
+<<<<<<< HEAD
+  let statusParam = null;
+  // cardKey가 statusValue를 직접 포함하는 경우를 대비
+  const card = summaryCards.value.find(c => c.key === cardKey);
+  if (card && card.statusValue) {
+    statusParam = card.statusValue;
+  } else {
+    // 기존 로직 유지 (todayNew 등)
+    switch (cardKey) {
+      case 'pending':
+        statusParam = 'PENDING';
+        break;
+      case 'inProgress':
+        statusParam = 'IN_PROGRESS';
+        break;
+    }
+  }
+=======
+  const card = summaryCards.value.find(c => c.key === cardKey);
+  const statusParam = card ? card.statusValue : null;
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 
   router.push({
     name: 'AdminInquiryList',
     query: statusParam ? { status: statusParam } : {}
   });
 }
+<<<<<<< HEAD
 
+=======
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 </script>
 
 <template>
@@ -181,6 +276,18 @@ function goToInquiryList(cardKey) {
     <div v-if="stats">
       <!-- Summary Cards Section -->
       <div class="row">
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+        <DashboardSummaryCard
+          v-for="card in summaryCards"
+          :key="card.key"
+          :card="card"
+          :value="stats ? stats[card.key] : 0"
+          @click="goToInquiryList(card.key)"
+        />
+=======
+>>>>>>> develop
         <div v-for="card in summaryCards" :key="card.key" class="col-xl-4 col-md-6 mb-4">
           <DashboardSummaryCard
             :card="card"
@@ -188,6 +295,10 @@ function goToInquiryList(cardKey) {
             @click="goToInquiryList(card.key)"
           />
         </div>
+<<<<<<< HEAD
+=======
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
       </div>
 
       <!-- Chart Section -->
@@ -216,4 +327,20 @@ function goToInquiryList(cardKey) {
 
 <style scoped>
 /* 필요한 경우 여기에 스타일 추가 */
+<<<<<<< HEAD
 </style>
+=======
+<<<<<<< HEAD
+</style>
+<style scoped>
+/* 임시 디버그 CSS: 카드 강제 표시 */
+.col-xl-3.col-md-6.mb-4 {
+  display: block !important;
+  visibility: visible !important;
+  background-color: rgba(255, 0, 0, 0.1); /* 디버그용 배경색 */
+}
+</style>
+=======
+</style>
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop

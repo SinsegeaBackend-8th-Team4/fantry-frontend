@@ -1,13 +1,52 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+<<<<<<< HEAD
 import { useRouter } from 'vue-router';
 import { getFaqStats } from '@/api/adminFaq.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+=======
+<<<<<<< HEAD
+import { searchFaqs } from '@/api/adminFaq.js';
+=======
+import { useRouter } from 'vue-router';
+import { getFaqStats } from '@/api/adminFaq.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 import LoadingSpinner from '@/components/common/atoms/LoadingSpinner.vue';
 import DashboardSummaryCard from '@/components/common/dashboard/DashboardSummaryCard.vue';
 import BaseChart from '@/components/common/chart/BaseChart.vue';
 import { useChartPalette } from '@/composables/useChartConfig';
 
+<<<<<<< HEAD
+// Chart.js 컴포넌트 로컬 등록 (도넛 차트용)
+import {
+  Chart,
+  ArcElement, DoughnutController, Legend, Tooltip
+} from 'chart.js';
+Chart.register(
+  ArcElement, DoughnutController, Legend, Tooltip, ChartDataLabels
+);
+=======
+<<<<<<< HEAD
+const loading = ref(true);
+const error = ref(null);
+const totalFaqs = ref(0);
+const faqsByType = ref({});
+>>>>>>> develop
+
+const router = useRouter();
+const palette = useChartPalette();
+
+<<<<<<< HEAD
+=======
+const summaryCard = ref({
+  key: 'totalFaqs',
+  title: '총 FAQ 건수',
+  color: 'primary',
+  icon: 'fas fa-question-circle',
+});
+=======
 // Chart.js 컴포넌트 로컬 등록 (도넛 차트용)
 import {
   Chart,
@@ -20,6 +59,7 @@ Chart.register(
 const router = useRouter();
 const palette = useChartPalette();
 
+>>>>>>> develop
 const summaryCards = ref([
   {
     key: 'total',
@@ -61,6 +101,10 @@ const summaryCards = ref([
 const stats = ref(null);
 const loading = ref(true);
 const error = ref(null);
+<<<<<<< HEAD
+=======
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 
 const chartData = ref({
   labels: [],
@@ -71,6 +115,84 @@ const chartOptions = ref({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
+<<<<<<< HEAD
+    legend: {
+      position: 'bottom',
+    },
+=======
+<<<<<<< HEAD
+    legend: { position: 'bottom' },
+>>>>>>> develop
+    datalabels: {
+      color: '#fff',
+      textAlign: 'center',
+      font: {
+        weight: 'bold',
+        size: 16,
+      },
+      formatter: (value) => {
+        return value + '건';
+      },
+      textStrokeColor: 'black',
+      textStrokeWidth: 2,
+    },
+    tooltip: {
+      callbacks: {
+        label: function(context) {
+          let label = context.label || '';
+          if (label) {
+            label += ': ';
+          }
+          if (context.parsed !== null) {
+            label += context.parsed + '건';
+          }
+          return label;
+        }
+      }
+    }
+  },
+});
+
+onMounted(async () => {
+  try {
+    stats.value = await getFaqStats();
+
+    if (stats.value) {
+      const labels = [
+        '활성',
+        '고정',
+        '임시저장',
+        '비활성',
+      ];
+      const data = [
+        stats.value.active,
+        stats.value.pinned,
+        stats.value.draft,
+        stats.value.inactive,
+      ];
+      const backgroundColors = [
+        palette.success,
+        palette.info,
+        palette.secondary,
+        palette.danger,
+      ];
+
+      chartData.value = {
+        labels: labels,
+        datasets: [
+          {
+            backgroundColor: backgroundColors,
+            data: data,
+          },
+        ],
+      };
+    }
+  } catch (e) {
+<<<<<<< HEAD
+    console.error('FAQ 통계 조회에 실패했습니다:', e);
+=======
+    console.error('FAQ 대시보드 데이터 조회 실패:', e);
+=======
     legend: {
       position: 'bottom',
     },
@@ -140,12 +262,24 @@ onMounted(async () => {
     }
   } catch (e) {
     console.error('FAQ 통계 조회에 실패했습니다:', e);
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
     error.value = '데이터를 불러오는 중 오류가 발생했습니다.';
   } finally {
     loading.value = false;
   }
+<<<<<<< HEAD
 });
 
+=======
+<<<<<<< HEAD
+}
+
+onMounted(fetchData);
+=======
+});
+
+>>>>>>> develop
 function goToFaqList(cardKey) {
   const card = summaryCards.value.find(c => c.key === cardKey);
   const statusParam = card ? card.statusValue : null;
@@ -155,6 +289,10 @@ function goToFaqList(cardKey) {
     query: statusParam ? { status: statusParam } : {},
   });
 }
+<<<<<<< HEAD
+=======
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 </script>
 
 <template>
@@ -168,6 +306,25 @@ function goToFaqList(cardKey) {
 
     <div v-if="error" class="alert alert-danger">{{ error }}</div>
 
+<<<<<<< HEAD
+    <div v-if="stats">
+      <!-- Summary Cards Section -->
+=======
+<<<<<<< HEAD
+    <div v-if="!loading && !error">
+      <!-- Summary Card -->
+>>>>>>> develop
+      <div class="row">
+        <div v-for="card in summaryCards" :key="card.key" class="col-xl-2 col-md-4 mb-4">
+          <DashboardSummaryCard
+<<<<<<< HEAD
+            :card="card"
+            :value="stats ? stats[card.key] : 0"
+            @click="goToFaqList(card.key)"
+=======
+            :card="summaryCard"
+            :value="totalFaqs"
+=======
     <div v-if="stats">
       <!-- Summary Cards Section -->
       <div class="row">
@@ -176,6 +333,8 @@ function goToFaqList(cardKey) {
             :card="card"
             :value="stats ? stats[card.key] : 0"
             @click="goToFaqList(card.key)"
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
           />
         </div>
       </div>
@@ -185,7 +344,15 @@ function goToFaqList(cardKey) {
         <div class="col-xl-6 col-lg-7 mb-4">
           <div class="card shadow mb-4">
             <div class="card-header py-3">
+<<<<<<< HEAD
               <h6 class="m-0 font-weight-bold text-primary">FAQ 상태 분포</h6>
+=======
+<<<<<<< HEAD
+              <h6 class="m-0 font-weight-bold text-primary">FAQ 유형별 분포</h6>
+=======
+              <h6 class="m-0 font-weight-bold text-primary">FAQ 상태 분포</h6>
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
             </div>
             <div class="card-body">
               <div class="chart-pie pt-4 pb-2">
@@ -202,8 +369,18 @@ function goToFaqList(cardKey) {
       </div>
     </div>
   </div>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+</template>
+=======
+>>>>>>> develop
 </template>
 
 <style scoped>
 /* 필요한 경우 여기에 스타일 추가 */
 </style>
+<<<<<<< HEAD
+=======
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
