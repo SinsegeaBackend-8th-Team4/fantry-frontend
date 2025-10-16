@@ -1,3 +1,5 @@
+@use 'variables-admin' as *;
+
 /**
  * 관리자 전용 커스텀 확장
  * - 전역 충돌 방지를 위해 body.admin-layout-active 네임스페이스 사용

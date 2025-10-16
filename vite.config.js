@@ -15,7 +15,9 @@ export default defineConfig(({ mode }) => {
     ],
     resolve: {
       alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url))
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+        '~bootstrap': fileURLToPath(new URL('./node_modules/bootstrap/scss', import.meta.url)),
+        '~startbootstrap-sb-admin-2': fileURLToPath(new URL('./node_modules/startbootstrap-sb-admin-2/scss', import.meta.url))
       }
     },
     define: {
