@@ -20,11 +20,23 @@ const SettlementListPage = () => import('@/pages/admin/settlement/SettlementList
 const SettlementSettingPage = () => import('@/pages/admin/settlement/SettlementSettingPage.vue') // 새로 추가
 
 // 반품 관리
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+const ReturnDashboardPage = () => import('@/pages/admin/return/ReturnDashboardPage.vue')
+const ReturnListPage = () => import('@/pages/admin/return/ReturnListPage.vue')
+const ReturnDetailPage = () => import('@/pages/admin/return/ReturnDetailPage.vue')
+=======
+>>>>>>> develop
 const AdminReturnListPage = () => import('@/pages/admin/return/AdminReturnListPage.vue');
 const AdminReturnDetailPage = () => import('@/pages/admin/return/AdminReturnDetailPage.vue');
 const AdminReturnCreatePage = () => import('@/pages/admin/return/AdminReturnCreatePage.vue'); // 새로 추가
 
 
+<<<<<<< HEAD
+=======
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 
 // CS 관리
 const InquiryDashboardPage = () => import('@/pages/admin/cs/InquiryDashboardPage.vue')
@@ -42,9 +54,18 @@ const NoticeDetailPage = () => import('@/pages/admin/cs/NoticeDetailPage.vue')
 const NoticeCreatePage = () => import('@/pages/admin/cs/NoticeCreatePage.vue')
 const NoticeEditPage = () => import('@/pages/admin/cs/NoticeEditPage.vue')
 const NoticeDashboardPage = () => import('@/pages/admin/cs/NoticeDashboardPage.vue')
+<<<<<<< HEAD
 const CsWritePage = () => import('@/pages/admin/cs/CsWritePage.vue')
 
 
+=======
+<<<<<<< HEAD
+=======
+const CsWritePage = () => import('@/pages/admin/cs/CsWritePage.vue')
+
+
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 
 const FaqDashboardPage = () => import('@/pages/admin/cs/FaqDashboardPage.vue')
 
@@ -120,8 +141,69 @@ const adminRoutes = [
           children: [
             { path: 'dashboard', name: 'AdminSettlementDashboard', component: SettlementDashboardPage, meta: { title: '정산 대시보드' } },
             { path: 'list', name: 'AdminSettlementList', component: SettlementListPage, meta: { title: '정산 내역' } },
+<<<<<<< HEAD
             { path: 'settings', name: 'AdminSettlementSettings', component: SettlementSettingPage, meta: { title: '정산 설정', menu: true } }, // 새로 추가
             // { path: 'sample', name: 'AdminSettlementListSample', component: SettlementListSamplePage, meta: { title: '샘플 목록' } }, // 샘플 페이지는 필요 없으므로 주석 처리 또는 삭제
+=======
+<<<<<<< HEAD
+            { path: 'sample', name: 'AdminSettlementListSample', component: SettlementListSamplePage, meta: { title: '샘플 목록' } },
+=======
+            { path: 'settings', name: 'AdminSettlementSettings', component: SettlementSettingPage, meta: { title: '정산 설정', menu: true } }, // 새로 추가
+            // { path: 'sample', name: 'AdminSettlementListSample', component: SettlementListSamplePage, meta: { title: '샘플 목록' } }, // 샘플 페이지는 필요 없으므로 주석 처리 또는 삭제
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+          ],
+        },
+
+        // --- 문의 관리 ---
+        {
+          path: 'inquiry',
+          redirect: { name: 'AdminInquiryDashboard' },
+          meta: { title: '문의 관리', icon: 'fas fa-fw fa-headset', menu: true },
+          children: [
+            { path: 'dashboard', name: 'AdminInquiryDashboard', component: InquiryDashboardPage, meta: { title: '문의 현황' } },
+            { path: 'list', name: 'AdminInquiryList', component: AdminInquiryListPage, meta: { title: '1:1 문의 목록' } },
+            { path: 'detail/:inquiryId', name: 'AdminInquiryDetail', component: AdminInquiryDetailPage, props: true, meta: { title: '1:1 문의 상세', hidden: true } },
+          ],
+        },
+        // --- FAQ 관리 ---
+        {
+          path: 'faq',
+          redirect: { name: 'AdminFaqDashboard' },
+          meta: { title: 'FAQ 관리', icon: 'fas fa-fw fa-question-circle', menu: true },
+          children: [
+            { path: 'dashboard', name: 'AdminFaqDashboard', component: FaqDashboardPage, meta: { title: 'FAQ 현황' } },
+            { path: 'list', name: 'AdminFaqList', component: FaqListPage, meta: { title: 'FAQ 목록' } },
+            { path: 'detail/:faqId', name: 'AdminFaqDetail', component: FaqDetailPage, props: true, meta: { title: 'FAQ 상세', hidden: true } },
+            { path: 'create', name: 'AdminFaqCreate', component: FaqCreatePage, meta: { title: 'FAQ 등록', menu: true } },
+            { path: 'edit/:faqId', name: 'AdminFaqEdit', component: FaqEditPage, props: true, meta: { title: 'FAQ 수정', hidden: true } },
+          ],
+        },
+        // --- 공지사항 관리 ---
+        {
+          path: 'notice',
+          redirect: { name: 'AdminNoticeDashboard' },
+          meta: { title: '공지사항 관리', icon: 'fas fa-fw fa-bullhorn', menu: true },
+          children: [
+            { path: 'dashboard', name: 'AdminNoticeDashboard', component: NoticeDashboardPage, meta: { title: '공지사항 현황' } },
+            { path: 'list', name: 'AdminNoticeList', component: NoticeListPage, meta: { title: '공지사항 목록' } },
+            { path: 'detail/:noticeId', name: 'AdminNoticeDetail', component: NoticeDetailPage, props: true, meta: { title: '공지사항 상세', hidden: true } },
+            { path: 'create', name: 'AdminNoticeCreate', component: NoticeCreatePage, meta: { title: '공지 등록', menu: true } },
+            { path: 'edit/:noticeId', name: 'AdminNoticeEdit', component: NoticeEditPage, props: true, meta: { title: '공지사항 수정', hidden: true } },
+            { path: 'write', name: 'AdminCsWrite', component: CsWritePage, props: true, meta: { title: '새 글 작성', hidden: true } },
+          ]
+        },
+
+        // --- 반품 관리 ---
+        {
+          path: 'return', // 'returns' 대신 'return'으로 통일
+          redirect: { name: 'AdminReturnList' },
+          meta: { title: '반품관리', icon: 'fas fa-fw fa-undo', menu: true },
+          children: [
+<<<<<<< HEAD
+            { path: 'dashboard', name: 'AdminReturnDashboard', component: ReturnDashboardPage, meta: { title: '반품 현황' } },
+            { path: 'list', name: 'AdminReturnList', component: ReturnListPage, meta: { title: '반품 목록' } },
+            { path: 'detail/:returnRequestId', name: 'AdminReturnDetail', component: ReturnDetailPage, props: true, meta: { title: '반품 상세', hidden: true } },
+>>>>>>> develop
           ],
         },
 
@@ -175,6 +257,13 @@ const adminRoutes = [
             { path: 'create', name: 'AdminReturnCreate', component: AdminReturnCreatePage, meta: { title: '반품 등록', hidden: true } }, // 새로 추가
           ],
         },
+=======
+            { path: 'list', name: 'AdminReturnList', component: AdminReturnListPage, meta: { title: '반품 목록' } },
+            { path: 'detail/:returnRequestId', name: 'AdminReturnDetail', component: AdminReturnDetailPage, props: true, meta: { title: '반품 상세', hidden: true } },
+            { path: 'create', name: 'AdminReturnCreate', component: AdminReturnCreatePage, meta: { title: '반품 등록', hidden: true } }, // 새로 추가
+          ],
+        },
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
 
         // --- 검수 관리 ---
         {

@@ -24,7 +24,6 @@ const SignupComplete = () => import('@/pages/user/access/SignupComplete.vue');
 const SignupFail = () => import('@/pages/user/access/SignupFail.vue');
 const ProductListPage = () => import('@/pages/product/ProductListPage.vue');
 const ProductDetailPage = () => import('@/pages/product/ProductDetailPage.vue');
-const ProductAuctionPage = () => import('@/pages/product/ProductAuctionPage.vue');
 const ProductAuctionPolicyPage = () => import('@/pages/product/ProductAuctionPolicyPage.vue');
 // 검수 페이지 컴포넌트
 const InspectionStep1Page = () => import('@/pages/user/inspection/Step1Page.vue')
@@ -114,15 +113,9 @@ const userRoutes = {
       meta: { requiredLogin: false },
     },
     {
-      path: 'product/detail/:id',
+      path: 'product/:id',
       name: 'ProductDetail',
       component: ProductDetailPage,
-      meta: { requiresAuth: false },
-    },
-        {
-      path: 'product/auction/:id',
-      name: 'ProducAuction',
-      component: ProductAuctionPage,
       meta: { requiresAuth: false },
     },
     {

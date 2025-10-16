@@ -1,5 +1,13 @@
 <script setup>
+<<<<<<< HEAD
 import { ref, onMounted, nextTick } from 'vue';
+=======
+<<<<<<< HEAD
+import { ref } from 'vue';
+=======
+import { ref, onMounted, nextTick } from 'vue';
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 import { useRouter } from 'vue-router';
 import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
 import { searchNotices } from '@/api/adminNotice.js';
@@ -9,15 +17,32 @@ const table = ref(null);
 const keyword = ref('');
 const tableKey = ref(0);
 
+<<<<<<< HEAD
 onMounted(() => {
 });
 
+=======
+<<<<<<< HEAD
+=======
+onMounted(() => {
+});
+
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 const statusFilters = [
   { label: '전체', value: null },
   { label: '활성', value: 'ACTIVE' },
   { label: '비활성', value: 'INACTIVE' },
+<<<<<<< HEAD
   { label: '고정', value: 'PINNED' },
   { label: '초안', value: 'DRAFT' },
+=======
+<<<<<<< HEAD
+=======
+  { label: '고정', value: 'PINNED' },
+  { label: '초안', value: 'DRAFT' },
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 ];
 const currentStatusFilter = ref(null);
 
@@ -33,17 +58,45 @@ const typeFilters = [
 const currentTypeFilter = ref(null);
 
 async function fetcher({ page, size, sort, keyword }) {
+<<<<<<< HEAD
   const response = await searchNotices({
     page: page,
+=======
+<<<<<<< HEAD
+  const params = {
+    page: page > 0 ? page - 1 : 0,
+=======
+  const response = await searchNotices({
+    page: page,
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
     size: size,
     sort: sort,
     status: currentStatusFilter.value,
     csTypeId: currentTypeFilter.value,
+<<<<<<< HEAD
     keyword: keyword,
   });
   return {
     rows: response.content,
     total: response.totalElements,
+=======
+<<<<<<< HEAD
+    title: keyword,
+  };
+  const response = await searchNotices(params);
+  const data = response.data;
+  return {
+    rows: data.content,
+    total: data.totalElements,
+=======
+    keyword: keyword,
+  });
+  return {
+    rows: response.content,
+    total: response.totalElements,
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
   };
 }
 
@@ -54,7 +107,15 @@ const columns = [
     title: '유형',
     className: 'text-center',
     render: (data) => {
+<<<<<<< HEAD
       const typeName = data || 'N/A';
+=======
+<<<<<<< HEAD
+      const typeName = data && data.name ? data.name : 'N/A';
+=======
+      const typeName = data || 'N/A';
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
       let badgeClass = 'bg-secondary';
       switch (typeName) {
         case '배송문의': badgeClass = 'bg-primary'; break;
@@ -69,17 +130,42 @@ const columns = [
   {
     data: 'title',
     title: '제목',
+<<<<<<< HEAD
+    className: 'text-left clickable-title-cell',
+=======
+<<<<<<< HEAD
+    className: 'text-left',
+>>>>>>> develop
+    render: (data, type, row) => {
+      return `<span class="notice-title" data-notice-id="${row.noticeId}" style="color: blue; cursor: pointer; text-decoration: underline;">${data}</span>`;
+    }
+  },
+<<<<<<< HEAD
+  { data: 'createdBy', title: '작성자', className: 'text-center' },
+=======
+  { data: 'authorName', title: '작성자', className: 'text-center' },
+=======
     className: 'text-left clickable-title-cell',
     render: (data, type, row) => {
       return `<span class="notice-title" data-notice-id="${row.noticeId}" style="color: blue; cursor: pointer; text-decoration: underline;">${data}</span>`;
     }
   },
   { data: 'createdBy', title: '작성자', className: 'text-center' },
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
   {
     data: 'status',
     title: '상태',
     className: 'text-center',
     render: (data) => {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+      const isActive = data === 'ACTIVE';
+      const badgeClass = isActive ? 'bg-success' : 'bg-danger';
+      const text = isActive ? '활성' : '비활성';
+=======
+>>>>>>> develop
       let badgeClass = 'bg-light text-dark';
       let text = data;
       switch (data) {
@@ -100,6 +186,10 @@ const columns = [
           text = '초안';
           break;
       }
+<<<<<<< HEAD
+=======
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
       return `<span class="badge ${badgeClass}">${text}</span>`;
     },
   },
@@ -121,17 +211,45 @@ const columns = [
       return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
   },
+<<<<<<< HEAD
 ];
 
+=======
+<<<<<<< HEAD
+  { data: 'viewCount', title: '조회수', className: 'text-center' },
+];
+
+function goToDetail(noticeId) {
+  router.push({ name: 'AdminNoticeDetail', params: { noticeId } });
+}
+
+=======
+];
+
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 function goToCreate() {
   router.push({ name: 'AdminNoticeCreate' });
 }
 
 function handleRowClick(row) {
+<<<<<<< HEAD
   // This function is now redundant as click handling is done via attachClickHandlers
   // but kept for reference or if other parts of the row need to be clickable.
   console.log("handleRowClick (redundant for title click):", row);
 }
+=======
+<<<<<<< HEAD
+  if (row && row.noticeId) {
+    goToDetail(row.noticeId);
+  }
+}
+=======
+  // This function is now redundant as click handling is done via attachClickHandlers
+  // but kept for reference or if other parts of the row need to be clickable.
+  console.log("handleRowClick (redundant for title click):", row);
+}
+>>>>>>> develop
 
 function attachClickHandlers() {
   nextTick(() => {
@@ -156,6 +274,10 @@ onMounted(() => {
   // 초기 로드 후에도 바인딩
   setTimeout(attachClickHandlers, 500);
 });
+<<<<<<< HEAD
+=======
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 </script>
 
 <template>
@@ -213,13 +335,27 @@ onMounted(() => {
           v-model:keyword="keyword"
           :columns="columns"
           :fetcher="fetcher"
+<<<<<<< HEAD
           @loaded="attachClickHandlers"
+=======
+<<<<<<< HEAD
+          @row-click="handleRowClick"
+=======
+          @loaded="attachClickHandlers"
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
         >
           <template #empty>현재 조건에 해당하는 공지사항이 없습니다.</template>
         </ServerDataTable>
       </div>
     </div>
   </main>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+</template>
+=======
+>>>>>>> develop
 </template>
 
 <style scoped>
@@ -235,4 +371,9 @@ onMounted(() => {
   background-color: #f8f9fa;
   cursor: pointer;
 }
+<<<<<<< HEAD
 </style>
+=======
+</style>
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop

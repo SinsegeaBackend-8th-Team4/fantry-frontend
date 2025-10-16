@@ -2,7 +2,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getOfflineInspectionDetail, changeInventoryStatus } from '@/api/adminInspection'
-import { createAuction, getAuctionByInspectionId } from '@/api/auction'
+import { createAuction, getAuctionByInspectionId, cancelAuction } from '@/api/auction'
 
 const router = useRouter()
 const route = useRoute()
@@ -18,6 +18,7 @@ const inspectionDetail = ref(null) // API로 가져온 검수 상세 정보
 // 페이지 모드: REGISTER (등록), MANAGE (관리)
 const pageMode = ref('')
 const isLocked = ref(false) // Form 잠금 상태
+const auctionId = ref('') // 현재 판매 정보의 Auction ID
 
 // 판매 등록 폼
 const saleForm = reactive({
@@ -65,6 +66,9 @@ async function fetchDetails(id) {
         const auctionRes = await getAuctionByInspectionId(id)
         if (auctionRes.data) {
           const auctionData = auctionRes.data
+
+          // auctionId 저장
+          auctionId.value = auctionData.auctionId;
           // 기존 판매 정보로 폼 채우기
           saleForm.saleType = auctionData.saleType
           saleForm.startPrice = auctionData.startPrice
@@ -116,8 +120,8 @@ async function handleRegister() {
 
   const payload = {
     ...restOfForm,
-    startTime: new Date(saleForm.startTime).toISOString(),
-    endTime: new Date(saleForm.endTime).toISOString(),
+    startTime: toUtcIsoStringFromLocal(saleForm.startTime),
+    endTime: toUtcIsoStringFromLocal(saleForm.endTime),
     isReRegistration: isReRegistration,
   }
 
@@ -128,8 +132,7 @@ async function handleRegister() {
   try {
     await createAuction(payload)
     alert('상품이 성공적으로 등록되었습니다.')
-    // 상세 정보를 다시 불러와 최신 상태를 반영
-    await fetchDetails(inspectionId.value)
+    router.push('/admin/inventory/list'); // Redirect to list page
   } catch (err) {
     console.error('상품 등록 실패:', err)
     alert(err.message || '상품 등록 중 오류가 발생했습니다.')
@@ -144,10 +147,8 @@ async function handleCancelSale() {
 
   loading.value = true
   try {
-    // 판매 취소 API는 Auction ID를 파라미터로 받을 수 있습니다. (API 명세에 따라 수정 필요)
-    // 여기서는 우선 재고 상태 변경 API를 호출하는 것으로 가정합니다.
-    await changeInventoryStatus(inspectionId.value, 'CANCELED')
-    alert('판매가 성공적으로 취소되었습니다.')
+    await cancelAuction(auctionId.value);
+    alert('판매가 성공적으로 취소되었습니다.');
     await fetchDetails(inspectionId.value) // 재조회하여 상태 변경 반영
   } catch (err) {
     console.error('판매 취소 실패:', err)
@@ -217,6 +218,15 @@ const toLocalISOString = (date) => {
     const tzoffset = d.getTimezoneOffset() * 60000; // timezone offset in milliseconds
     const localISOTime = new Date(d - tzoffset).toISOString().slice(0, -1);
     return localISOTime;
+};
+
+// Converts a local datetime-local string to a UTC ISO string, preserving the local time components
+const toUtcIsoStringFromLocal = (localDateTimeString) => {
+  if (!localDateTimeString) return '';
+  const localDate = new Date(localDateTimeString);
+  // Adjust the date to be UTC while preserving the local time components
+  const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+  return utcDate.toISOString();
 };
 
 </script>

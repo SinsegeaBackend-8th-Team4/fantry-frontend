@@ -1,6 +1,13 @@
 // src/api/adminNotice.js
 import { apiClient } from './index';
+<<<<<<< HEAD
 import { unwrap } from './InspectionHelper';
+=======
+<<<<<<< HEAD
+=======
+import { unwrap } from './InspectionHelper';
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 
 /**
  * 공지사항 목록을 검색 조건에 따라 페이징하여 조회합니다.
@@ -8,6 +15,12 @@ import { unwrap } from './InspectionHelper';
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const searchNotices = (params) => {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+  return apiClient.get('/admin/cs/notice', { params });
+=======
+>>>>>>> develop
   const queryParams = {
     page: params.page > 0 ? params.page - 1 : 0,
     size: params.size,
@@ -29,6 +42,10 @@ export const searchNotices = (params) => {
       return qs.toString();
     },
   }));
+<<<<<<< HEAD
+=======
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 };
 
 /**
@@ -37,7 +54,15 @@ export const searchNotices = (params) => {
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const getNoticeById = (noticeId) => {
+<<<<<<< HEAD
   return apiClient.get(`/admin/cs/notices/${noticeId}`);
+=======
+<<<<<<< HEAD
+  return apiClient.get(`/admin/cs/notice/${noticeId}`);
+=======
+  return apiClient.get(`/admin/cs/notices/${noticeId}`);
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 };
 
 /**
@@ -46,7 +71,15 @@ export const getNoticeById = (noticeId) => {
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const createNotice = (noticeData) => {
+<<<<<<< HEAD
   return apiClient.post('/admin/cs/notices', noticeData);
+=======
+<<<<<<< HEAD
+  return apiClient.post('/admin/cs/notice', noticeData);
+=======
+  return apiClient.post('/admin/cs/notices', noticeData);
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 };
 
 /**
@@ -56,7 +89,15 @@ export const createNotice = (noticeData) => {
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const updateNotice = (noticeId, noticeData) => {
+<<<<<<< HEAD
   return apiClient.patch(`/admin/cs/notices/${noticeId}`, noticeData);
+=======
+<<<<<<< HEAD
+  return apiClient.patch(`/admin/cs/notice/${noticeId}`, noticeData);
+=======
+  return apiClient.patch(`/admin/cs/notices/${noticeId}`, noticeData);
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 };
 
 /**
@@ -65,6 +106,12 @@ export const updateNotice = (noticeId, noticeData) => {
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const deleteNotice = (noticeId) => {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+  return apiClient.delete(`/admin/cs/notice/${noticeId}`);
+=======
+>>>>>>> develop
   return apiClient.delete(`/admin/cs/notices/${noticeId}`);
 };
 
@@ -73,7 +120,11 @@ export const deleteNotice = (noticeId) => {
  * @returns {Promise<NoticeStatsResponse>}
  */
 export const getNoticeStats = () => {
+<<<<<<< HEAD
   return unwrap(apiClient.get('/  admin/cs/notices/stats'));
+=======
+  return unwrap(apiClient.get('/admin/cs/notices/stats'));
+>>>>>>> develop
 };
 
 /**
@@ -92,4 +143,8 @@ export const addNoticeAttachments = (noticeId, files) => {
       'Content-Type': 'multipart/form-data',
     },
   });
+<<<<<<< HEAD
+=======
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
+>>>>>>> develop
 };
