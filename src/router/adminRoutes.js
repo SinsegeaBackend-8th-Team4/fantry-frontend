@@ -17,11 +17,12 @@ const MainDashboardPage = () => import('@/pages/admin/dashboard/MainDashboardPag
 // 정산 관리
 const SettlementDashboardPage = () => import('@/pages/admin/settlement/SettlementDashboardPage.vue')
 const SettlementListPage = () => import('@/pages/admin/settlement/SettlementListPage.vue')
-const SettlementListSamplePage = () => import('@/pages/admin/settlement/SettlementListSamplePage.vue')
+const SettlementSettingPage = () => import('@/pages/admin/settlement/SettlementSettingPage.vue') // 새로 추가
 
 // 반품 관리
 const AdminReturnListPage = () => import('@/pages/admin/return/AdminReturnListPage.vue');
 const AdminReturnDetailPage = () => import('@/pages/admin/return/AdminReturnDetailPage.vue');
+const AdminReturnCreatePage = () => import('@/pages/admin/return/AdminReturnCreatePage.vue'); // 새로 추가
 
 
 
@@ -119,7 +120,8 @@ const adminRoutes = [
           children: [
             { path: 'dashboard', name: 'AdminSettlementDashboard', component: SettlementDashboardPage, meta: { title: '정산 대시보드' } },
             { path: 'list', name: 'AdminSettlementList', component: SettlementListPage, meta: { title: '정산 내역' } },
-            { path: 'sample', name: 'AdminSettlementListSample', component: SettlementListSamplePage, meta: { title: '샘플 목록' } },
+            { path: 'settings', name: 'AdminSettlementSettings', component: SettlementSettingPage, meta: { title: '정산 설정', menu: true } }, // 새로 추가
+            // { path: 'sample', name: 'AdminSettlementListSample', component: SettlementListSamplePage, meta: { title: '샘플 목록' } }, // 샘플 페이지는 필요 없으므로 주석 처리 또는 삭제
           ],
         },
 
@@ -160,6 +162,18 @@ const adminRoutes = [
             { path: 'edit/:noticeId', name: 'AdminNoticeEdit', component: NoticeEditPage, props: true, meta: { title: '공지사항 수정', hidden: true } },
             { path: 'write', name: 'AdminCsWrite', component: CsWritePage, props: true, meta: { title: '새 글 작성', hidden: true } },
           ]
+        },
+
+        // --- 반품 관리 ---
+        {
+          path: 'return', // 'returns' 대신 'return'으로 통일
+          redirect: { name: 'AdminReturnList' },
+          meta: { title: '반품관리', icon: 'fas fa-fw fa-undo', menu: true },
+          children: [
+            { path: 'list', name: 'AdminReturnList', component: AdminReturnListPage, meta: { title: '반품 목록' } },
+            { path: 'detail/:returnRequestId', name: 'AdminReturnDetail', component: AdminReturnDetailPage, props: true, meta: { title: '반품 상세', hidden: true } },
+            { path: 'create', name: 'AdminReturnCreate', component: AdminReturnCreatePage, meta: { title: '반품 등록', hidden: true } }, // 새로 추가
+          ],
         },
 
         // --- 검수 관리 ---

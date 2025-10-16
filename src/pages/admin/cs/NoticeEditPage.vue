@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { getNoticeById, updateNotice } from '@/api/adminNotice.js';
+import { getNoticeById, updateNotice, addNoticeAttachments } from '@/api/adminNotice.js'; // addNoticeAttachments 임포트
 import CommonEditor from '@/components/common/organisms/CommonEditor.vue';
 import LoadingSpinner from '@/components/common/atoms/LoadingSpinner.vue';
 
@@ -12,10 +12,13 @@ const noticeId = Number(route.params.noticeId);
 const notice = ref(null);
 const loading = ref(true);
 const error = ref(null);
+const selectedFiles = ref([]); // 새 파일 저장을 위한 ref
 
 const statusOptions = ref([
   { value: 'ACTIVE', text: '활성' },
   { value: 'INACTIVE', text: '비활성' },
+  { value: 'PINNED', text: '고정' },
+  { value: 'DRAFT', text: '초안' },
 ]);
 
 const typeOptions = [
@@ -26,6 +29,11 @@ const typeOptions = [
   { id: 5, name: '환불/반품 문의' },
   { id: 6, name: '판매 문의' },
 ];
+
+// 파일 변경 핸들러
+function handleFileChange(event) {
+  selectedFiles.value = Array.from(event.target.files);
+}
 
 async function fetchNotice() {
   try {
@@ -56,6 +64,12 @@ async function handleSubmit() {
 
   try {
     await updateNotice(noticeId, payload);
+
+    // 새 파일이 선택된 경우에만 첨부 파일 업로드
+    if (selectedFiles.value.length > 0) {
+      await addNoticeAttachments(noticeId, selectedFiles.value);
+    }
+
     alert('공지사항이 성공적으로 수정되었습니다.');
     router.push({ name: 'AdminNoticeDetail', params: { noticeId } });
   } catch (e) {
@@ -107,6 +121,23 @@ onMounted(fetchNotice);
           <div class="mb-3">
             <label class="form-label">내용</label>
             <CommonEditor v-model="notice.content" />
+          </div>
+
+          <!-- 기존 첨부 파일 표시 -->
+          <div class="mb-3" v-if="notice.attachmentUrls && notice.attachmentUrls.length > 0">
+            <label class="form-label">기존 첨부 파일</label>
+            <div class="d-flex flex-wrap gap-2">
+              <a v-for="(url, index) in notice.attachmentUrls" :key="index" :href="url" target="_blank" class="btn btn-sm btn-outline-info">
+                <i class="fas fa-paperclip me-1"></i> 파일 {{ index + 1 }}
+              </a>
+            </div>
+          </div>
+
+          <!-- 새 첨부 파일 입력 -->
+          <div class="mb-3">
+            <label for="notice-attachments" class="form-label">새 첨부 파일</label>
+            <input type="file" id="notice-attachments" class="form-control" multiple @change="handleFileChange">
+            <small class="form-text text-muted">새로운 파일을 추가합니다. 기존 파일은 유지됩니다.</small>
           </div>
 
           <div class="d-flex justify-content-between">

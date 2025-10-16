@@ -22,18 +22,46 @@ const palette = useChartPalette(); // 색상 팔레트 초기화
 
 const summaryCards = ref([
   {
-    key: 'pending', // API 응답 필드 이름에 맞게 수정
+    key: 'pending',
     title: '답변 대기',
     color: 'warning',
     icon: 'fas fa-hourglass-half',
     statusValue: 'PENDING',
   },
   {
-    key: 'inProgress', // API 응답 필드 이름에 맞게 수정
+    key: 'inProgress',
     title: '처리 중',
     color: 'info',
     icon: 'fas fa-tasks',
     statusValue: 'IN_PROGRESS',
+  },
+  {
+    key: 'onHold',
+    title: '보류 중',
+    color: 'secondary',
+    icon: 'fas fa-pause-circle',
+    statusValue: 'ON_HOLD',
+  },
+  {
+    key: 'answered',
+    title: '답변 완료',
+    color: 'success',
+    icon: 'fas fa-check-circle',
+    statusValue: 'ANSWERED',
+  },
+  {
+    key: 'rejected',
+    title: '거절됨',
+    color: 'danger',
+    icon: 'fas fa-times-circle',
+    statusValue: 'REJECTED',
+  },
+  {
+    key: 'total',
+    title: '전체 문의',
+    color: 'primary',
+    icon: 'fas fa-clipboard-list',
+    statusValue: null, // 전체 목록은 특정 상태 없이 조회
   },
 ]);
 
@@ -84,22 +112,29 @@ const chartOptions = ref({
 
 onMounted(async () => {
   try {
-    stats.value = await getInquiryStats(); // 문의 통계 전용 API 호출
+    stats.value = await getInquiryStats();
 
-    // 차트 데이터 구성
     if (stats.value) {
       const labels = [
         '답변 대기',
         '처리 중',
+        '보류 중',
+        '답변 완료',
+        '거절됨',
       ];
       const data = [
-        stats.value.pending,     // API 응답 필드 이름에 맞게 수정
-        stats.value.inProgress,  // API 응답 필드 이름에 맞게 수정
+        stats.value.pending,
+        stats.value.inProgress,
+        stats.value.onHold,
+        stats.value.answered,
+        stats.value.rejected,
       ];
       const backgroundColors = [
-        palette.primary,
         palette.warning,
         palette.info,
+        palette.secondary,
+        palette.success,
+        palette.danger,
       ];
 
       chartData.value = {
@@ -129,6 +164,7 @@ function goToInquiryList(cardKey) {
     query: statusParam ? { status: statusParam } : {}
   });
 }
+
 </script>
 
 <template>

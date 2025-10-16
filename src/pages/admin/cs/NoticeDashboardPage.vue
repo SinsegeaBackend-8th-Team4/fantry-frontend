@@ -70,7 +70,7 @@ async function fetchData() {
     loading.value = true;
     const [statsData, noticesResponse] = await Promise.all([
       getNoticeStats(),
-      searchNotices({ page: 1, size: 5, sort: 'createdAt,desc' })
+      searchNotices({ page: 0, size: 5, sort: 'createdAt,desc' }) // page를 0-based로 수정
     ]);
 
     stats.value = statsData;
@@ -143,7 +143,7 @@ onMounted(fetchData);
     <div v-if="!loading && !error && stats">
       <!-- Summary Cards -->
       <div class="row">
-        <div v-for="card in summaryCards" :key="card.key" class="col-xl col-md-6 mb-4">
+        <div v-for="card in summaryCards" :key="card.key" class="col-xl-2 col-md-4 mb-4"> <!-- col-xl-2 col-md-4로 변경 -->
           <DashboardSummaryCard
             :card="card"
             :value="stats[card.key] || 0"

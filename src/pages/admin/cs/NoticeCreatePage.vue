@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { createNotice } from '@/api/adminNotice.js';
+import { createNotice, addNoticeAttachments } from '@/api/adminNotice.js';
 import CommonEditor from '@/components/common/organisms/CommonEditor.vue';
 
 const router = useRouter();
@@ -12,6 +12,9 @@ const newNotice = ref({
   status: 'DRAFT', // 기본값을 'DRAFT'로 변경
   csTypeId: 3, // 기본값 '기타문의'
 });
+
+const selectedFiles = ref([]);
+const previewFiles = ref([]); // 미리보기 URL을 저장할 ref
 
 const typeOptions = [
   { id: 1, name: '배송문의' },
@@ -32,6 +35,19 @@ const statusOptions = ref([
 
 const error = ref(null);
 
+// URL이 이미지 파일인지 확인하는 헬퍼 함수
+function isImage(url) {
+  return /\.(jpeg|jpg|gif|png|webp|bmp)$/i.test(url);
+}
+
+function handleFileChange(event) {
+  selectedFiles.value = Array.from(event.target.files);
+  previewFiles.value = selectedFiles.value.map(file => ({
+    name: file.name,
+    url: URL.createObjectURL(file)
+  }));
+}
+
 async function handleSubmit() {
   if (!newNotice.value.title || !newNotice.value.content || !newNotice.value.status) {
     alert('제목, 내용, 상태를 모두 입력해주세요.');
@@ -39,7 +55,13 @@ async function handleSubmit() {
   }
 
   try {
-    await createNotice(newNotice.value);
+    const noticeResponse = await createNotice(newNotice.value);
+    const noticeId = noticeResponse.data.noticeId; // Assuming the response contains noticeId
+
+    if (selectedFiles.value.length > 0) {
+      await addNoticeAttachments(noticeId, selectedFiles.value);
+    }
+
     alert('새 공지사항이 성공적으로 등록되었습니다.');
     router.push({ name: 'AdminNoticeList' });
   } catch (e) {
@@ -87,6 +109,24 @@ function goToList() {
             <CommonEditor v-model="newNotice.content" />
           </div>
 
+          <div class="mb-3">
+            <label for="notice-attachments" class="form-label">첨부 파일</label>
+            <input type="file" id="notice-attachments" class="form-control" multiple @change="handleFileChange">
+          </div>
+
+          <!-- 선택된 파일 미리보기 섹션 -->
+          <div v-if="previewFiles.length > 0" class="mb-3">
+            <h6>선택된 파일 미리보기</h6>
+            <div class="d-flex flex-wrap gap-2">
+              <div v-for="(file, index) in previewFiles" :key="index">
+                <img v-if="isImage(file.url)" :src="file.url" alt="Preview" class="img-thumbnail" style="max-width: 150px; max-height: 150px; object-fit: cover;">
+                <a v-else :href="file.url" target="_blank" class="btn btn-sm btn-outline-info">
+                  <i class="fas fa-paperclip me-1"></i> {{ file.name }}
+                </a>
+              </div>
+            </div>
+          </div>
+
           <div class="d-flex justify-content-between">
             <button type="button" class="btn btn-secondary" @click="goToList">취소</button>
             <button type="submit" class="btn btn-primary">등록</button>
@@ -96,3 +136,15 @@ function goToList() {
     </div>
   </div>
 </template>
+
+<style scoped>
+.img-thumbnail {
+  border: 1px solid #ddd;
+  padding: 3px;
+  border-radius: 5px;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+</style>

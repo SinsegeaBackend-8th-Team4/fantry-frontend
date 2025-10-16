@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { getFaqById, updateFaq } from '@/api/adminFaq.js';
+import { getFaqById, updateFaq, addFaqAttachments } from '@/api/adminFaq.js';
 import CommonEditor from '@/components/common/organisms/CommonEditor.vue';
 import LoadingSpinner from '@/components/common/atoms/LoadingSpinner.vue';
 
@@ -12,6 +12,7 @@ const faqId = Number(route.params.faqId);
 const faq = ref(null);
 const loading = ref(true);
 const error = ref(null);
+const selectedFiles = ref([]);
 
 // 문의 유형 목록 (임시)
 const csTypes = ref([
@@ -26,7 +27,13 @@ const csTypes = ref([
 const statusOptions = ref([
   { value: 'ACTIVE', text: '활성' },
   { value: 'INACTIVE', text: '비활성' },
+  { value: 'DRAFT', text: '초안' },
+  { value: 'PINNED', text: '고정' },
 ]);
+
+function handleFileChange(event) {
+  selectedFiles.value = Array.from(event.target.files);
+}
 
 async function fetchFaq() {
   try {
@@ -57,6 +64,11 @@ async function handleSubmit() {
 
   try {
     await updateFaq(faqId, payload);
+
+    if (selectedFiles.value.length > 0) {
+      await addFaqAttachments(faqId, selectedFiles.value);
+    }
+
     alert('FAQ가 성공적으로 수정되었습니다.');
     router.push({ name: 'AdminFaqDetail', params: { faqId } });
   } catch (e) {
@@ -108,6 +120,11 @@ onMounted(fetchFaq);
           <div class="mb-3">
             <label class="form-label">내용</label>
             <CommonEditor v-model="faq.content" />
+          </div>
+
+          <div class="mb-3">
+            <label for="faq-attachments" class="form-label">첨부 파일</label>
+            <input type="file" id="faq-attachments" class="form-control" multiple @change="handleFileChange">
           </div>
 
           <div class="d-flex justify-content-between">

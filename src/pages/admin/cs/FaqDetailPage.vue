@@ -12,6 +12,11 @@ const faq = ref(null);
 const loading = ref(true);
 const error = ref(null);
 
+// URL이 이미지 파일인지 확인하는 헬퍼 함수
+function isImage(url) {
+  return /\.(jpeg|jpg|gif|png|webp|bmp)$/i.test(url);
+}
+
 async function fetchFaq() {
   try {
     loading.value = true;
@@ -98,8 +103,21 @@ onMounted(fetchFaq);
           <div class="col-md-6">
             <p><strong>문의 유형:</strong> {{ faq.csType || 'N/A' }}</p>
             <p><strong>상태:</strong> 
-              <span class="badge" :class="faq.status === 'ACTIVE' ? 'bg-success' : 'bg-danger'">
-                {{ faq.status === 'ACTIVE' ? '활성' : '비활성' }}
+              <span class="badge"
+                :class="{
+                  'bg-success': faq.status === 'ACTIVE',
+                  'bg-info': faq.status === 'PINNED',
+                  'bg-secondary': faq.status === 'DRAFT',
+                  'bg-danger': faq.status === 'INACTIVE',
+                }"
+              >
+                {{ 
+                  faq.status === 'ACTIVE' ? '활성' :
+                  faq.status === 'PINNED' ? '고정' :
+                  faq.status === 'DRAFT' ? '초안' :
+                  faq.status === 'INACTIVE' ? '비활성' :
+                  faq.status
+                }}
               </span>
             </p>
             <p><strong>등록일:</strong> {{ formatDate(faq.createdAt) }}</p>
@@ -108,6 +126,21 @@ onMounted(fetchFaq);
         <hr>
         <h6>내용</h6>
         <div class="p-3 bg-light rounded" v-html="faq.content"></div>
+
+        <!-- 첨부 파일 섹션 -->
+        <div v-if="faq.attachmentUrls && faq.attachmentUrls.length > 0" class="mt-4">
+          <h6>첨부 파일</h6>
+          <div class="d-flex flex-wrap gap-2">
+            <div v-for="(url, index) in faq.attachmentUrls" :key="index">
+              <a :href="url" target="_blank" class="btn btn-sm btn-outline-info" v-if="!isImage(url)">
+                <i class="fas fa-paperclip me-1"></i> 파일 {{ index + 1 }}
+              </a>
+              <a :href="url" target="_blank" v-else>
+                <img :src="url" alt="Attachment Preview" class="img-thumbnail" style="max-width: 150px; max-height: 150px; object-fit: cover;">
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="card-footer d-flex justify-content-between">
         <button class="btn btn-secondary" @click="goToList">목록</button>
@@ -119,3 +152,15 @@ onMounted(fetchFaq);
     </div>
   </div>
 </template>
+
+<style scoped>
+.img-thumbnail {
+  border: 1px solid #ddd;
+  padding: 3px;
+  border-radius: 5px;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+</style>

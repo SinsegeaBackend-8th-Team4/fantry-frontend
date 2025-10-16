@@ -109,7 +109,12 @@ onMounted(async () => {
     stats.value = await getFaqStats();
 
     if (stats.value) {
-      const labels = ['활성', '고정', '임시저장', '비활성'];
+      const labels = [
+        '활성',
+        '고정',
+        '임시저장',
+        '비활성',
+      ];
       const data = [
         stats.value.active,
         stats.value.pinned,
@@ -166,7 +171,7 @@ function goToFaqList(cardKey) {
     <div v-if="stats">
       <!-- Summary Cards Section -->
       <div class="row">
-        <div v-for="card in summaryCards" :key="card.key" class="col-xl-3 col-md-6 mb-4">
+        <div v-for="card in summaryCards" :key="card.key" class="col-xl-2 col-md-4 mb-4">
           <DashboardSummaryCard
             :card="card"
             :value="stats ? stats[card.key] : 0"

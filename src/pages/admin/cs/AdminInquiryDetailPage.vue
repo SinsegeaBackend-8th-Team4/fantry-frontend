@@ -28,6 +28,11 @@ function getStatusText(status) {
   return option ? option.text : status;
 }
 
+// URL이 이미지 파일인지 확인하는 헬퍼 함수
+function isImage(url) {
+  return /\.(jpeg|jpg|gif|png|webp|bmp)$/i.test(url);
+}
+
 // 문의 상세 정보 로드
 async function fetchInquiry() {
   try {
@@ -42,9 +47,8 @@ async function fetchInquiry() {
     if (!inquiry.value.comment) {
       inquiry.value.comment = '';
     }
-    if (!inquiry.value.reqStatus) {
-      inquiry.value.reqStatus = inquiry.value.status || 'PENDING';
-    }
+    // 기존 상태가 있다면 그 상태를 기본값으로 설정
+    inquiry.value.reqStatus = inquiry.value.status;
   } catch (e) {
     console.error('문의 상세 정보 조회 실패:', e);
     error.value = '데이터를 불러오는 중 오류가 발생했습니다.';
@@ -139,7 +143,7 @@ onMounted(fetchInquiry);
               <p><strong>작성자:</strong> {{ inquiry.inquiredByName || 'N/A' }}</p>
             </div>
             <div class="col-md-6">
-              <p><strong>문의 유형:</strong> {{ inquiry.csType?.name || inquiry.csType?.NAME || 'N/A' }}</p>
+              <p><strong>문의 유형:</strong> {{ inquiry.csType.name || 'N/A' }}</p>
               <p><strong>상태:</strong> 
                 <span class="badge bg-primary">{{ getStatusText(inquiry.status) }}</span>
               </p>
@@ -149,6 +153,21 @@ onMounted(fetchInquiry);
           <hr>
           <h6>문의 내용</h6>
           <div class="p-3 bg-light rounded" v-html="inquiry.content"></div>
+
+          <!-- 첨부 파일 섹션 -->
+          <div v-if="inquiry.attachmentUrls && inquiry.attachmentUrls.length > 0" class="mt-4">
+            <h6>첨부 파일</h6>
+            <div class="d-flex flex-wrap gap-2">
+              <div v-for="(url, index) in inquiry.attachmentUrls" :key="index">
+                <a :href="url" target="_blank" class="btn btn-sm btn-outline-info" v-if="!isImage(url)">
+                  <i class="fas fa-paperclip me-1"></i> 파일 {{ index + 1 }}
+                </a>
+                <a :href="url" target="_blank" v-else>
+                  <img :src="url" alt="Attachment Preview" class="img-thumbnail" style="max-width: 150px; max-height: 150px; object-fit: cover;">
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -202,5 +221,11 @@ onMounted(fetchInquiry);
 
 .gap-2 {
   gap: 0.5rem;
+}
+
+.img-thumbnail {
+  border: 1px solid #ddd;
+  padding: 3px;
+  border-radius: 5px;
 }
 </style>

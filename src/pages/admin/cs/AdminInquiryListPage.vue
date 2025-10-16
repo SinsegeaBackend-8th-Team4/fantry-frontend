@@ -19,7 +19,9 @@ const statusFilters = [
   { label: '전체', value: null },
   { label: '답변 대기', value: 'PENDING' },
   { label: '처리 중', value: 'IN_PROGRESS' },
+  { label: '보류 중', value: 'ON_HOLD' },
   { label: '답변 완료', value: 'ANSWERED' },
+  { label: '거절됨', value: 'REJECTED' },
 ];
 
 // 유형 필터 버튼 목록 정의

@@ -88,9 +88,8 @@ onMounted(fetchNotice);
       </div>
       <div class="card-body">
         <div class="d-flex justify-content-between text-muted small mb-3">
-          <span>작성자: {{ notice.createdBy || notice.authorName || 'N/A' }}</span>
+          <span>작성자: {{ notice.createdBy || 'N/A' }}</span>
           <span>등록일: {{ formatDate(notice.createdAt) }}</span>
-          <span>조회수: {{ notice.viewCount }}</span>
         </div>
         <hr>
         <div v-html="notice.content" class="mt-4"></div>
