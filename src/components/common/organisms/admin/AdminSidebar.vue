@@ -40,13 +40,13 @@ const menuItems = computed(() => {
 
 <template>
   <!-- 사이드바 -->
-  <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+  <ul class="navbar-nav bg-white sidebar sidebar-light accordion" id="accordionSidebar">
     <!-- 사이드바 로고/브랜드 -->
     <RouterLink to="/admin" class="sidebar-brand d-flex align-items-center justify-content-center">
       <div class="sidebar-brand-icon">
-        <i class="fas fa-cogs"></i>
+        <img src="/images/fantry_logo.png" alt="Fantry" style="height: 30px;">
       </div>
-      <div class="sidebar-brand-text mx-3">Fantry 관리</div>
+      <div class="sidebar-brand-text mx-2">Fantry Admin</div>
     </RouterLink>
 
     <!-- 구분선 -->

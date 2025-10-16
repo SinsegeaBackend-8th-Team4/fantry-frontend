@@ -7,6 +7,7 @@
 
 // --- 레이아웃 ---
 import UserLayout from '@/layouts/UserLayout.vue'
+import CSPageLayout from '@/layouts/CSPageLayout.vue'
 import CheckoutPage from '@/pages/payment/CheckoutPage.vue'
 import UserInfoPage from '@/pages/payment/UserInfoPage.vue'
 import PaymentCompletePage from '@/pages/payment/PaymentCompletePage.vue'
@@ -32,6 +33,12 @@ const InspectionStep3Page = () => import('@/pages/user/inspection/Step3Page.vue'
 const InspectionPolicyPage = () => import('@/pages/user/inspection/InspectionPolicyPage.vue'); 
 // 마이페이지
 const MyPageLayout = () => import('@/pages/user/mypage/MyPage.vue')
+// 고객센터
+
+const FaqPage = () => import('@/pages/user/cs/FaqPage.vue')
+const NoticePage = () => import('@/pages/user/cs/NoticePage.vue')
+const NoticeDetailPage = () => import('@/pages/user/cs/NoticeDetailPage.vue')
+const InquiryPage = () => import('@/pages/user/cs/InquiryPage.vue')
 
 const userRoutes = {
   path: '/',
@@ -155,6 +162,34 @@ const userRoutes = {
       name: 'MyPageLayout',
       component: MyPageLayout,
       meta: { requiresAuth: true },
+    },
+    {
+      path: 'cs',
+      component: CSPageLayout,
+      redirect: '/cs/notice',
+      children: [
+        {
+          path: 'faq',
+          name: 'FaqPage',
+          component: FaqPage,
+        },
+        {
+          path: 'notice',
+          name: 'NoticePage',
+          component: NoticePage,
+        },
+        {
+          path: 'notice/:id',
+          name: 'NoticeDetail',
+          component: NoticeDetailPage,
+        },
+        {
+          path: 'inquiry',
+          name: 'InquiryPage',
+          component: InquiryPage,
+          meta: { requiresAuth: true },
+        },
+      ]
     },
     {
       path: 'order',

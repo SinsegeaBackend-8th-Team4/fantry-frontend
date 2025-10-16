@@ -17,9 +17,8 @@ export const searchNotices = (params) => {
         page: params.page > 0 ? params.page - 1 : 0, // API는 0-based page
         size: params.size,
         sort: params.sort,
-        csTypeId: params.csTypeId,
+        type: params.type,
         keyword: params.keyword,
-        status: params.status,
     };
 
     return unwrap(apiClient.get('/cs/notices', {
