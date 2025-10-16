@@ -108,14 +108,6 @@ const statusInfo = computed(() => {
 });
 
 
-<<<<<<< HEAD
-async function updateDeductedShippingFee() {
-  if (!confirm(`차감 배송비를 ${deductedShippingFeeInput.value.toLocaleString()}원으로 저장하시겠습니까?`)) return;
-  await updateReturnRequest(returnRequest.value.status); // 현재 상태로 업데이트하며 차감 배송비만 변경
-}
-
-=======
->>>>>>> develop
 function goBack() {
   router.push('/admin/return/list');
 }
@@ -320,9 +312,6 @@ onMounted(fetchReturnDetail);
     </div>
   </main>
 </template>
-<<<<<<< HEAD
- 
-=======
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
@@ -462,7 +451,6 @@ function goBack() {
 onMounted(fetchReturnDetail);
 </script>
 
->>>>>>> develop
 <style scoped>
 .img-thumbnail {
   border: 1px solid #ddd;
