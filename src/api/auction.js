@@ -43,21 +43,12 @@ export const getActiveAuctionsByBidder = (memberId) => {
  * @param {string} [params.sort] - 정렬 기준 (예: 'createdAt,desc')
  * @param {string} [params.saleType] - 판매 유형 (AUCTION, INSTANT_BUY)
  * @param {string} [params.saleStatus] - 판매 상태 (ACTIVE, SOLD 등)
+ * @param {string} [params.artistGroupType] - 아티스트 그룹 유형
  * @returns {Promise<Page<AuctionSummaryResponse>>}
  */
-/**
- * 상품 목록을 조건에 따라 페이징하여 조회합니다.
- * @param {object} params - 페이징 및 필터 정보
- * @param {number} params.page - 조회할 페이지 번호 (0부터 시작)
- * @param {number} params.size - 한 페이지에 보여줄 개수
- * @param {string} [params.sort] - 정렬 기준 (예: 'createdAt,desc')
- * @param {string} [params.saleType] - 판매 유형 (AUCTION, INSTANT_BUY)
- * @param {string} [params.saleStatus] - 판매 상태 (ACTIVE, SOLD 등)
- * @returns {Promise<Page<AuctionSummaryResponse>>}
- */
-export const getAuctionList = ({ page, size, sort, saleType, saleStatus }) => {
-    return apiClient.get('/auctions', {
-        params: { page, size, sort, saleType, saleStatus }
+export const getAuctionList = ({ page, size, sort, saleType, saleStatus, artistGroupType }) => {
+    return publicApiClient.get('/auctions', {
+        params: { page, size, sort, saleType, saleStatus, artistGroupType }
     });
 }
 
@@ -152,4 +143,13 @@ export const changeAuctionSaleType = ({ auctionId, newSaleType }) => {
     return apiClient.patch(`/auctions/${auctionId}/sale-type`, null, {
         params: { newSaleType }
     });
+}
+
+/**
+ * 검수 ID를 기준으로 최신 경매/판매 정보를 조회합니다.
+ * @param {number} productInspectionId - 조회할 검수 ID
+ * @returns {Promise<AuctionDetailResponse>} - 조회된 경매 상세 정보
+ */
+export const getAuctionByInspectionId = (productInspectionId) => {
+    return apiClient.get(`/auctions/inspection/${productInspectionId}`);
 }

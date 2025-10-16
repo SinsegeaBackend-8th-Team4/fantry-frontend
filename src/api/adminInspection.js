@@ -38,6 +38,43 @@ export const getInspectionsByStatus = (params) => {
 }
 
 /**
+ * 재고 상태별 검수 목록 조회
+ * @param {object} params - 페이지네이션, 정렬, 필터링 파라미터
+ * @returns
+ */
+export const getInspectionsByInventoryStatus = (params) => {
+  const queryParams = {
+    statuses: params.statuses,
+    page: params.page - 1,
+    size: params.size,
+    sort: params.sort,
+    keyword: params.keyword,
+    goodsCategoryId: params.goodsCategoryId,
+    artistId: params.artistId,
+    startDate: params.startDate,
+    endDate: params.endDate,
+  }
+
+  const requestPromise = apiClient.get('/admin/inspections/inventories', {
+    params: queryParams,
+    // Axios가 배열을 올바르게 처리하도록 paramsSerializer 옵션 추가
+    paramsSerializer: (params) => {
+      const qs = new URLSearchParams()
+      for (const key in params) {
+        if (Array.isArray(params[key])) {
+          params[key].forEach((value) => qs.append(key, value))
+        } else if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+          qs.append(key, params[key])
+        }
+      }
+      return qs.toString()
+    },
+  })
+  return unwrap(requestPromise).catch(rethrow)
+}
+
+
+/**
  * 1차 검수 상세 조회
  * @param {number} productInspectionId
  * @returns
@@ -69,3 +106,11 @@ export const approveOfflineInspection = (productInspectionId, body) => unwrap(ap
 
 /** 2차 검수 반려 */
 export const rejectOfflineInspection = (productInspectionId, body) => unwrap(apiClient.post(`/admin/inspections/${productInspectionId}/secondReject`, body)).catch(rethrow)
+
+/** 재고 상태 변경 */
+export const changeInventoryStatus = (productInspectionId, status) => {
+  const requestPromise = apiClient.put(`/admin/inspections/${productInspectionId}/inventory/status`, null, {
+    params: { status },
+  })
+  return unwrap(requestPromise).catch(rethrow)
+}

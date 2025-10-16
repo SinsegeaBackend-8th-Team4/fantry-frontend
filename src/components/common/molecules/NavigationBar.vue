@@ -22,6 +22,11 @@ const goToMyPage = () => {
   router.push('/mypage');
 }
 
+//상품 목록 페이지로 이동 (그룹 타입 필터링 포함)
+const goToProductList = (groupType) => {
+  router.push({ path: '/product', query: { groupType: groupType } });
+}
+
 </script>
 
 <template>
@@ -41,13 +46,13 @@ const goToMyPage = () => {
     </button>
     <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
       <div class="navbar-nav mr-auto py-0">
-        <NavigationItem @click="router.push('/')">전체</NavigationItem>
-        <NavigationItem>남자 그룹</NavigationItem>
-        <NavigationItem>여자 그룹</NavigationItem>
-        <NavigationItem>남자 솔로</NavigationItem>
-        <NavigationItem>여자 솔로</NavigationItem>
-        <NavigationItem>혼성 그룹</NavigationItem>
-        <NavigationItem>기타</NavigationItem>
+        <NavigationItem @click="goToProductList('ALL')">전체</NavigationItem>
+        <NavigationItem @click="goToProductList('MALE_GROUP')">남자 그룹</NavigationItem>
+        <NavigationItem @click="goToProductList('FEMALE_GROUP')">여자 그룹</NavigationItem>
+        <NavigationItem @click="goToProductList('MALE_SOLO')">남자 솔로</NavigationItem>
+        <NavigationItem @click="goToProductList('FEMALE_SOLO')">여자 솔로</NavigationItem>
+        <NavigationItem @click="goToProductList('MIXED')">혼성 그룹</NavigationItem>
+        <NavigationItem @click="goToProductList('OTHER')">기타</NavigationItem>
       </div>
       <div class="navbar-nav ml-auto py-0">
         <template v-if="userStore.isLoggedIn">
