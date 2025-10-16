@@ -46,14 +46,10 @@ const FaqDashboardPage = () => import('@/pages/admin/cs/FaqDashboardPage.vue')
 
 // 검수 관리
 const InspectionDashboardPage = () => import('@/pages/admin/inspection/InspectionDashboardPage.vue')
-const OnlineInspectionListPage = () =>
-  import('@/pages/admin/inspection/OnlineInspectionListPage.vue')
-const OnlineInspectionDetailPage = () =>
-  import('@/pages/admin/inspection/OnlineInspectionDetailPage.vue')
-const OfflineInspectionListPage = () =>
-  import('@/pages/admin/inspection/OfflineInspectionListPage.vue')
-const OfflineInspectionDetailPage = () =>
-  import('@/pages/admin/inspection/OfflineInspectionDetailPage.vue')
+const OnlineInspectionListPage = () => import('@/pages/admin/inspection/OnlineInspectionListPage.vue')
+const OnlineInspectionDetailPage = () => import('@/pages/admin/inspection/OnlineInspectionDetailPage.vue')
+const OfflineInspectionListPage = () => import('@/pages/admin/inspection/OfflineInspectionListPage.vue')
+const OfflineInspectionDetailPage = () => import('@/pages/admin/inspection/OfflineInspectionDetailPage.vue')
 
 // 재고 관리
 const InventoryDashboardPage = () => import('@/pages/admin/inventory/InventoryDashboardPage.vue')
