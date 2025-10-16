@@ -8,7 +8,7 @@ import DashboardSummaryCard from '@/components/common/dashboard/DashboardSummary
 import BaseChart from '@/components/common/chart/BaseChart.vue';
 import { useChartPalette } from '@/composables/useChartConfig';
 
-// Chart.js 컴포넌트 로컬 등록 (도넛 차트용)
+// Chart.js 컴포넌트 로컬 등록
 import {
   Chart,
   ArcElement, DoughnutController, Legend, Tooltip
@@ -18,7 +18,7 @@ Chart.register(
 );
 
 const router = useRouter();
-const palette = useChartPalette(); // 색상 팔레트 초기화
+const palette = useChartPalette();
 
 const summaryCards = ref([
   {
@@ -61,7 +61,7 @@ const summaryCards = ref([
     title: '전체 문의',
     color: 'primary',
     icon: 'fas fa-clipboard-list',
-    statusValue: null, // 전체 목록은 특정 상태 없이 조회
+    statusValue: null,
   },
 ]);
 
@@ -88,7 +88,7 @@ const chartOptions = ref({
         size: 16,
       },
       formatter: (value) => {
-        return value + '건';
+        return value > 0 ? value + '건' : '';
       },
       textStrokeColor: 'black',
       textStrokeWidth: 2,
@@ -115,13 +115,7 @@ onMounted(async () => {
     stats.value = await getInquiryStats();
 
     if (stats.value) {
-      const labels = [
-        '답변 대기',
-        '처리 중',
-        '보류 중',
-        '답변 완료',
-        '거절됨',
-      ];
+      const labels = ['답변 대기', '처리 중', '보류 중', '답변 완료', '거절됨'];
       const data = [
         stats.value.pending,
         stats.value.inProgress,

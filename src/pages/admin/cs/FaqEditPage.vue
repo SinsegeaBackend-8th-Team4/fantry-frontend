@@ -14,7 +14,6 @@ const loading = ref(true);
 const error = ref(null);
 const selectedFiles = ref([]);
 
-// 문의 유형 목록 (임시)
 const csTypes = ref([
   { id: 1, name: '배송문의' },
   { id: 2, name: '결제문의' },
@@ -39,11 +38,14 @@ async function fetchFaq() {
   try {
     loading.value = true;
     const response = await getFaqById(faqId);
-    faq.value = response.data;
-    // API 응답에서 csType이 객체이므로 id만 추출하여 v-model에 바인딩
-    if (faq.value && faq.value.csType) {
-      faq.value.csTypeId = faq.value.csType.id;
+    faq.value = response;
+    
+    // csType이 문자열로 올 경우, csTypes에서 해당 id를 찾아 설정
+    const foundType = csTypes.value.find(t => t.name === faq.value.csType);
+    if (foundType) {
+      faq.value.csTypeId = foundType.id;
     }
+
   } catch (e) {
     console.error('FAQ 정보 로드 실패:', e);
     error.value = '데이터를 불러오는 중 오류가 발생했습니다.';

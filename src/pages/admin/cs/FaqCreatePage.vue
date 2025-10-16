@@ -17,7 +17,6 @@ const previewFiles = ref([]); // 미리보기 URL을 저장할 ref
 
 const error = ref(null);
 
-// 문의 유형 목록 (임시)
 const csTypes = ref([
   { id: 1, name: '배송문의' },
   { id: 2, name: '결제문의' },
@@ -48,7 +47,7 @@ async function handleSubmit() {
 
   try {
     const faqResponse = await createFaq(newFaq.value);
-    const faqId = faqResponse.data.faqId; // Assuming the response contains faqId
+    const faqId = faqResponse.faqId;
 
     if (selectedFiles.value.length > 0) {
       await addFaqAttachments(faqId, selectedFiles.value);
@@ -99,7 +98,6 @@ function goToList() {
             <input type="file" id="faq-attachments" class="form-control" multiple @change="handleFileChange">
           </div>
 
-          <!-- 선택된 파일 미리보기 섹션 -->
           <div v-if="previewFiles.length > 0" class="mb-3">
             <h6>선택된 파일 미리보기</h6>
             <div class="d-flex flex-wrap gap-2">

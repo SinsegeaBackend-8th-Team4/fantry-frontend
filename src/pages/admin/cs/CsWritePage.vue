@@ -120,7 +120,7 @@ onMounted(() => {
 
           <div class="mb-3">
             <label class="form-label">내용</label>
-            <CommonEditor v-model:content="post.content" />
+            <CommonEditor v-model="post.content" />
           </div>
 
           <div class="d-flex justify-content-between">

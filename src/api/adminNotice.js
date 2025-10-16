@@ -3,9 +3,9 @@ import { apiClient } from './index';
 import { unwrap } from './InspectionHelper';
 
 /**
- * 공지사항 목록을 검색 조건에 따라 페이징하여 조회합니다.
- * @param {object} params - { page, size, sort, title, content, csTypeId, status }
- * @returns {Promise<axios.AxiosResponse<any>>}
+ * 공지사항 목록을 검색 조건에 따라 페이징하여 조회합니다. (관리자용)
+ * @param {object} params - { page, size, sort, csTypeId, status, keyword }
+ * @returns {Promise<Page<NoticeSummaryResponse>>}
  */
 export const searchNotices = (params) => {
   const queryParams = {
@@ -32,45 +32,45 @@ export const searchNotices = (params) => {
 };
 
 /**
- * 특정 ID의 공지사항 상세 정보를 조회합니다.
+ * 특정 ID의 공지사항 상세 정보를 조회합니다. (관리자용)
  * @param {number} noticeId - 조회할 공지사항의 ID
- * @returns {Promise<axios.AxiosResponse<any>>}
+ * @returns {Promise<NoticeDetailResponse>}
  */
 export const getNoticeById = (noticeId) => {
-  return apiClient.get(`/admin/cs/notices/${noticeId}`);
+  return unwrap(apiClient.get(`/admin/cs/notices/${noticeId}`));
 };
 
 /**
  * 새로운 공지사항을 등록합니다.
- * @param {object} noticeData - { title, content, status, csTypeId }
- * @returns {Promise<axios.AxiosResponse<any>>}
+ * @param {object} noticeData - { csTypeId, title, content, status }
+ * @returns {Promise<NoticeDetailResponse>}
  */
 export const createNotice = (noticeData) => {
-  return apiClient.post('/admin/cs/notices', noticeData);
+  return unwrap(apiClient.post('/admin/cs/notices', noticeData));
 };
 
 /**
  * 특정 ID의 공지사항을 수정합니다.
  * @param {number} noticeId - 수정할 공지사항의 ID
- * @param {object} noticeData - { title, content, status, csTypeId }
- * @returns {Promise<axios.AxiosResponse<any>>}
+ * @param {object} noticeData - { csTypeId, title, content, status }
+ * @returns {Promise<NoticeDetailResponse>}
  */
 export const updateNotice = (noticeId, noticeData) => {
-  return apiClient.patch(`/admin/cs/notices/${noticeId}`, noticeData);
+  return unwrap(apiClient.patch(`/admin/cs/notices/${noticeId}`, noticeData));
 };
 
 /**
  * 특정 ID의 공지사항을 삭제합니다.
  * @param {number} noticeId - 삭제할 공지사항의 ID
- * @returns {Promise<axios.AxiosResponse<any>>}
+ * @returns {Promise<void>}
  */
 export const deleteNotice = (noticeId) => {
-  return apiClient.delete(`/admin/cs/notices/${noticeId}`);
+  return unwrap(apiClient.delete(`/admin/cs/notices/${noticeId}`));
 };
 
 /**
  * 공지사항 상태별 통계를 조회합니다.
- * @returns {Promise<NoticeStatsResponse>}
+ * @returns {Promise<NoticeStatsAdminResponse>}
  */
 export const getNoticeStats = () => {
   return unwrap(apiClient.get('/admin/cs/notices/stats'));
@@ -80,16 +80,16 @@ export const getNoticeStats = () => {
  * 특정 공지사항에 파일을 첨부합니다.
  * @param {number} noticeId - 파일을 첨부할 공지사항의 ID
  * @param {File[]} files - 첨부할 파일 목록
- * @returns {Promise<axios.AxiosResponse<any>>}
+ * @returns {Promise<void>}
  */
 export const addNoticeAttachments = (noticeId, files) => {
   const formData = new FormData();
   files.forEach(file => {
     formData.append('files', file);
   });
-  return apiClient.post(`/admin/cs/notices/${noticeId}/attachments`, formData, {
+  return unwrap(apiClient.post(`/admin/cs/notices/${noticeId}/attachments`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
-  });
+  }));
 };

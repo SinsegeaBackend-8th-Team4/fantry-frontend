@@ -65,11 +65,11 @@ const columns = [
       const typeName = data || 'N/A';
       let badgeClass = 'bg-secondary';
       switch (typeName) {
-        case '배송문의': badgeClass = 'bg-primary'; break;
-        case '결제문의': badgeClass = 'bg-success'; break;
-        case '상품문의': badgeClass = 'bg-info'; break;
-        case '환불/반품 문의': badgeClass = 'bg-danger'; break;
-        case '판매 문의': badgeClass = 'bg-dark'; break;
+        case '배송': badgeClass = 'bg-primary'; break;
+        case '결제': badgeClass = 'bg-success'; break;
+        case '상품': badgeClass = 'bg-info'; break;
+        case '환불/반품': badgeClass = 'bg-danger'; break;
+        case '판매': badgeClass = 'bg-dark'; break;
       }
       return `<span class="badge ${badgeClass}">${typeName}</span>`;
     },
@@ -116,17 +116,10 @@ const columns = [
     title: '등록일',
     className: 'text-center',
     render: (val) => {
-      if (!val || !Array.isArray(val)) return '-';
-      const dt = new Date(val[0], val[1] - 1, val[2], val[3], val[4], val[5] || 0);
-      
-      const year = dt.getFullYear();
-      const month = String(dt.getMonth() + 1).padStart(2, '0');
-      const day = String(dt.getDate()).padStart(2, '0');
-      const hours = String(dt.getHours()).padStart(2, '0');
-      const minutes = String(dt.getMinutes()).padStart(2, '0');
-      const seconds = String(dt.getSeconds()).padStart(2, '0');
-
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      if (!val) return '-';
+      const dt = new Date(Array.isArray(val) ? val.slice(0, 6).join(',') : val);
+      if (isNaN(dt.getTime())) return '-';
+      return dt.toLocaleString('ko-KR');
     }
   },
 ];
@@ -145,13 +138,11 @@ function attachClickHandlers() {
   nextTick(() => {
     const titleElements = document.querySelectorAll('.faq-title');
     titleElements.forEach(el => {
-      // 중복 바인딩 방지
       if (el.dataset.bound) return;
       el.dataset.bound = 'true';
       
       el.addEventListener('click', (e) => {
         const faqId = e.target.dataset.faqId;
-        console.log('Navigating to AdminFaqDetail with faqId:', faqId);
         router.push({
           name: 'AdminFaqDetail',
           params: { faqId }
@@ -169,7 +160,6 @@ onMounted(() => {
       currentStatusFilter.value = foundFilter.value;
     }
   }
-  // 초기 로드 후에도 바인딩
   setTimeout(attachClickHandlers, 500);
 });
 </script>
@@ -239,11 +229,11 @@ onMounted(() => {
 </template>
 
 <style scoped>
-:deep(table td){
+:deep(table td) {
   pointer-events: none;
 }
 
-:deep(table td .faq-title){
+:deep(table td .faq-title) {
   pointer-events: auto;
 }
 

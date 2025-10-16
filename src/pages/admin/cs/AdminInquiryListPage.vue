@@ -5,16 +5,14 @@ import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
 import { searchInquiries } from '@/api/adminInquiry.js';
 
 const router = useRouter();
-const route = useRoute(); // useRoute 초기화
-const table = ref(null); // ServerDataTable 참조
+const route = useRoute();
+const table = ref(null);
 
-// --- 필터링 & 검색 관련 상태 ---
-const tableKey = ref(0); // 필터 변경 시 테이블 리로드용 키
-const keyword = ref(''); // 검색어
-const currentStatusFilter = ref(null); // 현재 선택된 상태 필터
-const currentTypeFilter = ref(null); // 현재 선택된 유형 필터
+const tableKey = ref(0);
+const keyword = ref('');
+const currentStatusFilter = ref(null);
+const currentTypeFilter = ref(null);
 
-// 상태 필터 버튼 목록 정의
 const statusFilters = [
   { label: '전체', value: null },
   { label: '답변 대기', value: 'PENDING' },
@@ -24,7 +22,6 @@ const statusFilters = [
   { label: '거절됨', value: 'REJECTED' },
 ];
 
-// 유형 필터 버튼 목록 정의
 const typeFilters = [
   { label: '전체', value: null },
   { label: '배송문의', value: 1 },
@@ -35,7 +32,6 @@ const typeFilters = [
   { label: '판매 문의', value: 6 },
 ];
 
-// --- API --- 
 async function fetcher({ page, size, sort, keyword }) {
   const unwrappedResponse = await searchInquiries({
     page: page,
@@ -100,6 +96,14 @@ const columns = [
           badgeClass = 'bg-success';
           text = '답변 완료';
           break;
+        case 'ON_HOLD':
+          badgeClass = 'bg-secondary';
+          text = '보류 중';
+          break;
+        case 'REJECTED':
+          badgeClass = 'bg-danger';
+          text = '거절됨';
+          break;
       }
       return `<span class="badge ${badgeClass}">${text}</span>`;
     },
@@ -109,17 +113,10 @@ const columns = [
     title: '등록일',
     className: 'text-center',
     render: (val) => {
-      if (!val || !Array.isArray(val)) return '-';
-      const dt = new Date(val[0], val[1] - 1, val[2], val[3], val[4], val[5] || 0);
-      
-      const year = dt.getFullYear();
-      const month = String(dt.getMonth() + 1).padStart(2, '0');
-      const day = String(dt.getDate()).padStart(2, '0');
-      const hours = String(dt.getHours()).padStart(2, '0');
-      const minutes = String(dt.getMinutes()).padStart(2, '0');
-      const seconds = String(dt.getSeconds()).padStart(2, '0');
-
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      if (!val) return '-';
+      const dt = new Date(Array.isArray(val) ? val.slice(0, 6).join(',') : val);
+      if (isNaN(dt.getTime())) return '-';
+      return dt.toLocaleString('ko-KR');
     }
   },
 ];
@@ -134,7 +131,6 @@ function attachClickHandlers() {
   nextTick(() => {
     const titleElements = document.querySelectorAll('.inquiry-title');
     titleElements.forEach(el => {
-      // 중복 바인딩 방지
       if (el.dataset.bound) return;
       el.dataset.bound = 'true';
       
@@ -150,13 +146,11 @@ function attachClickHandlers() {
 }
 
 onMounted(() => {
-  // URL 쿼리 파라미터에서 상태 값 읽어오기
   if (route.query.status) {
     const initialStatus = route.query.status.toString();
     const isValidStatus = statusFilters.some(f => f.value === initialStatus);
     if (isValidStatus) {
       currentStatusFilter.value = initialStatus;
-      // tableKey를 변경하여 ServerDataTable이 데이터를 다시 불러오도록 트리거
       tableKey.value++;
     }
   }
@@ -168,16 +162,13 @@ onMounted(() => {
 <template>
   <main class="container-fluid p-4">
     <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
-      <!-- 헤더 -->
       <div class="card-header bg-white border-bottom-0 pt-4 px-4 pb-2">
         <h4 class="fw-semibold text-dark mb-1">1:1 문의 목록</h4>
         <p class="text-muted small">사용자들이 등록한 1:1 문의를 확인하고 답변을 관리합니다.</p>
       </div>
 
-      <!-- 필터 버튼 -->
       <div class="card-body p-4">
         <div class="d-flex flex-column gap-3 mb-4">
-          <!-- 상태 필터 -->
           <div class="input-group input-group-sm">
             <span class="input-group-text fw-bold">상태</span>
             <div class="btn-group" role="group">
@@ -187,13 +178,12 @@ onMounted(() => {
                 type="button"
                 class="btn btn-outline-secondary"
                 :class="{ active: currentStatusFilter === filter.value }"
-                @click="currentStatusFilter = filter.value; tableKey++; console.log('Status Filter Changed:', currentStatusFilter.value, 'Table Key:', tableKey.value)"
+                @click="currentStatusFilter = filter.value; tableKey++;"
               >
                 {{ filter.label }}
               </button>
             </div>
           </div>
-          <!-- 유형 필터 -->
           <div class="input-group input-group-sm">
             <span class="input-group-text fw-bold">유형</span>
             <div class="btn-group" role="group">
@@ -203,7 +193,7 @@ onMounted(() => {
                 type="button"
                 class="btn btn-outline-secondary"
                 :class="{ active: currentTypeFilter === filter.value }"
-                @click="currentTypeFilter = filter.value; tableKey++; console.log('Type Filter Changed:', currentTypeFilter.value, 'Table Key:', tableKey.value)"
+                @click="currentTypeFilter = filter.value; tableKey++;"
               >
                 {{ filter.label }}
               </button>
@@ -211,7 +201,6 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- 테이블 -->
         <ServerDataTable
           ref="table"
           :key="tableKey"

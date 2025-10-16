@@ -39,11 +39,13 @@ async function fetchNotice() {
   try {
     loading.value = true;
     const response = await getNoticeById(noticeId);
-    notice.value = response.data;
-    // csType 객체에서 ID를 추출하여 바인딩
-    if (notice.value && notice.value.csType) {
-      notice.value.csTypeId = notice.value.csType.id;
+    notice.value = response;
+    
+    const foundType = typeOptions.find(t => t.name === notice.value.csType);
+    if (foundType) {
+      notice.value.csTypeId = foundType.id;
     }
+
   } catch (e) {
     console.error('공지사항 정보 로드 실패:', e);
     error.value = '데이터를 불러오는 중 오류가 발생했습니다.';
@@ -65,7 +67,6 @@ async function handleSubmit() {
   try {
     await updateNotice(noticeId, payload);
 
-    // 새 파일이 선택된 경우에만 첨부 파일 업로드
     if (selectedFiles.value.length > 0) {
       await addNoticeAttachments(noticeId, selectedFiles.value);
     }
@@ -123,7 +124,6 @@ onMounted(fetchNotice);
             <CommonEditor v-model="notice.content" />
           </div>
 
-          <!-- 기존 첨부 파일 표시 -->
           <div class="mb-3" v-if="notice.attachmentUrls && notice.attachmentUrls.length > 0">
             <label class="form-label">기존 첨부 파일</label>
             <div class="d-flex flex-wrap gap-2">
@@ -133,7 +133,6 @@ onMounted(fetchNotice);
             </div>
           </div>
 
-          <!-- 새 첨부 파일 입력 -->
           <div class="mb-3">
             <label for="notice-attachments" class="form-label">새 첨부 파일</label>
             <input type="file" id="notice-attachments" class="form-control" multiple @change="handleFileChange">

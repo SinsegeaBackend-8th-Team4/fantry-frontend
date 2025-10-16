@@ -16,7 +16,7 @@ async function fetchNotice() {
   try {
     loading.value = true;
     const response = await getNoticeById(noticeId);
-    notice.value = response.data;
+    notice.value = response;
   } catch (e) {
     console.error('공지사항 상세 정보 조회 실패:', e);
     error.value = '데이터를 불러오는 중 오류가 발생했습니다.';

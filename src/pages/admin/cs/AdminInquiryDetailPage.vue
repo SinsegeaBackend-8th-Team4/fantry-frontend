@@ -38,16 +38,16 @@ async function fetchInquiry() {
   try {
     loading.value = true;
     const response = await getInquiryById(inquiryId);
-    inquiry.value = response.data;
+    inquiry.value = response; // unwrap 했으므로 .data 제거
     
-    // 기존 답변이 있으면 폼에 세팅
+    // 기존 답변이 없으면 빈 문자열로 초기화
     if (!inquiry.value.answerContent) {
       inquiry.value.answerContent = '';
     }
     if (!inquiry.value.comment) {
       inquiry.value.comment = '';
     }
-    // 기존 상태가 있다면 그 상태를 기본값으로 설정
+    // 현재 상태를 기본 선택값으로 설정
     inquiry.value.reqStatus = inquiry.value.status;
   } catch (e) {
     console.error('문의 상세 정보 조회 실패:', e);
@@ -93,25 +93,10 @@ function goToList() {
 
 function formatDate(dateValue) {
   if (!dateValue) return 'N/A';
-
-  let dt;
-  if (Array.isArray(dateValue)) {
-    dt = new Date(dateValue[0], dateValue[1] - 1, dateValue[2], dateValue[3], dateValue[4], dateValue[5] || 0);
-  } else {
-    dt = new Date(dateValue);
-  }
-
-  if (isNaN(dt.getTime())) {
-    return 'Invalid Date';
-  }
-
-  const year = dt.getFullYear();
-  const month = String(dt.getMonth() + 1).padStart(2, '0');
-  const day = String(dt.getDate()).padStart(2, '0');
-  const hours = String(dt.getHours()).padStart(2, '0');
-  const minutes = String(dt.getMinutes()).padStart(2, '0');
-  const seconds = String(dt.getSeconds()).padStart(2, '0');
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  // 날짜 배열 또는 문자열 형식 모두 처리
+  const dt = new Date(Array.isArray(dateValue) ? dateValue.slice(0, 6).join(',') : dateValue);
+  if (isNaN(dt.getTime())) return 'Invalid Date';
+  return dt.toLocaleString('ko-KR');
 }
 
 onMounted(fetchInquiry);
@@ -143,7 +128,7 @@ onMounted(fetchInquiry);
               <p><strong>작성자:</strong> {{ inquiry.inquiredByName || 'N/A' }}</p>
             </div>
             <div class="col-md-6">
-              <p><strong>문의 유형:</strong> {{ inquiry.csType.name || 'N/A' }}</p>
+              <p><strong>문의 유형:</strong> {{ inquiry.csType || 'N/A' }}</p>
               <p><strong>상태:</strong> 
                 <span class="badge bg-primary">{{ getStatusText(inquiry.status) }}</span>
               </p>
@@ -218,11 +203,12 @@ onMounted(fetchInquiry);
   padding: 0.35em 0.65em;
   font-size: 0.875em;
 }
-
 .gap-2 {
   gap: 0.5rem;
 }
-
+.me-2 { 
+  margin-right: 0.5rem; 
+}
 .img-thumbnail {
   border: 1px solid #ddd;
   padding: 3px;
