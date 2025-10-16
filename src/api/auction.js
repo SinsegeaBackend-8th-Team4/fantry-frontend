@@ -43,11 +43,12 @@ export const getActiveAuctionsByBidder = (memberId) => {
  * @param {string} [params.sort] - 정렬 기준 (예: 'createdAt,desc')
  * @param {string} [params.saleType] - 판매 유형 (AUCTION, INSTANT_BUY)
  * @param {string} [params.saleStatus] - 판매 상태 (ACTIVE, SOLD 등)
+ * @param {string} [params.artistGroupType] - 아티스트 그룹 유형
  * @returns {Promise<Page<AuctionSummaryResponse>>}
  */
-export const getAuctionList = ({ page, size, sort, saleType, saleStatus }) => {
-    return apiClient.get('/auctions', {
-        params: { page, size, sort, saleType, saleStatus }
+export const getAuctionList = ({ page, size, sort, saleType, saleStatus, artistGroupType }) => {
+    return publicApiClient.get('/auctions', {
+        params: { page, size, sort, saleType, saleStatus, artistGroupType }
     });
 }
 
