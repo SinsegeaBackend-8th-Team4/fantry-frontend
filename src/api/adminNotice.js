@@ -73,7 +73,7 @@ export const deleteNotice = (noticeId) => {
  * @returns {Promise<NoticeStatsResponse>}
  */
 export const getNoticeStats = () => {
-  return unwrap(apiClient.get('/admin/cs/notices/stats'));
+  return unwrap(apiClient.get('/  admin/cs/notices/stats'));
 };
 
 /**

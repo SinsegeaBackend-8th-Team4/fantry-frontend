@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, defineProps, defineEmits } from 'vue';
+import { ref, onMounted, defineProps } from 'vue';
 import { useRouter } from 'vue-router';
 import { getOrderById } from '@/api/order';
 

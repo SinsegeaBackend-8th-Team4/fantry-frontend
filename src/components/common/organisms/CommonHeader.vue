@@ -26,25 +26,12 @@ const goToInspection = () => {
 </script>
 <template>
   <div class="container-fluid">
-    <!-- 상단 얇은 정보 바: 기존 bg-secondary 대신 커스텀 .top-bar 적용 -->
-    <div class="row top-bar py-2 px-xl-5">
-      <div class="col-lg-6 d-none d-lg-block">
-        <div class="col-lg-6 d-none d-lg-block">
-        <div class="d-inline-flex align-items-center">
-          <a class="text-dark" href="">FAQs</a>
-          <span class="text-muted px-2">|</span>
-          <a class="text-dark" href="/inspection/policy">검수 기준</a>
-          <span class="text-muted px-2">|</span>
-          <a class="text-dark" href="">고객 지원</a>
-        </div>
-      </div>
-      </div>
-    </div>
-    <div class="row align-items-center py-3 px-xl-5">
-      <div class="col-lg-3 d-none d-lg-block">
+
+    <div class="row align-items-center py-3 px-xl-5 header-main-section">
+      <div class="col-lg-2 d-none d-lg-block">
         <BrandLogo />
       </div>
-      <div class="col-lg-6 col-6 text-left">
+      <div class="col-lg-7 col-6 text-left">
         <slot name="saerchBar"></slot>
       </div>
       <div class="col-lg-3 col-6 text-right">

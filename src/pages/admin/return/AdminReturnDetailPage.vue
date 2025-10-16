@@ -108,6 +108,11 @@ const statusInfo = computed(() => {
 });
 
 
+async function updateDeductedShippingFee() {
+  if (!confirm(`차감 배송비를 ${deductedShippingFeeInput.value.toLocaleString()}원으로 저장하시겠습니까?`)) return;
+  await updateReturnRequest(returnRequest.value.status); // 현재 상태로 업데이트하며 차감 배송비만 변경
+}
+
 function goBack() {
   router.push('/admin/return/list');
 }
@@ -312,145 +317,7 @@ onMounted(fetchReturnDetail);
     </div>
   </main>
 </template>
-
-<script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { getAdminReturnDetail, updateAdminReturn } from '@/api/adminReturn.js';
-import { formatDate } from '@/utils/tableFormatters';
-
-const route = useRoute();
-const router = useRouter();
-
-const returnRequestId = ref(Number(route.params.returnRequestId));
-const returnRequest = ref(null);
-const loading = ref(false);
-const error = ref(null);
-
-const showRejectReasonModal = ref(false);
-const rejectReasonInput = ref('');
-const deductedShippingFeeInput = ref(0); // 차감 배송비 입력 필드
-
-// URL이 이미지 파일인지 확인하는 헬퍼 함수
-function isImage(url) {
-  return /\.(jpeg|jpg|gif|png|webp|bmp)$/i.test(url);
-}
-
-// 반품/환불 상세 정보 로드
-async function fetchReturnDetail() {
-  loading.value = true;
-  try {
-    const response = await getAdminReturnDetail(returnRequestId.value);
-    returnRequest.value = response.data;
-    // 기존 차감 배송비가 있으면 폼에 설정
-    deductedShippingFeeInput.value = returnRequest.value.deductedShippingFee || 0;
-  } catch (e) {
-    error.value = '환불/반품 정보를 불러오는 데 실패했습니다.';
-    console.error(e);
-  } finally {
-    loading.value = false;
-  }
-}
-
-// 상태 변경
-async function handleStatusChange(newStatus) {
-  const statusKorean = {
-    'IN_TRANSIT': '처리중',
-    'INSPECTING': '검수중',
-    'APPROVED': '승인',
-    'REJECTED': '거절',
-    'COMPLETED': '완료'
-  };
-
-  if (newStatus === 'REJECTED') {
-    showRejectReasonModal.value = true;
-    return;
-  }
-
-  if (!confirm(`상태를 '${statusKorean[newStatus] || newStatus}'(으)로 변경하시겠습니까?`)) return;
-  
-  await updateReturnRequest(newStatus);
-}
-
-async function confirmReject() {
-  if (!rejectReasonInput.value.trim()) {
-    alert('거절 사유를 입력해주세요.');
-    return;
-  }
-  if (!confirm(`상태를 '거절'로 변경하고 거절 사유를 저장하시겠습니까?`)) return;
-
-  showRejectReasonModal.value = false;
-  await updateReturnRequest('REJECTED', rejectReasonInput.value);
-  rejectReasonInput.value = ''; // 초기화
-}
-
-// 차감 배송비 업데이트
-async function updateDeductedShippingFee() {
-  if (!confirm(`차감 배송비를 ${deductedShippingFeeInput.value.toLocaleString()}원(으)로 저장하시겠습니까?`)) return;
-
-  loading.value = true;
-  try {
-    const payload = {
-      status: returnRequest.value.status, // 현재 상태 유지
-      deductedShippingFee: deductedShippingFeeInput.value,
-    };
-    await updateAdminReturn(returnRequestId.value, payload);
-    alert('차감 배송비가 성공적으로 저장되었습니다.');
-    await fetchReturnDetail(); // 정보 새로고침
-  } catch (e) {
-    error.value = '차감 배송비 저장 중 오류가 발생했습니다.';
-    console.error(e);
-  } finally {
-    loading.value = false;
-  }
-}
-
-async function updateReturnRequest(newStatus, rejectReason = null) {
-  loading.value = true;
-  try {
-    const payload = {
-      status: newStatus,
-      rejectReason: rejectReason,
-      deductedShippingFee: deductedShippingFeeInput.value, // 차감 배송비 추가
-      // memo 등 필요시 추가
-    };
-    await updateAdminReturn(returnRequestId.value, payload);
-    alert('상태가 성공적으로 변경되었습니다.');
-    await fetchReturnDetail(); // 정보 새로고침
-  } catch (e) {
-    error.value = '상태 변경 중 오류가 발생했습니다.';
-    console.error(e);
-  } finally {
-    loading.value = false;
-  }
-}
-
-const statusInfo = computed(() => {
-  if (!returnRequest.value) return {};
-  const status = returnRequest.value.status;
-  let badgeClass = 'bg-light text-dark';
-  let koreanText = status;
-  switch (status) {
-    case 'REQUESTED': badgeClass = 'bg-primary'; koreanText = '요청됨'; break;
-    case 'IN_TRANSIT': badgeClass = 'bg-info'; koreanText = '처리중'; break;
-    case 'INSPECTING': badgeClass = 'bg-warning'; koreanText = '검수중'; break;
-    case 'APPROVED': badgeClass = 'bg-success'; koreanText = '승인됨'; break;
-    case 'REJECTED': badgeClass = 'bg-danger'; koreanText = '거절됨'; break;
-    case 'COMPLETED': badgeClass = 'bg-dark'; koreanText = '완료됨'; break;
-    case 'USER_CANCELLED': badgeClass = 'bg-secondary'; koreanText = '사용자 취소'; break;
-    case 'DELETED': badgeClass = 'bg-danger bg-opacity-50'; koreanText = '삭제됨'; break;
-  }
-  return { badgeClass, koreanText };
-});
-
-
-function goBack() {
-  router.push('/admin/return/list');
-}
-
-onMounted(fetchReturnDetail);
-</script>
-
+ 
 <style scoped>
 .img-thumbnail {
   border: 1px solid #ddd;
