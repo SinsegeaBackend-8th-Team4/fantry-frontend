@@ -57,11 +57,11 @@ const columns = [
       const typeName = data || 'N/A';
       let badgeClass = 'bg-secondary';
       switch (typeName) {
-        case '배송문의': badgeClass = 'bg-primary'; break;
-        case '결제문의': badgeClass = 'bg-success'; break;
-        case '상품문의': badgeClass = 'bg-info'; break;
-        case '환불/반품 문의': badgeClass = 'bg-danger'; break;
-        case '판매 문의': badgeClass = 'bg-dark'; break;
+        case '배송': badgeClass = 'bg-primary'; break;
+        case '결제': badgeClass = 'bg-success'; break;
+        case '상품': badgeClass = 'bg-info'; break;
+        case '환불/반품': badgeClass = 'bg-danger'; break;
+        case '판매': badgeClass = 'bg-dark'; break;
       }
       return `<span class="badge ${badgeClass}">${typeName}</span>`;
     },
@@ -137,7 +137,6 @@ function attachClickHandlers() {
   nextTick(() => {
     const titleElements = document.querySelectorAll('.notice-title');
     titleElements.forEach(el => {
-      // 중복 바인딩 방지
       if (el.dataset.bound) return;
       el.dataset.bound = 'true';
       
@@ -153,7 +152,6 @@ function attachClickHandlers() {
 }
 
 onMounted(() => {
-  // 초기 로드 후에도 바인딩
   setTimeout(attachClickHandlers, 500);
 });
 </script>
@@ -223,11 +221,11 @@ onMounted(() => {
 </template>
 
 <style scoped>
-:deep(table td){
+:deep(table td) {
   pointer-events: none;
 }
 
-:deep(table td .notice-title){
+:deep(table td .notice-title) {
   pointer-events: auto;
 }
 

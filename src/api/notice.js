@@ -1,6 +1,7 @@
 // src/api/notice.js
 
 import { apiClient } from './index';
+import { unwrap } from './InspectionHelper';
 
 /* -------------------------------------------------------------
   공지사항 기능 관련 API (사용자용)
@@ -9,12 +10,6 @@ import { apiClient } from './index';
 /**
  * 공개된(ACTIVE, PINNED) 공지사항 목록을 검색 조건에 따라 페이징하여 조회합니다.
  * @param {object} params - 검색 조건 및 페이징 정보
- * @param {number} [params.csTypeId] - 유형 ID로 검색
- * @param {string} [params.keyword] - 제목 또는 내용에 포함된 키워드
- * @param {string} [params.status] - 공지사항 상태 (예: ACTIVE, PINNED). 사용자용이므로 ACTIVE, PINNED만 유효.
- * @param {number} params.page - 조회할 페이지 번호 (0부터 시작)
- * @param {number} params.size - 한 페이지에 보여줄 개수
- * @param {string} [params.sort] - 정렬 기준 (예: 'createdAt,desc')
  * @returns {Promise<Page<NoticeSummaryResponse>>}
  */
 export const searchNotices = (params) => {
@@ -26,18 +21,19 @@ export const searchNotices = (params) => {
         keyword: params.keyword,
         status: params.status,
     };
-    return apiClient.get('/cs/notices', {
+
+    return unwrap(apiClient.get('/cs/notices', {
         params: queryParams,
-        paramsSerializer: (params) => {
+        paramsSerializer: (p) => {
             const qs = new URLSearchParams();
-            for (const key in params) {
-                if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
-                    qs.append(key, params[key]);
+            for (const key in p) {
+                if (p[key] !== undefined && p[key] !== null && p[key] !== '') {
+                    qs.append(key, p[key]);
                 }
             }
             return qs.toString();
         },
-    });
+    }));
 };
 
 /**
@@ -46,5 +42,5 @@ export const searchNotices = (params) => {
  * @returns {Promise<NoticeDetailResponse>}
  */
 export const getNoticeDetail = (noticeId) => {
-    return apiClient.get(`/cs/notices/${noticeId}`);
+    return unwrap(apiClient.get(`/cs/notices/${noticeId}`));
 };

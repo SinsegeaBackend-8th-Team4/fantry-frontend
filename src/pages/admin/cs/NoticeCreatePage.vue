@@ -14,7 +14,8 @@ const newNotice = ref({
 });
 
 const selectedFiles = ref([]);
-const previewFiles = ref([]); // 미리보기 URL을 저장할 ref
+const previewFiles = ref([]);
+const error = ref(null);
 
 const typeOptions = [
   { id: 1, name: '배송문의' },
@@ -25,7 +26,6 @@ const typeOptions = [
   { id: 6, name: '판매 문의' },
 ];
 
-// 상태 옵션 추가
 const statusOptions = ref([
   { value: 'ACTIVE', text: '활성' },
   { value: 'INACTIVE', text: '비활성' },
@@ -33,9 +33,6 @@ const statusOptions = ref([
   { value: 'DRAFT', text: '초안' },
 ]);
 
-const error = ref(null);
-
-// URL이 이미지 파일인지 확인하는 헬퍼 함수
 function isImage(url) {
   return /\.(jpeg|jpg|gif|png|webp|bmp)$/i.test(url);
 }
@@ -56,7 +53,7 @@ async function handleSubmit() {
 
   try {
     const noticeResponse = await createNotice(newNotice.value);
-    const noticeId = noticeResponse.data.noticeId; // Assuming the response contains noticeId
+    const noticeId = noticeResponse.noticeId;
 
     if (selectedFiles.value.length > 0) {
       await addNoticeAttachments(noticeId, selectedFiles.value);
@@ -114,7 +111,6 @@ function goToList() {
             <input type="file" id="notice-attachments" class="form-control" multiple @change="handleFileChange">
           </div>
 
-          <!-- 선택된 파일 미리보기 섹션 -->
           <div v-if="previewFiles.length > 0" class="mb-3">
             <h6>선택된 파일 미리보기</h6>
             <div class="d-flex flex-wrap gap-2">

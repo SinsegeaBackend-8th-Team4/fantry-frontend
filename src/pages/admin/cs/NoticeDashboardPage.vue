@@ -70,13 +70,12 @@ async function fetchData() {
     loading.value = true;
     const [statsData, noticesResponse] = await Promise.all([
       getNoticeStats(),
-      searchNotices({ page: 0, size: 5, sort: 'createdAt,desc' }) // page를 0-based로 수정
+      searchNotices({ page: 1, size: 5, sort: 'createdAt,desc' }) // page를 1-based로 유지
     ]);
 
     stats.value = statsData;
     recentNotices.value = noticesResponse.content;
 
-    // 차트 데이터 구성
     if (stats.value) {
       const labels = ['활성', '고정', '임시저장', '비활성'];
       const data = [
@@ -143,7 +142,7 @@ onMounted(fetchData);
     <div v-if="!loading && !error && stats">
       <!-- Summary Cards -->
       <div class="row">
-        <div v-for="card in summaryCards" :key="card.key" class="col-xl-2 col-md-4 mb-4"> <!-- col-xl-2 col-md-4로 변경 -->
+        <div v-for="card in summaryCards" :key="card.key" class="col-xl-2 col-md-4 mb-4">
           <DashboardSummaryCard
             :card="card"
             :value="stats[card.key] || 0"

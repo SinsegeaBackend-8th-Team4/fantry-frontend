@@ -82,7 +82,7 @@ const chartOptions = ref({
         size: 16,
       },
       formatter: (value) => {
-        return value + '건';
+        return value > 0 ? value + '건' : '';
       },
       textStrokeColor: 'black',
       textStrokeWidth: 2,
@@ -109,12 +109,7 @@ onMounted(async () => {
     stats.value = await getFaqStats();
 
     if (stats.value) {
-      const labels = [
-        '활성',
-        '고정',
-        '임시저장',
-        '비활성',
-      ];
+      const labels = ['활성', '고정', '임시저장', '비활성'];
       const data = [
         stats.value.active,
         stats.value.pinned,

@@ -2,7 +2,13 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getAdminReturnDetail, updateAdminReturn } from '@/api/adminReturn.js';
-import { formatDate } from '@/utils/tableFormatters';
+
+function formatDate(dateValue) {
+  if (!dateValue) return 'N/A';
+  const dt = new Date(Array.isArray(dateValue) ? dateValue.slice(0, 6).join(',') : dateValue);
+  if (isNaN(dt.getTime())) return 'Invalid Date';
+  return dt.toLocaleString('ko-KR');
+}
 
 const route = useRoute();
 const router = useRouter();
@@ -14,20 +20,17 @@ const error = ref(null);
 
 const showRejectReasonModal = ref(false);
 const rejectReasonInput = ref('');
-const deductedShippingFeeInput = ref(0); // 차감 배송비 입력 필드
+const deductedShippingFeeInput = ref(0);
 
-// URL이 이미지 파일인지 확인하는 헬퍼 함수
 function isImage(url) {
   return /\.(jpeg|jpg|gif|png|webp|bmp)$/i.test(url);
 }
 
-// 반품/환불 상세 정보 로드
 async function fetchReturnDetail() {
   loading.value = true;
   try {
     const response = await getAdminReturnDetail(returnRequestId.value);
-    returnRequest.value = response.data;
-    // 기존 차감 배송비가 있으면 폼에 설정
+    returnRequest.value = response; // unwrap 되어 있다고 가정
     deductedShippingFeeInput.value = returnRequest.value.deductedShippingFee || 0;
   } catch (e) {
     error.value = '환불/반품 정보를 불러오는 데 실패했습니다.';
@@ -37,7 +40,6 @@ async function fetchReturnDetail() {
   }
 }
 
-// 상태 변경
 async function handleStatusChange(newStatus) {
   const statusKorean = {
     'IN_TRANSIT': '처리중',
@@ -66,7 +68,27 @@ async function confirmReject() {
 
   showRejectReasonModal.value = false;
   await updateReturnRequest('REJECTED', rejectReasonInput.value);
-  rejectReasonInput.value = ''; // 초기화
+  rejectReasonInput.value = '';
+}
+
+async function updateDeductedShippingFee() {
+  if (!confirm(`차감 배송비를 ${deductedShippingFeeInput.value.toLocaleString()}원(으)로 저장하시겠습니까?`)) return;
+
+  loading.value = true;
+  try {
+    const payload = {
+      status: returnRequest.value.status,
+      deductedShippingFee: deductedShippingFeeInput.value,
+    };
+    await updateAdminReturn(returnRequestId.value, payload);
+    alert('차감 배송비가 성공적으로 저장되었습니다.');
+    await fetchReturnDetail();
+  } catch (e) {
+    error.value = '차감 배송비 저장 중 오류가 발생했습니다.';
+    console.error(e);
+  } finally {
+    loading.value = false;
+  }
 }
 
 async function updateReturnRequest(newStatus, rejectReason = null) {
@@ -75,12 +97,11 @@ async function updateReturnRequest(newStatus, rejectReason = null) {
     const payload = {
       status: newStatus,
       rejectReason: rejectReason,
-      deductedShippingFee: deductedShippingFeeInput.value, // 차감 배송비 추가
-      // memo 등 필요시 추가
+      deductedShippingFee: deductedShippingFeeInput.value,
     };
     await updateAdminReturn(returnRequestId.value, payload);
     alert('상태가 성공적으로 변경되었습니다.');
-    await fetchReturnDetail(); // 정보 새로고침
+    await fetchReturnDetail();
   } catch (e) {
     error.value = '상태 변경 중 오류가 발생했습니다.';
     console.error(e);

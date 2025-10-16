@@ -34,31 +34,34 @@ export const searchInquiries = (params) => {
   }));
 };
 
+
 /**
- * 특정 ID의 1:1 문의 상세 정보를 조회합니다. (어드민용)
+ * 특정 1:1 문의의 상세 정보를 조회합니다. (관리자용)
  * @param {number} inquiryId - 조회할 문의의 ID
  * @returns {Promise<InquiryDetailAdminResponse>}
  */
 export const getInquiryById = (inquiryId) => {
-  return apiClient.get(`/admin/cs/inquiry/${inquiryId}`);
+  return unwrap(apiClient.get(`/admin/cs/inquiry/${inquiryId}`));
 };
 
+
 /**
- * 특정 1:1 문의에 답변을 등록하거나 수정하고 처리 상태를 변경합니다.
+ * 특정 1:1 문의에 답변을 등록하고 처리 상태를 변경합니다. (관리자용)
  * @param {number} inquiryId - 답변할 문의의 ID
  * @param {object} answerRequest - { answerContent: string, reqStatus: string, comment?: string }
  * @returns {Promise<InquiryDetailAdminResponse>}
  */
 export const answerInquiry = (inquiryId, answerRequest) => {
-  return apiClient.patch(`/admin/cs/inquiry/${inquiryId}/answer`, answerRequest);
+  return unwrap(apiClient.patch(`/admin/cs/inquiry/${inquiryId}/answer`, answerRequest));
 };
 
+
 /**
- * 1:1 문의 상태별 통계를 조회합니다. (어드민 대시보드용)
+ * 1:1 문의 상태별 통계를 조회합니다. (관리자용)
  * @returns {Promise<InquiryStatsAdminResponse>}
  */
+
 export const getInquiryStats = () => {
   return unwrap(apiClient.get('/admin/cs/inquiry/stats'));
 };
-
 
