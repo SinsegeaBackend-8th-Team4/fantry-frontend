@@ -34,7 +34,7 @@
                 <!-- ====================================================== -->
                 <!-- 1. saleStatus가 ACTIVE일 때만 기존 경매/판매 로직 표시 -->
                 <!-- ====================================================== -->
-                <template v-if="auction.saleStatus === 'ACTIVE'">
+                <template v-if="auction.saleStatus === 'ACTIVE' || auction.saleStatus === 'REACTIVE'">
                     <!-- Case 1: 경매 상품일 경우 ('AUCTION') -->
                     <template v-if="isAuction">
                         <div class="countdown-timer mb-5">
@@ -111,10 +111,19 @@
                             <h5 class="mb-3">즉시 구매가</h5>
                             <p class="current-bid-price-main">{{ formattedStartPrice }}</p>
                         </div>
-                        <button class="btn btn-primary btn-lg w-100" @click="purchaseNow" :disabled="!userStore.isLoggedIn"
-                            :title="!userStore.isLoggedIn ? '로그인이 필요합니다.' : '즉시 구매하세요'">
-                            {{ userStore.isLoggedIn ? '즉시 구매하기' : '로그인 후 구매 가능' }}
-                        </button>
+                        <!-- 판매 진행 중일 때 -->
+                        <template v-if="!isAuctionEnded">
+                            <button class="btn btn-primary btn-lg w-100" @click="purchaseNow" :disabled="!userStore.isLoggedIn"
+                                :title="!userStore.isLoggedIn ? '로그인이 필요합니다.' : '즉시 구매하세요'">
+                                {{ userStore.isLoggedIn ? '즉시 구매하기' : '로그인 후 구매 가능' }}
+                            </button>
+                        </template>
+                        <!-- 판매가 종료되었을 때 -->
+                        <template v-else>
+                            <button class="btn btn-secondary btn-lg w-100" disabled>
+                                판매가 종료되었습니다
+                            </button>
+                        </template>
                     </template>
                 </template>
 
@@ -313,7 +322,9 @@
     const auctionStatusTitle = computed(() => {
         if (!auction.value) return '';
         switch(auction.value.saleStatus) {
-            case 'PREPARING': return '판매 준비 중';
+            case 'PREPARING':
+            case 'REPREPARING': 
+                return '판매 준비 중';
             case 'SOLD': return '판매 완료';
             case 'NOT_SOLD': return '유찰';
             case 'CANCELLED': return '판매 취소';
@@ -324,7 +335,9 @@
     const auctionStatusMessage = computed(() => {
         if (!auction.value) return '';
         switch(auction.value.saleStatus) {
-            case 'PREPARING': return '판매가 곧 시작될 예정입니다.';
+            case 'PREPARING':
+            case 'REPREPARING': 
+                return '판매가 곧 시작될 예정입니다.';
             case 'SOLD': return '이 상품은 판매가 완료되었습니다.';
             case 'NOT_SOLD': return '이 상품은 유찰되었습니다.';
             case 'CANCELLED': return '이 상품은 판매가 취소되었습니다.';
@@ -357,8 +370,8 @@
             highestBidderId.value = auction.value.highestBidderId; // 최고 입찰자 ID 설정
             console.log(response.data);
 
-            // saleStatus가 ACTIVE일 때만 경매 관련 로직 수행
-            if (auction.value.saleStatus === 'ACTIVE') {
+            // saleStatus가 ACTIVE 또는 REACTIVE일 때만 경매 관련 로직 수행
+            if (['ACTIVE', 'REACTIVE'].includes(auction.value.saleStatus)) {
                 // 경매 종료 여부 초기 확인
                 const endTime = parseJavaLocalDateTime(auction.value.endTime);
                 if (endTime && new Date() > endTime) {
@@ -387,7 +400,7 @@
                     }
                 }
                 
-                startCountdown(); // 카운트다운은 ACTIVE 상태에서만 시작
+                startCountdown(); // 카운트다운은 ACTIVE/REACTIVE 상태에서만 시작
             }
         } catch (err) {
             error.value = "상품 정보를 불러오는 데 실패했습니다. 페이지를 새로고침해주세요.";
@@ -591,7 +604,7 @@
     //모달 ui 영역
     const openBidModal = () => {
         // 경매 상태 선제적 확인
-        if (auction.value.saleStatus !== 'ACTIVE' || isAuctionEnded.value) {
+        if (!['ACTIVE', 'REACTIVE'].includes(auction.value.saleStatus) || isAuctionEnded.value) {
             alert("경매가 진행중인 상품이 아닙니다.");
             // 최신 상태를 보여주기 위해 데이터 갱신
             fetchAuctionData();
