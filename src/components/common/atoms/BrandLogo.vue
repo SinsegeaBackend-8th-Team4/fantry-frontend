@@ -1,7 +1,7 @@
 <script setup></script>
 <template>
   <div class="logo">
-    <img @click="router.push('/')" src="/images/fantry_text_logo.png" style="width: 100px;" />
+    <img @click="router.push('/')" src="/images/fantry_logo.png" />
   </div>
 </template>
 <style scoped>

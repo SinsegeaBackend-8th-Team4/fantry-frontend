@@ -46,7 +46,6 @@ function goToEdit() {
   router.push({ name: 'AdminNoticeEdit', params: { noticeId } });
 }
 
-<<<<<<< HEAD
 function formatDate(dateValue) {
   if (!dateValue) return 'N/A';
 
@@ -59,36 +58,6 @@ function formatDate(dateValue) {
     // Assuming it's a date string
     dt = new Date(dateValue);
   }
-=======
-<<<<<<< HEAD
-function formatDate(dateString) {
-  if (!dateString) return 'N/A';
-  try {
-    const dt = new Date(dateString);
-    const year = dt.getFullYear();
-    const month = String(dt.getMonth() + 1).padStart(2, '0');
-    const day = String(dt.getDate()).padStart(2, '0');
-    const hours = String(dt.getHours()).padStart(2, '0');
-    const minutes = String(dt.getMinutes()).padStart(2, '0');
-    const seconds = String(dt.getSeconds()).padStart(2, '0');
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  } catch (e) {
-    return dateString; // 파싱 실패 시 원본 값 반환
-  }
-=======
-function formatDate(dateValue) {
-  if (!dateValue) return 'N/A';
-
-  let dt;
-  if (Array.isArray(dateValue)) {
-    // Assuming format [year, month, day, hour, minute, second]
-    // Month is 0-indexed in Date constructor
-    dt = new Date(dateValue[0], dateValue[1] - 1, dateValue[2], dateValue[3], dateValue[4], dateValue[5] || 0);
-  } else {
-    // Assuming it's a date string
-    dt = new Date(dateValue);
-  }
->>>>>>> develop
 
   if (isNaN(dt.getTime())) {
     return 'Invalid Date'; // Handle invalid date values
@@ -101,10 +70,6 @@ function formatDate(dateValue) {
   const minutes = String(dt.getMinutes()).padStart(2, '0');
   const seconds = String(dt.getSeconds()).padStart(2, '0');
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-<<<<<<< HEAD
-=======
->>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
->>>>>>> develop
 }
 
 onMounted(fetchNotice);
@@ -123,19 +88,8 @@ onMounted(fetchNotice);
       </div>
       <div class="card-body">
         <div class="d-flex justify-content-between text-muted small mb-3">
-<<<<<<< HEAD
           <span>작성자: {{ notice.createdBy || 'N/A' }}</span>
           <span>등록일: {{ formatDate(notice.createdAt) }}</span>
-=======
-<<<<<<< HEAD
-          <span>작성자: {{ notice.authorName || 'N/A' }}</span>
-          <span>등록일: {{ formatDate(notice.createdAt) }}</span>
-          <span>조회수: {{ notice.viewCount }}</span>
-=======
-          <span>작성자: {{ notice.createdBy || 'N/A' }}</span>
-          <span>등록일: {{ formatDate(notice.createdAt) }}</span>
->>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
->>>>>>> develop
         </div>
         <hr>
         <div v-html="notice.content" class="mt-4"></div>

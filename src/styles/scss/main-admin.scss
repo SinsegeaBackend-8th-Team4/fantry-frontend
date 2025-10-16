@@ -1,8 +1,8 @@
 // Admin theme entry: variables -> bootstrap -> SB Admin 2 -> custom
-@use './variables-admin';
-@use 'bootstrap/scss/bootstrap.scss';
-@use 'startbootstrap-sb-admin-2/scss/sb-admin-2.scss';
-@use './admin-custom';
+@import './variables-admin';
+@import 'bootstrap/scss/bootstrap.scss';
+@import 'startbootstrap-sb-admin-2/scss/sb-admin-2.scss';
+@import './admin-custom';
 
 // 확장 필요 시: 별도 admin-extension.scss 추가 (user 확장과 분리)
 // 반복되는 다수 페이지 전용 스타일 partial 은 ./parts/ 폴더 생성 후 아래와 같이 import

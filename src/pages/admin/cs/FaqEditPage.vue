@@ -1,15 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-<<<<<<< HEAD
 import { getFaqById, updateFaq, addFaqAttachments } from '@/api/adminFaq.js';
-=======
-<<<<<<< HEAD
-import { getFaqById, updateFaq } from '@/api/adminFaq.js';
-=======
-import { getFaqById, updateFaq, addFaqAttachments } from '@/api/adminFaq.js';
->>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
->>>>>>> develop
 import CommonEditor from '@/components/common/organisms/CommonEditor.vue';
 import LoadingSpinner from '@/components/common/atoms/LoadingSpinner.vue';
 
@@ -20,14 +12,7 @@ const faqId = Number(route.params.faqId);
 const faq = ref(null);
 const loading = ref(true);
 const error = ref(null);
-<<<<<<< HEAD
 const selectedFiles = ref([]);
-=======
-<<<<<<< HEAD
-=======
-const selectedFiles = ref([]);
->>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
->>>>>>> develop
 
 // 문의 유형 목록 (임시)
 const csTypes = ref([
@@ -42,29 +27,14 @@ const csTypes = ref([
 const statusOptions = ref([
   { value: 'ACTIVE', text: '활성' },
   { value: 'INACTIVE', text: '비활성' },
-<<<<<<< HEAD
   { value: 'DRAFT', text: '초안' },
   { value: 'PINNED', text: '고정' },
 ]);
 
-=======
-<<<<<<< HEAD
-]);
-
-=======
-  { value: 'DRAFT', text: '초안' },
-  { value: 'PINNED', text: '고정' },
-]);
-
->>>>>>> develop
 function handleFileChange(event) {
   selectedFiles.value = Array.from(event.target.files);
 }
 
-<<<<<<< HEAD
-=======
->>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
->>>>>>> develop
 async function fetchFaq() {
   try {
     loading.value = true;
@@ -94,20 +64,11 @@ async function handleSubmit() {
 
   try {
     await updateFaq(faqId, payload);
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
->>>>>>> develop
 
     if (selectedFiles.value.length > 0) {
       await addFaqAttachments(faqId, selectedFiles.value);
     }
 
-<<<<<<< HEAD
-=======
->>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
->>>>>>> develop
     alert('FAQ가 성공적으로 수정되었습니다.');
     router.push({ name: 'AdminFaqDetail', params: { faqId } });
   } catch (e) {
@@ -158,22 +119,12 @@ onMounted(fetchFaq);
 
           <div class="mb-3">
             <label class="form-label">내용</label>
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-            <CommonEditor v-model:content="faq.content" />
-=======
->>>>>>> develop
             <CommonEditor v-model="faq.content" />
           </div>
 
           <div class="mb-3">
             <label for="faq-attachments" class="form-label">첨부 파일</label>
             <input type="file" id="faq-attachments" class="form-control" multiple @change="handleFileChange">
-<<<<<<< HEAD
-=======
->>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
->>>>>>> develop
           </div>
 
           <div class="d-flex justify-content-between">
