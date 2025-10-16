@@ -9,19 +9,39 @@
     </div>
 
     <!-- 요약 카드 섹션 -->
-    <div class="row">
-      <SummaryCard 
-        title="이번 달 정산액" 
-        value="₩40,000,000" 
-        icon="fa-won-sign" 
-        border-color="primary" 
-      />
-      <SummaryCard 
-        title="정산 대기 건수" 
-        value="18" 
-        icon="fa-comments-dollar" 
-        border-color="warning" 
-      />
+    <div v-if="loading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+    <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
+    <div v-else-if="dashboardSummary">
+      <div class="row">
+        <DashboardSummaryCard 
+          title="당월 정산 예정액" 
+          :value="formatCurrency(dashboardSummary.monthlyScheduledAmount)" 
+          icon="fa-calendar-alt" 
+          border-color="primary" 
+        />
+        <DashboardSummaryCard 
+          title="어제 정산된 금액" 
+          :value="formatCurrency(dashboardSummary.yesterdaySettledAmount)" 
+          icon="fa-money-bill-wave" 
+          border-color="success" 
+        />
+        <DashboardSummaryCard 
+          title="정산 보류/실패 건수" 
+          :value="dashboardSummary.pendingOrFailedCount" 
+          icon="fa-exclamation-triangle" 
+          border-color="warning" 
+        />
+        <DashboardSummaryCard 
+          title="누적 정산액" 
+          :value="formatCurrency(dashboardSummary.cumulativeSettlementAmount)" 
+          icon="fa-coins" 
+          border-color="info" 
+        />
+      </div>
     </div>
 
     <!-- 차트 섹션 -->
@@ -51,9 +71,14 @@
 
 <script setup>
 import { onMounted, ref, computed } from 'vue';
-import SummaryCard from '@/components/common/molecules/admin/SummaryCard.vue';
+import DashboardSummaryCard from '@/components/common/dashboard/DashboardSummaryCard.vue'; // SummaryCard -> DashboardSummaryCard
 import BaseChart from '@/components/common/chart/BaseChart.vue';
 import { useChartPalette, makeLineDataset } from '@/composables/useChartConfig';
+import { getSettlementDashboardSummary } from '@/api/adminSettlement.js'; // API 임포트
+
+const dashboardSummary = ref(null);
+const loading = ref(true);
+const error = ref(null);
 
 const chartData = ref(null);
 const chartOptions = ref({
@@ -71,14 +96,31 @@ const chartOptions = ref({
 
 const palette = useChartPalette();
 
-onMounted(() => {
-  const labels = ["1주차", "2주차", "3주차", "4주차"];
-  const values = [4215000, 5312000, 7825000, 9253000];
-  chartData.value = {
-    labels,
-    datasets: [
-      makeLineDataset('주간 정산액', values, palette.primary)
-    ]
-  };
+// 통화 형식 포맷터
+const formatCurrency = (value) => {
+  if (value === null || value === undefined) return '-';
+  return `₩${new Intl.NumberFormat('ko-KR').format(value)}`;
+};
+
+onMounted(async () => {
+  try {
+    const response = await getSettlementDashboardSummary();
+    dashboardSummary.value = response.data; // API 응답 데이터 할당
+
+    // 차트 데이터는 현재 하드코딩 유지 (API 명세에 없으므로)
+    const labels = ["1주차", "2주차", "3주차", "4주차"];
+    const values = [4215000, 5312000, 7825000, 9253000];
+    chartData.value = {
+      labels,
+      datasets: [
+        makeLineDataset('주간 정산액', values, palette.primary)
+      ]
+    };
+  } catch (e) {
+    console.error('정산 대시보드 요약 조회 실패:', e);
+    error.value = '데이터를 불러오는 중 오류가 발생했습니다.';
+  } finally {
+    loading.value = false;
+  }
 });
 </script>

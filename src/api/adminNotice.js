@@ -1,5 +1,9 @@
 // src/api/adminNotice.js
 import { apiClient } from './index';
+<<<<<<< HEAD
+=======
+import { unwrap } from './InspectionHelper';
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
 
 /**
  * 공지사항 목록을 검색 조건에 따라 페이징하여 조회합니다.
@@ -7,7 +11,31 @@ import { apiClient } from './index';
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const searchNotices = (params) => {
+<<<<<<< HEAD
   return apiClient.get('/admin/cs/notice', { params });
+=======
+  const queryParams = {
+    page: params.page > 0 ? params.page - 1 : 0,
+    size: params.size,
+    sort: params.sort,
+    status: params.status,
+    csTypeId: params.csTypeId,
+    keyword: params.keyword,
+  };
+
+  return unwrap(apiClient.get('/admin/cs/notices', {
+    params: queryParams,
+    paramsSerializer: (p) => {
+      const qs = new URLSearchParams();
+      for (const key in p) {
+        if (p[key] !== undefined && p[key] !== null && p[key] !== '') {
+          qs.append(key, p[key]);
+        }
+      }
+      return qs.toString();
+    },
+  }));
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
 };
 
 /**
@@ -16,7 +44,11 @@ export const searchNotices = (params) => {
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const getNoticeById = (noticeId) => {
+<<<<<<< HEAD
   return apiClient.get(`/admin/cs/notice/${noticeId}`);
+=======
+  return apiClient.get(`/admin/cs/notices/${noticeId}`);
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
 };
 
 /**
@@ -25,7 +57,11 @@ export const getNoticeById = (noticeId) => {
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const createNotice = (noticeData) => {
+<<<<<<< HEAD
   return apiClient.post('/admin/cs/notice', noticeData);
+=======
+  return apiClient.post('/admin/cs/notices', noticeData);
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
 };
 
 /**
@@ -35,7 +71,11 @@ export const createNotice = (noticeData) => {
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const updateNotice = (noticeId, noticeData) => {
+<<<<<<< HEAD
   return apiClient.patch(`/admin/cs/notice/${noticeId}`, noticeData);
+=======
+  return apiClient.patch(`/admin/cs/notices/${noticeId}`, noticeData);
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
 };
 
 /**
@@ -44,5 +84,35 @@ export const updateNotice = (noticeId, noticeData) => {
  * @returns {Promise<axios.AxiosResponse<any>>}
  */
 export const deleteNotice = (noticeId) => {
+<<<<<<< HEAD
   return apiClient.delete(`/admin/cs/notice/${noticeId}`);
+=======
+  return apiClient.delete(`/admin/cs/notices/${noticeId}`);
+};
+
+/**
+ * 공지사항 상태별 통계를 조회합니다.
+ * @returns {Promise<NoticeStatsResponse>}
+ */
+export const getNoticeStats = () => {
+  return unwrap(apiClient.get('/admin/cs/notices/stats'));
+};
+
+/**
+ * 특정 공지사항에 파일을 첨부합니다.
+ * @param {number} noticeId - 파일을 첨부할 공지사항의 ID
+ * @param {File[]} files - 첨부할 파일 목록
+ * @returns {Promise<axios.AxiosResponse<any>>}
+ */
+export const addNoticeAttachments = (noticeId, files) => {
+  const formData = new FormData();
+  files.forEach(file => {
+    formData.append('files', file);
+  });
+  return apiClient.post(`/admin/cs/notices/${noticeId}/attachments`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
 };

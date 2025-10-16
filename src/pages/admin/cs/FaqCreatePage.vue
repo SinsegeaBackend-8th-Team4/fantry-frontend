@@ -1,7 +1,11 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+<<<<<<< HEAD
 import { createFaq } from '@/api/adminFaq.js';
+=======
+import { createFaq, addFaqAttachments } from '@/api/adminFaq.js';
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
 import CommonEditor from '@/components/common/organisms/CommonEditor.vue';
 
 const router = useRouter();
@@ -12,6 +16,12 @@ const newFaq = ref({
   content: '',
 });
 
+<<<<<<< HEAD
+=======
+const selectedFiles = ref([]);
+const previewFiles = ref([]); // 미리보기 URL을 저장할 ref
+
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
 const error = ref(null);
 
 // 문의 유형 목록 (임시)
@@ -24,6 +34,22 @@ const csTypes = ref([
   { id: 6, name: '판매 문의' },
 ]);
 
+<<<<<<< HEAD
+=======
+// URL이 이미지 파일인지 확인하는 헬퍼 함수
+function isImage(url) {
+  return /\.(jpeg|jpg|gif|png|webp|bmp)$/i.test(url);
+}
+
+function handleFileChange(event) {
+  selectedFiles.value = Array.from(event.target.files);
+  previewFiles.value = selectedFiles.value.map(file => ({
+    name: file.name,
+    url: URL.createObjectURL(file)
+  }));
+}
+
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
 async function handleSubmit() {
   if (!newFaq.value.csTypeId || !newFaq.value.title || !newFaq.value.content) {
     alert('모든 필드를 입력해주세요.');
@@ -31,7 +57,17 @@ async function handleSubmit() {
   }
 
   try {
+<<<<<<< HEAD
     await createFaq(newFaq.value);
+=======
+    const faqResponse = await createFaq(newFaq.value);
+    const faqId = faqResponse.data.faqId; // Assuming the response contains faqId
+
+    if (selectedFiles.value.length > 0) {
+      await addFaqAttachments(faqId, selectedFiles.value);
+    }
+
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
     alert('새 FAQ가 성공적으로 등록되었습니다.');
     router.push({ name: 'AdminFaqList' });
   } catch (e) {
@@ -69,7 +105,29 @@ function goToList() {
 
           <div class="mb-3">
             <label class="form-label">내용</label>
+<<<<<<< HEAD
             <CommonEditor v-model:content="newFaq.content" />
+=======
+            <CommonEditor v-model="newFaq.content" />
+          </div>
+
+          <div class="mb-3">
+            <label for="faq-attachments" class="form-label">첨부 파일</label>
+            <input type="file" id="faq-attachments" class="form-control" multiple @change="handleFileChange">
+          </div>
+
+          <!-- 선택된 파일 미리보기 섹션 -->
+          <div v-if="previewFiles.length > 0" class="mb-3">
+            <h6>선택된 파일 미리보기</h6>
+            <div class="d-flex flex-wrap gap-2">
+              <div v-for="(file, index) in previewFiles" :key="index">
+                <img v-if="isImage(file.url)" :src="file.url" alt="Preview" class="img-thumbnail" style="max-width: 150px; max-height: 150px; object-fit: cover;">
+                <a v-else :href="file.url" target="_blank" class="btn btn-sm btn-outline-info">
+                  <i class="fas fa-paperclip me-1"></i> {{ file.name }}
+                </a>
+              </div>
+            </div>
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
           </div>
 
           <div class="d-flex justify-content-between">
@@ -81,3 +139,18 @@ function goToList() {
     </div>
   </div>
 </template>
+<<<<<<< HEAD
+=======
+
+<style scoped>
+.img-thumbnail {
+  border: 1px solid #ddd;
+  padding: 3px;
+  border-radius: 5px;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+</style>
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10

@@ -1,18 +1,45 @@
 <script setup>
+<<<<<<< HEAD
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+=======
+import { ref, onMounted, nextTick } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
 import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
 import { searchFaqs } from '@/api/adminFaq.js';
 
 const router = useRouter();
+<<<<<<< HEAD
+=======
+const route = useRoute();
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
 const table = ref(null);
 const keyword = ref('');
 const tableKey = ref(0);
 
+<<<<<<< HEAD
+=======
+onMounted(() => {
+  const statusFromQuery = route.query.status;
+  if (statusFromQuery) {
+    const foundFilter = statusFilters.find(f => f.value === statusFromQuery);
+    if (foundFilter) {
+      currentStatusFilter.value = foundFilter.value;
+    }
+  }
+});
+
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
 const statusFilters = [
   { label: '전체', value: null },
   { label: '활성', value: 'ACTIVE' },
   { label: '비활성', value: 'INACTIVE' },
+<<<<<<< HEAD
+=======
+  { label: '고정', value: 'PINNED' },
+  { label: '초안', value: 'DRAFT' },
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
 ];
 const currentStatusFilter = ref(null);
 
@@ -28,6 +55,7 @@ const typeFilters = [
 const currentTypeFilter = ref(null);
 
 async function fetcher({ page, size, sort, keyword }) {
+<<<<<<< HEAD
   const params = {
     pageable: {
       page: page > 0 ? page - 1 : 0,
@@ -45,6 +73,19 @@ async function fetcher({ page, size, sort, keyword }) {
   return {
     rows: data.content,
     total: data.totalElements,
+=======
+  const response = await searchFaqs({
+    page: page,
+    size: size,
+    sort: sort,
+    status: currentStatusFilter.value,
+    csTypeId: currentTypeFilter.value,
+    keyword: keyword,
+  });
+  return {
+    rows: response.content,
+    total: response.totalElements,
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
   };
 }
 
@@ -55,8 +96,12 @@ const columns = [
     title: '문의 유형',
     className: 'text-center',
     render: (data) => {
+<<<<<<< HEAD
       // csType이 객체 형태일 수 있으므로 name을 추출
       const typeName = data && data.name ? data.name : 'N/A';
+=======
+      const typeName = data || 'N/A';
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
       let badgeClass = 'bg-secondary';
       switch (typeName) {
         case '배송문의': badgeClass = 'bg-primary'; break;
@@ -71,20 +116,52 @@ const columns = [
   {
     data: 'title',
     title: '제목',
+<<<<<<< HEAD
     className: 'text-left',
     render: (data, type, row) => {
       return `<a href="javascript:void(0)" class="text-primary" data-id="${row.faqId}">${data}</a>`;
     }
   },
   { data: 'authorName', title: '작성자', className: 'text-center' },
+=======
+    className: 'text-left clickable-title-cell',
+    render: (data, type, row) => {
+      return `<span class="faq-title" data-faq-id="${row.faqId}" style="color: blue; cursor: pointer; text-decoration: underline;">${data}</span>`;
+    }
+  },
+  { data: 'createdBy', title: '작성자', className: 'text-center' },
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
   {
     data: 'status',
     title: '상태',
     className: 'text-center',
     render: (data) => {
+<<<<<<< HEAD
       const isActive = data === 'ACTIVE';
       const badgeClass = isActive ? 'bg-success' : 'bg-danger';
       const text = isActive ? '활성' : '비활성';
+=======
+      let badgeClass = 'bg-light text-dark';
+      let text = data;
+      switch (data) {
+        case 'ACTIVE':
+          badgeClass = 'bg-success';
+          text = '활성';
+          break;
+        case 'INACTIVE':
+          badgeClass = 'bg-danger';
+          text = '비활성';
+          break;
+        case 'PINNED':
+          badgeClass = 'bg-info';
+          text = '고정';
+          break;
+        case 'DRAFT':
+          badgeClass = 'bg-secondary';
+          text = '초안';
+          break;
+      }
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
       return `<span class="badge ${badgeClass}">${text}</span>`;
     },
   },
@@ -108,19 +185,61 @@ const columns = [
   },
 ];
 
+<<<<<<< HEAD
 function goToDetail(faqId) {
   router.push({ name: 'AdminFaqDetail', params: { faqId } });
 }
 
+=======
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
 function goToCreate() {
   router.push({ name: 'AdminFaqCreate' });
 }
 
 function handleRowClick(row) {
+<<<<<<< HEAD
   if (row && row.faqId) {
     goToDetail(row.faqId);
   }
 }
+=======
+  // This function is now redundant as click handling is done via attachClickHandlers
+  // but kept for reference or if other parts of the row need to be clickable.
+  console.log("handleRowClick (redundant for title click):", row);
+}
+
+function attachClickHandlers() {
+  nextTick(() => {
+    const titleElements = document.querySelectorAll('.faq-title');
+    titleElements.forEach(el => {
+      // 중복 바인딩 방지
+      if (el.dataset.bound) return;
+      el.dataset.bound = 'true';
+      
+      el.addEventListener('click', (e) => {
+        const faqId = e.target.dataset.faqId;
+        console.log('Navigating to AdminFaqDetail with faqId:', faqId);
+        router.push({
+          name: 'AdminFaqDetail',
+          params: { faqId }
+        });
+      });
+    });
+  });
+}
+
+onMounted(() => {
+  const statusFromQuery = route.query.status;
+  if (statusFromQuery) {
+    const foundFilter = statusFilters.find(f => f.value === statusFromQuery);
+    if (foundFilter) {
+      currentStatusFilter.value = foundFilter.value;
+    }
+  }
+  // 초기 로드 후에도 바인딩
+  setTimeout(attachClickHandlers, 500);
+});
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
 </script>
 
 <template>
@@ -178,11 +297,34 @@ function handleRowClick(row) {
           v-model:keyword="keyword"
           :columns="columns"
           :fetcher="fetcher"
+<<<<<<< HEAD
           @row-click="handleRowClick"
+=======
+          @loaded="attachClickHandlers"
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
         >
           <template #empty>현재 조건에 해당하는 FAQ가 없습니다.</template>
         </ServerDataTable>
       </div>
     </div>
   </main>
+<<<<<<< HEAD
 </template>
+=======
+</template>
+
+<style scoped>
+:deep(table td){
+  pointer-events: none;
+}
+
+:deep(table td .faq-title){
+  pointer-events: auto;
+}
+
+:deep(table tbody tr:hover) {
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+</style>
+>>>>>>> 9e2ff05ff607911e93867be14c9d9027c109dd10
