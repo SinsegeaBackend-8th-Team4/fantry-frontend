@@ -142,8 +142,9 @@ const adminRoutes = [
           redirect: { name: 'AdminInventoryDashboard' },
           meta: { title: '재고관리', icon: 'fas fa-fw fa-boxes', menu: true },
           children: [
-            { path: 'dashboard', name: 'AdminInventoryDashboard', component: InventoryDashboardPage },
-            { path: 'list', name: 'AdminInventoryList', component: InventoryListPage },
+            { path: 'dashboard', name: 'AdminInventoryDashboard', component: InventoryDashboardPage, meta: { title: '재고 대시보드' } },
+            { path: 'list', name: 'AdminInventoryList', component: InventoryListPage, meta: { title: '재고 목록' } },
+            { path: 'detail/:id', name: 'AdminInventoryDetail', component: () => import('@/pages/admin/inventory/InventoryDetailPage.vue'), props: true, meta: { title: '재고 상세', hidden: true } },
           ],
         },
         // --- 회원 관리 ---
@@ -164,14 +165,14 @@ const adminRoutes = [
             { path: 'reportReceiveEdit/:reportId', name: 'AdminReportReceiveEdit', component: ReportReceiveEditPage, props: true, meta: { menu: false, hidden: true } },
           ],
         },
-        // --- 경매 관리 ---
+        // --- 판매 관리 ---
         {
-          path: 'auction',
-          redirect: { name: 'AdminAuctionDashboard' },
-          meta: { title: '경매관리', icon: 'fas fa-fw fa-gavel', menu: true },
+          path: 'sale',
+          redirect: { name: 'AdminSaleDashboard' },
+          meta: { title: '판매 관리', icon: 'fas fa-fw fa-gavel', menu: true },
           children: [
-            { path: 'dashboard', name: 'AdminAuctionDashboard', component: AuctionDashboardPage },
-            { path: 'list', name: 'AdminAuctionList', component: AuctionListPage },
+            { path: 'dashboard', name: 'AdminSaleDashboard', component: AuctionDashboardPage, meta: { title: '판매 대시보드' } },
+            { path: 'list', name: 'AdminSaleList', component: AuctionListPage, meta: { title: '판매 상품 목록' } },
           ],
         },
         // --- 주문 관리 (추가) ---
