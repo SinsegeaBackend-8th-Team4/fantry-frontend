@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getAdminReturnDetail, updateAdminReturn } from '@/api/adminReturn.js';
-import { formatDate } from '@/utils/tableFormatters';
+import { formatDateTime } from '@/utils/tableFormatters';
 
 const route = useRoute();
 const router = useRouter();
@@ -174,11 +174,11 @@ onMounted(fetchReturnDetail);
               </div>
               <div class="col-md-6">
                 <p class="mb-1 text-muted small">요청일</p>
-                <p class="fw-bold">{{ formatDate(returnRequest.requestedAt) }}</p>
+                <p class="fw-bold">{{ formatDateTime(returnRequest.requestedAt) }}</p>
               </div>
               <div class="col-md-6">
                 <p class="mb-1 text-muted small">마지막 업데이트</p>
-                <p class="fw-bold">{{ formatDate(returnRequest.updatedAt) }}</p>
+                <p class="fw-bold">{{ formatDateTime(returnRequest.updatedAt) }}</p>
               </div>
               <div class="col-12">
                 <p class="mb-1 text-muted small">요청 사유</p>
