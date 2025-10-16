@@ -22,7 +22,7 @@ const menuItems = computed(() => {
             .filter((child) => child.meta && child.meta.title && !child.meta.hidden)
             .map((child) => {
               const title = child.meta?.title ?? (child.path === 'list' ? '목록 조회' : child.path === 'write' ? '글쓰기 (샘플)' : '대시보드')
-              return { to: { name: child.name }, title: title }
+              return { to: { name: child.name }, title: title, name: child.name }
             })
         : []
 
@@ -71,7 +71,7 @@ const menuItems = computed(() => {
       <div v-if="!item.to" :id="`collapse-${item.id}`" class="collapse" :aria-labelledby="`heading-${item.id}`" data-parent="#accordionSidebar">
         <div class="bg-white py-2 collapse-inner rounded">
           <h6 class="collapse-header">{{ item.name }}:</h6>
-          <RouterLink v-for="subMenu in item.subMenus" :key="subMenu.to.name" :to="subMenu.to" class="collapse-item">
+          <RouterLink v-for="subMenu in item.subMenus" :key="subMenu.name" :to="subMenu.to" class="collapse-item">
             {{ subMenu.title }}
           </RouterLink>
         </div>
