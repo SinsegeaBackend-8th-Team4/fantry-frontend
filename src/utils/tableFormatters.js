@@ -70,3 +70,17 @@ export function badgeCol(data, title, options = {}) {
     render,
   });
 }
+export function productNameFormatter(value) {
+    if (!value) return '-';
+    // XSS 방지를 위해 HTML을 이스케이프 처리합니다.
+    const escapedValue = value.replace(/[&<>"']/g, function(match) {
+        return {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[match];
+    });
+    return `<div class="text-truncate" title="${escapedValue}">${escapedValue}</div>`;
+}
