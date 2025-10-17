@@ -5,8 +5,10 @@ import { currencyCol, dateCol } from '@/composables/useDataTableColumns';
 import { getMyInspections, startOfflineInspection } from '@/api/userInspection';
 import { useAdminInspectionStore } from '@/stores/adminInspectionStore';
 import { useModal } from '@/composables/useModal';
+import { useAlertDialog } from '@/composables/useAlertDialog.js';
 
 const adminStore = useAdminInspectionStore();
+const {showAlert} = useAlertDialog();
 
 const rootEl = ref(null);
 const keyword = ref('');
@@ -28,7 +30,7 @@ async function fetchMyInspections({ page, size, sort }) {
     return data;
   } catch (e) {
     console.error('내 검수 목록 조회 실패', e);
-    alert(e?.message ?? '데이터를 불러오는 데 실패했습니다.');
+    showAlert('오류', e?.message ?? '데이터를 불러오는 데 실패했습니다.')
     localRows.value = [];
     return { rows: [], total: 0 };
   } finally {
@@ -47,11 +49,11 @@ async function handleStartOffline(productInspectionId) {
   if (!confirm('해당 상품을 발송하시겠습니까?')) return;
   try {
     await startOfflineInspection(productInspectionId);
-    alert('상품 발송이 처리되었습니다.');
+    showAlert('알림', '상품 발송이 처리되었습니다.')
     tableKey.value++;
   } catch (e) {
     console.error('발송 처리 전환 실패', e);
-    alert(e?.message ?? '처리 중 오류가 발생했습니다.');
+    showAlert('오류', e?.message ?? '처리 중 오류가 발생했습니다.')
   }
 }
 
