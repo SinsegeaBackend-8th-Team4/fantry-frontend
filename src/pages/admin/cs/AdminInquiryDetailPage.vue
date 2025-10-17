@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { getInquiryById, answerInquiry } from '@/api/adminInquiry';
 import CommonEditor from '@/components/common/organisms/CommonEditor.vue';
 import LoadingSpinner from '@/components/common/atoms/LoadingSpinner.vue';
+import { useAlertDialog } from '@/composables/useAlertDialog';
 
 const route = useRoute();
 const router = useRouter();
@@ -12,6 +13,7 @@ const inquiryId = Number(route.params.inquiryId);
 const inquiry = ref(null);
 const loading = ref(true);
 const error = ref(null);
+const { showAlert: showAlertDialog } = useAlertDialog();
 
 // 상태 선택 옵션
 const statusOptions = ref([
@@ -62,12 +64,12 @@ async function handleSubmit() {
   if (!inquiry.value) return;
 
   if (!inquiry.value.answerContent || !inquiry.value.answerContent.trim()) {
-    alert('답변 내용을 입력해주세요.');
+    showAlertDialog('알림', '답변 내용을 입력해주세요.');
     return;
   }
 
   if (!inquiry.value.reqStatus) {
-    alert('처리 상태를 선택해주세요.');
+    showAlertDialog('알림', '처리 상태를 선택해주세요.');
     return;
   }
 
@@ -79,11 +81,11 @@ async function handleSubmit() {
 
   try {
     await answerInquiry(inquiryId, payload);
-    alert('답변이 성공적으로 등록되었습니다.');
+    showAlertDialog('성공', '답변이 성공적으로 등록되었습니다.');
     router.push({ name: 'AdminInquiryList' });
   } catch (e) {
     console.error('답변 저장 실패:', e);
-    alert('답변 저장 중 오류가 발생했습니다.');
+    showAlertDialog('오류', '답변 저장 중 오류가 발생했습니다.');
   }
 }
 
@@ -98,6 +100,10 @@ function formatDate(dateValue) {
   if (isNaN(dt.getTime())) return 'Invalid Date';
   return dt.toLocaleString('ko-KR');
 }
+
+watch(() => inquiry.value?.answerContent, (newValue) => {
+  console.log('inquiry.answerContent changed:', newValue);
+});
 
 onMounted(fetchInquiry);
 </script>

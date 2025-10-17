@@ -3,8 +3,10 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { createNotice, addNoticeAttachments } from '@/api/adminNotice.js';
 import CommonEditor from '@/components/common/organisms/CommonEditor.vue';
+import { useAlertDialog } from '@/composables/useAlertDialog';
 
 const router = useRouter();
+const { showAlert: showAlertDialog } = useAlertDialog();
 
 const newNotice = ref({
   title: '',
@@ -47,7 +49,7 @@ function handleFileChange(event) {
 
 async function handleSubmit() {
   if (!newNotice.value.title || !newNotice.value.content || !newNotice.value.status) {
-    alert('제목, 내용, 상태를 모두 입력해주세요.');
+    showAlertDialog('알림', '제목, 내용, 상태를 모두 입력해주세요.');
     return;
   }
 
@@ -59,12 +61,12 @@ async function handleSubmit() {
       await addNoticeAttachments(noticeId, selectedFiles.value);
     }
 
-    alert('새 공지사항이 성공적으로 등록되었습니다.');
+    showAlertDialog('성공', '새 공지사항이 성공적으로 등록되었습니다.');
     router.push({ name: 'AdminNoticeList' });
   } catch (e) {
     console.error('공지사항 등록 실패:', e);
     error.value = '등록 중 오류가 발생했습니다.';
-    alert(error.value);
+    showAlertDialog('오류', error.value);
   }
 }
 

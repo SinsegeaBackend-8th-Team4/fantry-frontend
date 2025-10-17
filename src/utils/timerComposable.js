@@ -2,6 +2,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useUserStore } from '@/stores/userStore';
 import { useRouter } from 'vue-router';
 import { apiClient } from '@/api/index.js'; // 로그아웃 API 호출을 위해 사용
+import { showAlert } from '@/composables/useAlertDialog';
 
 /**
  * 사용자 미활동(Idle Time)을 감지하여 자동 로그아웃을 처리하는 Vue Composable
@@ -21,7 +22,7 @@ export function useIdleTimer(timeoutMinutes) {
 
   // 미활동으로 인한 클라이언트 측 강제 로그아웃을 처리
   const forceLogout = async () => {
-    alert("미활동 시간 초과: 장시간 활동하지 않아 자동 로그아웃 처리되었습니다. 다시 로그인해주세요.");
+    showAlert("알림", "미활동 시간 초과: 장시간 활동하지 않아 자동 로그아웃 처리되었습니다. 다시 로그인해주세요.");
     clearTimeout(idleTimer);
     
     // 1. 사용자에게 알림

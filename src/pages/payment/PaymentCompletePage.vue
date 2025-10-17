@@ -3,10 +3,12 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import CardHeader from './components/atoms/CardHeader.vue'
 import { usePaymentStore } from '@/stores/paymentStore'
+import { useAlertDialog } from '@/composables/useAlertDialog';
 
 const router = useRouter()
 const route = useRoute()
 const paymentStore = usePaymentStore()
+const { showAlert: showAlertDialog } = useAlertDialog();
 
 // 결제 정보
 const paymentInfo = ref({
@@ -92,7 +94,7 @@ const initializePaymentData = () => {
     }, 1000)
   } else {
     // 결제 정보가 없으면 홈으로 리다이렉트
-    alert('잘못된 접근입니다.')
+    showAlertDialog('경고', '잘못된 접근입니다.')
     router.replace('/')
   }
 }
@@ -125,7 +127,7 @@ const handlePopState = (event) => {
   history.pushState(null, '', location.href)
 
   // 사용자에게 알림 (선택사항)
-  alert('결제가 완료되었습니다. 주문 내역은 마이페이지에서 확인하실 수 있습니다.')
+  showAlertDialog('성공', '결제가 완료되었습니다. 주문 내역은 마이페이지에서 확인하실 수 있습니다.')
 }
 
 // 주문번호 생성

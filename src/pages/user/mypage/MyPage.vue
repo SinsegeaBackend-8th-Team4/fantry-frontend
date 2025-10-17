@@ -13,8 +13,6 @@ import SalesHistory from './selling/SalesHistory.vue'
 //구매 관리
 import AuctionHistory from './buying/AuctionHistory.vue'
 import OrderHistory from './buying/OrderHistory.vue'
-//고객 센터
-import MypageInquiry from './support/MypageInquiry.vue'
 
 const activeMenu = ref('account')
 const activeSubMenu = ref('profile')
@@ -35,8 +33,6 @@ const componentMap = {
   //구매 관리===========================
   'auction-history': AuctionHistory,
   'order-history': OrderHistory,
-  //고객 센터===========================
-  'inquiry': MypageInquiry,
 }
 
 const currentComponent = computed(()=>{

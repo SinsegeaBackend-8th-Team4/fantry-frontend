@@ -5,8 +5,10 @@ import { getAuctionByInspectionId } from '@/api/auction'
 import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue'
 import { currencyCol } from '@/composables/useDataTableColumns'
 import { useRouter } from 'vue-router'
+import { useAlertDialog } from '@/composables/useAlertDialog';
 
 const router = useRouter()
+const { showAlert: showAlertDialog } = useAlertDialog();
 
 // 상태 변수
 const loading = ref(false)
@@ -125,7 +127,7 @@ async function fetchInventoryItems({ page, size, sort, keyword }) {
     }
   } catch (err) {
     console.error('재고 목록 조회 실패:', err)
-    alert(err.message || '데이터를 불러오는 데 실패했습니다.')
+    showAlertDialog('오류', err.message || '데이터를 불러오는 데 실패했습니다.')
     return { rows: [], total: 0 }
   } finally {
     loading.value = false

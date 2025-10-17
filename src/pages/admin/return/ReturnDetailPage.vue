@@ -3,9 +3,11 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getAdminReturnDetail, updateAdminReturnStatus } from '@/api/adminReturn.js';
 import { formatDate } from '@/utils/tableFormatters';
+import { useAlertDialog } from '@/composables/useAlertDialog';
 
 const route = useRoute();
 const router = useRouter();
+const { showAlert: showAlertDialog } = useAlertDialog();
 
 const returnRequestId = ref(route.params.returnRequestId);
 const returnRequest = ref(null);
@@ -41,7 +43,7 @@ async function handleStatusChange(newStatus) {
   loading.value = true;
   try {
     await updateAdminReturnStatus(returnRequestId.value, { status: newStatus });
-    alert('상태가 성공적으로 변경되었습니다.');
+    showAlertDialog('성공', '상태가 성공적으로 변경되었습니다.');
     await fetchReturnDetail(); // 정보 새로고침
   } catch (e) {
     error.value = '상태 변경 중 오류가 발생했습니다.';

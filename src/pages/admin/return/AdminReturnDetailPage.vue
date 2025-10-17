@@ -3,9 +3,11 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getAdminReturnDetail, updateAdminReturn } from '@/api/adminReturn.js';
 import { formatDateTime } from '@/utils/tableFormatters';
+import { useAlertDialog } from '@/composables/useAlertDialog';
 
 const route = useRoute();
 const router = useRouter();
+const { showAlert: showAlertDialog } = useAlertDialog();
 
 const returnRequestId = ref(Number(route.params.returnRequestId));
 const returnRequest = ref(null);
@@ -59,7 +61,7 @@ async function handleStatusChange(newStatus) {
 
 async function confirmReject() {
   if (!rejectReasonInput.value.trim()) {
-    alert('거절 사유를 입력해주세요.');
+    showAlertDialog('알림', '거절 사유를 입력해주세요.');
     return;
   }
   if (!confirm(`상태를 '거절'로 변경하고 거절 사유를 저장하시겠습니까?`)) return;
@@ -80,7 +82,7 @@ async function updateDeductedShippingFee() {
       deductedShippingFee: deductedShippingFeeInput.value,
     };
     await updateAdminReturn(returnRequestId.value, payload);
-    alert('차감 배송비가 성공적으로 저장되었습니다.');
+    showAlertDialog('성공', '차감 배송비가 성공적으로 저장되었습니다.');
     await fetchReturnDetail(); // 정보 새로고침
   } catch (e) {
     error.value = '차감 배송비 저장 중 오류가 발생했습니다.';
@@ -100,7 +102,7 @@ async function updateReturnRequest(newStatus, rejectReason = null) {
       // memo 등 필요시 추가
     };
     await updateAdminReturn(returnRequestId.value, payload);
-    alert('상태가 성공적으로 변경되었습니다.');
+    showAlertDialog('성공', '상태가 성공적으로 변경되었습니다.');
     await fetchReturnDetail(); // 정보 새로고침
   } catch (e) {
     error.value = '상태 변경 중 오류가 발생했습니다.';
