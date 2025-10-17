@@ -275,15 +275,18 @@
  * 1. 임포트 (Import) & 초기 설정
  * ============================================= */
     import { ref, onMounted, onUnmounted, computed , watch} from 'vue';
-    import { useRoute } from 'vue-router';
+    import { useRoute, useRouter } from 'vue-router';
     import { getAuctionDetails, getAuctionWinnerStatus} from '@/api/auction';  //경매 관련 API 함수
     import { getBidsByAuctionId } from '@/api/bid';  //입찰 관련 API 함수
     import { useUserStore } from '@/stores/userStore';
     import { subscribe, unsubscribe, publish, disconnect, connect } from '@/services/websocketService';
+    import { usePaymentStore } from '@/stores/paymentStore';
     import ProductAuctionPolicy from '@/components/product/ProductAuctionPolicy.vue'; // 경매 이용 안내 컴포넌트
 
     const route = useRoute();
+    const router = useRouter();
     const userStore = useUserStore();
+    const paymentStore = usePaymentStore();
     const auctionId = route.params.id;
 
 /* =============================================
@@ -603,15 +606,20 @@
             alert("로그인이 필요한 기능입니다.");
             return;
         }
-        // TODO: 즉시 구매 로직 구현 (결제 페이지로 이동)
-        console.log("즉시 구매 시도");
+        paymentStore.setAuctionContext(auctionId);
+        router.push('/product/order/info');
     };
 
     /**
      * 낙찰 후 결제하기 버튼 클릭 시 동작
      */
     const goToPayment = () => {
-        alert('Todo : 결제 페이지 이동');
+        if (!userStore.isLoggedIn) {
+            alert("로그인이 필요한 기능입니다.");
+            return;
+        }
+        paymentStore.setAuctionContext(auctionId);
+        router.push('/product/order/info');
     };
 
     const validateAndConfirmBid = () => {
