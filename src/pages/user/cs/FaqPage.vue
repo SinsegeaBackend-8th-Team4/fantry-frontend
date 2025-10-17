@@ -127,6 +127,7 @@ watch([currentCategory, currentPage], () => {
 
 .faq-accordion {
   border-top: 2px solid #212529;
+  min-height: 600px !important; /* 10개 항목 기준 대략적인 높이 */
 }
 
 .faq-accordion .card {

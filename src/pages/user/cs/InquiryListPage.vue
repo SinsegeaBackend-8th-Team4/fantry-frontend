@@ -1,16 +1,12 @@
 <script setup>
   import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
   import { ref, nextTick, onMounted } from 'vue';
+  import { useRouter } from 'vue-router';
   import { getMyInquiryList } from '@/api/inquiry';
-  import MypageInquiryDetail from '@/pages/user/mypage/support/MypageInquiryDetail.vue';
-
+  const router = useRouter();
   const dataTableRef = ref(null);
   const keyword = ref('');
   const loading = ref(false);
-
-  //모달 상태
-  const showDetail = ref(false);
-  const selectedInquiryId = ref(null);
 
   // 날짜 포맷 함수
   function formatDate(dateArray) {
@@ -103,12 +99,10 @@
 
   //상세 열기/닫기
   function openDetail(id) {
-    selectedInquiryId.value = id;
-    showDetail.value = true;
-  }
-  function closeDetail() {
-    selectedInquiryId.value = null;
-    showDetail.value = false;
+    router.push({
+      name: 'InquiryDetail',
+      params: { id: id }
+    });
   }
 
   // 테이블 렌더링 후 클릭 이벤트 바인딩
@@ -129,40 +123,23 @@
     });
   }
 
-  async function fetchInquiries({ page, size, sort, keyword }) {
+  async function fetchInquiries({ page, size, sort }) {
     try {
-            const res = await getMyInquiryList({
-              page: page - 1,
+            const requestParams = {
+              page: page,
               size,
               sort: sort || 'inquiredAt,desc'
-            });
+            };
+            console.log('getMyInquiryList Request Params:', requestParams);
+            const res = await getMyInquiryList(requestParams);
+            console.log('getMyInquiryList Response:', res);
       
-            let allInquiries = [];
             const payload = res;
       
-            // API 응답 구조에 따라 데이터 추출
-            if (Array.isArray(payload.content)) {
-              allInquiries = payload.content;
-            } else if (Array.isArray(payload)) {
-              allInquiries = payload;
-            } else if (Array.isArray(payload.data)) {
-              allInquiries = payload.data;
-            }
-      // 검색 필터링
-      if (keyword) {
-        allInquiries = allInquiries.filter(i => 
-          i.title?.includes(keyword) || 
-          i.inquiredByName?.includes(keyword) ||
-          statusLabel(i.status)?.includes(keyword)
-        );
-      }
-
-      // 전체 개수와 현재 페이지 데이터 반환
-      // API가 이미 페이징된 데이터를 반환하는 경우
-      return {
-        rows: allInquiries,
-        total: payload.totalElements || allInquiries.length
-      };
+            return {
+              rows: payload.content,
+              total: payload.totalElements
+            };
     } catch (err) {
       console.error('fetch inquiries error', err);
       return { rows: [], total: 0 };
@@ -202,15 +179,6 @@
       </ServerDataTable>
     </div>
 
-    <!-- 상세 모달 -->
-    <div v-if="showDetail" class="inquiry-modal-backdrop" @click.self="closeDetail">
-      <div class="inquiry-modal">
-        <MypageInquiryDetail
-          v-if="selectedInquiryId !== null"
-          :inquiryId="selectedInquiryId" 
-          @close="closeDetail" />
-      </div>
-    </div>
   </div>
 </template>
 

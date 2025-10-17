@@ -49,11 +49,13 @@
             <small class="form-text text-muted" v-if="totalFileSize > 0">총 파일 크기: {{ (totalFileSize / (1024 * 1024)).toFixed(2) }} MB</small>
           </div>
           <button type="submit" class="btn btn-primary btn-lg btn-block" :disabled="isSubmitting || totalFileSize > MAX_FILE_SIZE">
-            {{ isSubmitting ? '등록 중...' : '문의 등록' }}
+            문의 등록
           </button>
         </form>
       </div>
     </div>
+
+    <LoadingSpinner :show="isSubmitting" message="문의를 등록하고 있습니다..." />
 
     <!-- 내 문의 목록 -->
     <!-- <h4 class="mb-4 font-weight-bold">내 문의 내역</h4>
@@ -89,15 +91,16 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { createInquiry, getMyInquiryList, addInquiryAttachments } from '@/api/inquiry';
+import { useUiStore } from '@/stores/uiStore'; // Import useUiStore
 
 const router = useRouter();
+const uiStore = useUiStore(); // Initialize uiStore
 
 const newInquiry = ref({
   csTypeId: '',
   title: '',
   content: ''
 });
-const isSubmitting = ref(false);
 
 // 유효성 검사 오류 메시지
 const errors = ref({
@@ -184,11 +187,10 @@ const submitInquiry = async () => {
     return;
   }
 
-  isSubmitting.value = true;
+  uiStore.startLoading();
   try {
     // 1단계: 문의 텍스트 내용 등록
     const createdInquiry = await createInquiry(newInquiry.value);
-    alert('문의가 성공적으로 등록되었습니다.');
 
     // 2단계: 파일 첨부 (파일이 있는 경우에만)
     if (selectedFiles.value.length > 0) {
@@ -197,25 +199,26 @@ const submitInquiry = async () => {
         formData.append('files', file);
       });
       await addInquiryAttachments(createdInquiry.inquiryId, formData);
-      alert('파일이 성공적으로 첨부되었습니다.');
     }
 
-    // 폼 초기화
+    alert('문의가 성공적으로 등록되었습니다.');
+    // 폼 초기화 및 리디렉션
     newInquiry.value = { csTypeId: '', title: '', content: '' };
     selectedFiles.value = [];
     filePreviews.value = [];
     totalFileSize.value = 0;
     errors.value = { csTypeId: '', title: '', content: '', files: '' }; // 오류 초기화
-    // Reset file input manually
     const fileInput = document.getElementById('inquiryAttachments');
     if (fileInput) {
       fileInput.value = '';
     }
+    router.push('/cs/inquiry-list'); // 문의 목록 페이지로 이동
+
   } catch (error) {
     console.error('문의 등록 또는 파일 첨부 중 오류가 발생했습니다:', error);
     alert('문의 등록 또는 파일 첨부에 실패했습니다.');
   } finally {
-    isSubmitting.value = false;
+    uiStore.stopLoading();
   }
 };
 

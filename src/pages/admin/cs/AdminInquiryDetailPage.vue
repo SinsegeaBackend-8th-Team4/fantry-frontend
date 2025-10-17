@@ -99,6 +99,10 @@ function formatDate(dateValue) {
   return dt.toLocaleString('ko-KR');
 }
 
+watch(() => inquiry.value?.answerContent, (newValue) => {
+  console.log('inquiry.answerContent changed:', newValue);
+});
+
 onMounted(fetchInquiry);
 </script>
 
