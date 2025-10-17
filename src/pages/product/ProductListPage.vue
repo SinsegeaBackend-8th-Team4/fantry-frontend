@@ -92,6 +92,7 @@ const selectedSaleType = ref(null); // null: 전체, 'AUCTION': 경매, 'INSTANT
 
 // --- Computed 속성 ---
 const filterGroupType = computed(() => route.query.groupType || null);
+const searchQuery = computed(() => route.query.keyword || null);
 
 // --- 메서드 ---
 const fetchAuctions = async () => {
@@ -110,6 +111,9 @@ const fetchAuctions = async () => {
     }
     if (selectedSaleType.value) {
       params.saleType = selectedSaleType.value;
+    }
+    if (searchQuery.value) {
+      params.keyword = searchQuery.value;
     }
 
     const response = await getAuctionList(params);
@@ -177,6 +181,15 @@ watch(
   () => route.query.groupType,
   () => {
     currentPage.value = 0; // 필터 변경 시 첫 페이지로 리셋
+    fetchAuctions();
+  }
+);
+
+// 라우트 쿼리(keyword) 변경 감지
+watch(
+  () => route.query.keyword,
+  () => {
+    currentPage.value = 0; // 검색어 변경 시 첫 페이지로 리셋
     fetchAuctions();
   }
 );
