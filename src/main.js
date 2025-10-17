@@ -1,8 +1,12 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
-import { useUiStore } from './stores/uiStore';
+// useUiStore는 이제 router/index.js에서 사용하므로 제거합니다.
+// import { useUiStore } from './stores/uiStore'; 
+
+// router/index.js에서 setupRouter 함수를 import 합니다.
+import { setupRouter } from './router'; 
+
 import App from './App.vue'
-import router from './router'
 import Toast from 'vue-toastification'
 
 
@@ -22,24 +26,16 @@ window.$ = window.jQuery = jQuery
 const app = createApp(App);
 const pinia = createPinia(); // Pinia 인스턴스 생성
 
-// 1. Vue Router와 Pinia를 앱에 등록
-app.use(router);
+// 1. Pinia를 앱에 등록합니다. (라우터 가드에서 Store 접근을 위해 선행)
 app.use(pinia); 
 
-// 2. Pinia가 설치된 후 uiStore 초기화 (네비게이션 가드에서 사용)
-const uiStore = useUiStore();
+// 2. Pinia 등록 후, setupRouter 함수를 호출하여 라우터 인스턴스를 생성하고 네비게이션 가드를 설정합니다.
+const router = setupRouter();
 
-// Vue Router Navigation Guards
-router.beforeEach((to, from, next) => {
-  uiStore.startLoading();
-  next();
-});
+// 3. Vue Router를 앱에 등록합니다.
+app.use(router); 
 
-router.afterEach(() => {
-  uiStore.stopLoading();
-});
-
-
+// 4. Toast 옵션 설정
 const toastOption = {
   position: 'top-right',
   timeout: 20000,
@@ -55,6 +51,6 @@ const toastOption = {
   rtl: false,
 }
 
-// 3. vue-toastification 등록 및 앱 마운트
+// 5. vue-toastification 등록 및 앱 마운트
 app.use(Toast, toastOption)
 app.mount('#app')

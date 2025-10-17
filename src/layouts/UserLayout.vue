@@ -55,3 +55,20 @@ onUnmounted(() => {
   document.body.classList.remove('user-layout-active');
 });
 </script>
+<template>
+  <div>
+    <template v-if="isShowChrome">
+      <CommonHeader>
+        <template #searchBar>
+          <SearchBar v-model="searchInput" :onSearch="onSearch" />
+        </template>
+      </CommonHeader>
+    </template>
+    <router-view />
+    <template v-if="isShowChrome">
+      <CommonFooter />
+    </template>
+    <LoadingSpinner :show="uiStore.isLoading" />   </div>
+</template>
+
+<style scoped></style>

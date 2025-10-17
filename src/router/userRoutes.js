@@ -206,27 +206,6 @@ const userRoutes = {
       ]
     },
     {
-      path: 'order',
-      children: [
-        {
-          path: 'info',
-          name: 'Info',
-          component: UserInfoPage,
-          meta: { requiredLogin: false },
-        },
-        {
-          path: 'checkout',
-          name: 'Checkout',
-          component: CheckoutPage,
-          meta: { requiredLogin: false },
-        },
-        {
-          path: 'complete',
-          name: 'Complete',
-          component: PaymentCompletePage,
-          meta: { requiredLogin: false },
-        },
-      ],
       path: 'product/order/info',
       name: 'Info',
       component: UserInfoPage,

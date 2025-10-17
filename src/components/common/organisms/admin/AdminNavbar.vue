@@ -216,7 +216,7 @@
 import { logout } from '@/api/login';
 import { useUserStore } from '@/stores/userStore';
 import { computed } from 'vue';
-import router from '@/router';
+import { router } from '@/router/index.js';
 
 const userStore = useUserStore();
 

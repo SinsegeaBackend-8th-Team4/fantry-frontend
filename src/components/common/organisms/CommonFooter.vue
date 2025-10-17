@@ -59,6 +59,3 @@ const router = useRouter()
   border-top: 1px solid #eceff2;
 }
 </style>
-
-
-
