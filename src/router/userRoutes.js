@@ -40,6 +40,7 @@ const NoticePage = () => import('@/pages/user/cs/NoticePage.vue')
 const NoticeDetailPage = () => import('@/pages/user/cs/NoticeDetailPage.vue')
 const InquiryWritePage = () => import('@/pages/user/cs/InquiryWritePage.vue')
 const InquiryListPage = () => import('@/pages/user/cs/InquiryListPage.vue')
+const InquiryDetailPage = () => import('@/pages/user/cs/InquiryDetailPage.vue')
 
 const userRoutes = {
   path: '/',
@@ -194,6 +195,12 @@ const userRoutes = {
           path: 'inquiry-list',
           name: 'InquiryListPage',
           component: InquiryListPage,
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'inquiry/:id',
+          name: 'InquiryDetail',
+          component: InquiryDetailPage,
           meta: { requiresAuth: true },
         },
       ]
