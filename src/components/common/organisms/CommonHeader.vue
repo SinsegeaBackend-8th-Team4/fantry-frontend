@@ -32,7 +32,7 @@ const goToInspection = () => {
         <BrandLogo />
       </div>
       <div class="col-lg-7 col-6 text-left">
-        <slot name="saerchBar"></slot>
+        <slot name="searchBar"></slot>
       </div>
       <div class="col-lg-3 col-6 text-right">
         <template v-if="userStore.isLoggedIn">
