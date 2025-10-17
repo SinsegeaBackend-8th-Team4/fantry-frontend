@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { getMemberByToken } from '@/api/member.js';
+import { disconnectSse } from '@/api/notification';
 
 /**
  * 사용자 관련 전역 상태를 관리하는 Pinia 스토어입니다.
@@ -72,6 +73,8 @@ export const useUserStore = defineStore('user', () => {
    * @description 로그아웃 시, 모든 사용자 관련 상태를 초기화합니다.
    */
   function logout() {
+    disconnectSse()
+    
     currentUser.value = null;
     authToken.value = null;
     // TODO: localStorage에 저장된 토큰도 삭제

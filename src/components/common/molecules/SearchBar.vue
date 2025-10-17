@@ -25,6 +25,7 @@ const onSearch = () => {
       placeholder="검색어를 입력해주세요."
       v-model="modelValue"
       v-bind="$attrs"
+      @keyup.enter="onSearch"
     />
     <SearchButton @click="onSearch" />
   </div>
