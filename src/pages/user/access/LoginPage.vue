@@ -3,8 +3,10 @@
   import { ref } from 'vue';
   import { login } from '@/api/login';
   import { useUserStore } from '@/stores/userStore'
+  import { useAlertDialog } from '@/composables/useAlertDialog.js';
+  
+  const { showAlert } = useAlertDialog();
   const userStore = useUserStore();
-
   const router = useRouter();
 
   const username = ref('');
@@ -26,7 +28,7 @@
         router.push('/');
       }
     } catch (error) {
-      alert(error.response.data.message);
+      showAlert("🚫로그인 오류", error.response.data.message);
       console.log("로그인결과: ", error);
       //초기화
       username.value = null;
@@ -43,7 +45,7 @@
   }
 
   const snsLogin = () => {
-    alert("현재 버전에서는 지원하지 않습니다. 일반 로그인을 진행해주세요.");
+    showAlert("⚠️주의", "현재 버전에서는 지원하지 않습니다. 일반 로그인을 진행해주세요.");
   }
 
 </script>

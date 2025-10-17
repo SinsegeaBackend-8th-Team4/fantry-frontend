@@ -7,6 +7,9 @@
 import { ref, computed } from 'vue';
 import { useUserStore } from '@/stores/userStore';
 import { verifyMemberPassword, getMemberDetail, updateOneMember } from '@/api/member';
+import { useAlertDialog } from '@/composables/useAlertDialog.js';
+
+const { showAlert } = useAlertDialog();
 
 const userStore = useUserStore();
 
@@ -123,7 +126,7 @@ const saveProfile = async () => {
         const response = await updateOneMember(currentUserId.value, editData.value);
         
         if (response.data) {
-        alert('회원 정보가 성공적으로 수정되었습니다.');
+        showAlert("✅안내", "회원 정보가 성공적으로 수정되었습니다.");
         memberData.value = { ...editData.value }
         closeModal();
         }
