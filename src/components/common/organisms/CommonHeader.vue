@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted } from 'vue'
-import IconCountChip from '../atoms/IconCountChip.vue'
 import SearchBar from '../molecules/SearchBar.vue'
 import NavigationBar from '../molecules/NavigationBar.vue'
 import BrandLogo from '../atoms/BrandLogo.vue'
@@ -23,30 +22,29 @@ const goToInspection = () => {
   hidePolicyModal()
   router.push('/inspection/step1')
 }
+
+// 검수기준 페이지 이동
+const goToPolicy = () => {
+  hidePolicyModal()
+  router.push('/inspection/policy')
+}
 </script>
 <template>
   <div class="container-fluid">
-
     <div class="row align-items-center py-3 px-xl-5 header-main-section">
-      <div class="col-lg-2 d-none d-lg-block">
+      <div class="col-lg-auto d-none d-lg-block">
         <BrandLogo />
       </div>
-      <div class="col-lg-7 col-6 text-left">
-        <slot name="saerchBar"></slot>
+      <div class="col-lg col-6 text-left">
+        <slot name="searchBar"></slot>
       </div>
-      <div class="col-lg-3 col-6 text-right">
+      <div class="col-lg-auto col-6 text-right">
         <template v-if="userStore.isLoggedIn">
-          <a href="#" class="btn border" @click.prevent="showPolicyModal" style="margin-right: 0.5rem;">
+          <a href="#" class="btn border" @click.prevent="showPolicyModal" style="margin-right: 0.5rem">
             <i class="fas fa-tags text-primary"></i>
             <span class="badge">판매하기</span>
           </a>
-        </template>
-        <IconCountChip count="30" style="margin-right: 0.5rem;">
-          <i class="fas fa-heart text-primary"></i>
-        </IconCountChip>
-        <IconCountChip count="10" style="margin-right: 0.5rem;">
-          <i class="fas fa-shopping-cart text-primary"></i>
-        </IconCountChip>
+        </template>        
       </div>
     </div>
   </div>
@@ -70,7 +68,7 @@ const goToInspection = () => {
           <p class="text-muted small">검수 기준에 동의하지 않으실 경우, 검수 신청이 반려될 수 있습니다.</p>
         </div>
         <div class="modal-footer">
-           <a href="/inspection/policy" class="btn btn-outline-secondary" data-dismiss="modal">검수 기준 보기</a>
+          <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" @click="goToPolicy">검수 기준 보기</button>
           <button type="button" class="btn btn-primary" data-dismiss="modal" @click="goToInspection">신청 계속하기</button>
         </div>
       </div>
