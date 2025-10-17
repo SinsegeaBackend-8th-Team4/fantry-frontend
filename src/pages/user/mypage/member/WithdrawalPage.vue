@@ -135,9 +135,9 @@ const closeModal = () => {
                     </div>
 
                     <div class="modal-footer">
-                        <button class="btn-secondary" @click="closeModal" :disabled="isLoading">
+                        <!-- <button class="btn-secondary" @click="closeModal" :disabled="isLoading">
                             취소
-                        </button>
+                        </button> -->
                         <button class="btn-primary" @click="verifyPassword" :disabled="isLoading">
                             {{ isLoading ? '인증 중...' : '확인' }}
                         </button>

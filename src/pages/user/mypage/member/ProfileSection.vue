@@ -203,9 +203,9 @@ const cancelEdit = () => {
           </div>
 
           <div class="modal-footer">
-            <button class="btn-secondary" @click="closeModal" :disabled="isLoading">
+            <!-- <button class="btn-secondary" @click="closeModal" :disabled="isLoading">
               취소
-            </button>
+            </button> -->
             <button class="btn-primary" @click="verifyPassword" :disabled="isLoading">
               {{ isLoading ? '인증 중...' : '확인' }}
             </button>
@@ -268,9 +268,9 @@ const cancelEdit = () => {
           </div>
 
           <div class="modal-footer">
-            <button class="btn-secondary" @click="cancelEdit" :disabled="isLoading">
+            <!-- <button class="btn-secondary" @click="cancelEdit" :disabled="isLoading">
               취소
-            </button>
+            </button> -->
             <button class="btn-primary" @click="saveProfile" :disabled="isLoading">
               {{ isLoading ? '저장 중...' : '저장하기' }}
             </button>

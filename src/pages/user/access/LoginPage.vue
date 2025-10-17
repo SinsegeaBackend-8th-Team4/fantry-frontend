@@ -23,7 +23,9 @@
     } catch (error) {
       alert(error.response.data.message);
       console.log("로그인결과: ", error);
-      router.push('/login/fail');
+      //초기화
+      username.value = null;
+      password.value = null;
     }
   }
 
