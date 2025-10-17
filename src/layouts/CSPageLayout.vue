@@ -6,7 +6,8 @@
         <nav class="nav flex-column cs-nav">
           <router-link to="/cs/notice" class="nav-link">공지사항</router-link>
           <router-link to="/cs/faq" class="nav-link">자주 묻는 질문</router-link>
-          <router-link to="/cs/inquiry" class="nav-link">문의하기</router-link>
+          <router-link to="/cs/inquiry-write" class="nav-link">문의하기</router-link>
+          <router-link to="/cs/inquiry-list" class="nav-link">나의 문의내역</router-link>
         </nav>
       </div>
       <div class="col-lg-9 col-md-8">

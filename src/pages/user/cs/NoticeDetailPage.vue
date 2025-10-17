@@ -6,8 +6,8 @@
   </div>
   <div v-else-if="notice" class="notice-detail-container">
     <div class="notice-header">
-      <p class="notice-type mb-2">{{ notice.csType }}</p>
-      <h2 class="notice-title">{{ notice.title }}</h2>
+      <p class="notice-type mb-2">{{ notice.noticeType }}</p>
+      <h2 class="notice-title">{{ notice.noticeType ? `(${notice.noticeType}) ` : '' }}{{ notice.title }}</h2>
       <div class="notice-meta">
         <span>{{ notice.createdBy }}</span>
         <span>{{ formatDate(notice.createdAt) }}</span>
@@ -40,6 +40,7 @@ const fetchNoticeDetail = async () => {
   try {
     const noticeId = route.params.id;
     notice.value = await getNoticeDetail(noticeId);
+    console.log('Notice Detail noticeType:', notice.value.noticeType);
   } catch (error) {
     console.error('공지사항 상세 정보를 불러오는 중 오류가 발생했습니다:', error);
     notice.value = null;
@@ -48,13 +49,11 @@ const fetchNoticeDetail = async () => {
   }
 };
 
-const formatDate = (dateInput) => {
-  if (!dateInput) return '';
-  const dateString = String(dateInput);
-  const datePart = dateString.split('T')[0];
-  const [year, month, day] = datePart.split('-');
-  if (!year || !month || !day) return datePart; // Fallback
-  return `${year}년 ${month}월 ${day}일`;
+const formatDate = (dateArray) => {
+  if (!dateArray || !Array.isArray(dateArray)) return '';
+  const [year, month, day, hour, minute] = dateArray;
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${year}.${pad(month)}.${pad(day)} ${pad(hour)}:${pad(minute)}`;
 };
 
 const goBack = () => {

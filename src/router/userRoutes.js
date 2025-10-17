@@ -38,7 +38,8 @@ const MyPageLayout = () => import('@/pages/user/mypage/MyPage.vue')
 const FaqPage = () => import('@/pages/user/cs/FaqPage.vue')
 const NoticePage = () => import('@/pages/user/cs/NoticePage.vue')
 const NoticeDetailPage = () => import('@/pages/user/cs/NoticeDetailPage.vue')
-const InquiryPage = () => import('@/pages/user/cs/InquiryPage.vue')
+const InquiryWritePage = () => import('@/pages/user/cs/InquiryWritePage.vue')
+const InquiryListPage = () => import('@/pages/user/cs/InquiryListPage.vue')
 
 const userRoutes = {
   path: '/',
@@ -184,9 +185,15 @@ const userRoutes = {
           component: NoticeDetailPage,
         },
         {
-          path: 'inquiry',
-          name: 'InquiryPage',
-          component: InquiryPage,
+          path: 'inquiry-write',
+          name: 'InquiryWritePage',
+          component: InquiryWritePage,
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'inquiry-list',
+          name: 'InquiryListPage',
+          component: InquiryListPage,
           meta: { requiresAuth: true },
         },
       ]

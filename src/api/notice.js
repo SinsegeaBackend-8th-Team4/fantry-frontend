@@ -17,7 +17,7 @@ export const searchNotices = (params) => {
         page: params.page > 0 ? params.page - 1 : 0, // API는 0-based page
         size: params.size,
         sort: params.sort,
-        type: params.type,
+        noticeTypeId: params.noticeTypeId,
         keyword: params.keyword,
     };
 

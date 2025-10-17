@@ -29,8 +29,8 @@
         </tr>
         <tr v-for="notice in notices" :key="notice.noticeId" @click="goToNoticeDetail(notice.noticeId)">
           <td>
-            <span class="notice-type">{{ notice.csType }}</span>
-            <p class="notice-title mb-0">{{ notice.title }}</p>
+            <span class="notice-type">{{ notice.noticeType }}</span>
+            <p class="notice-title mb-0">{{ notice.noticeType ? `(${notice.noticeType}) ` : '' }}{{ notice.title }}</p>
           </td>
           <td class="text-right notice-date">{{ formatDate(notice.createdAt) }}</td>
         </tr>
@@ -79,11 +79,16 @@ const fetchNotices = async () => {
     const params = {
       page: currentPage.value,
       size: 10,
-      csTypeId: currentType.value === 'ALL' ? null : noticeTypeMapping[currentType.value],
+      noticeTypeId: currentType.value === 'ALL' ? null : noticeTypeMapping[currentType.value],
     };
+    console.log('Notice API Request Params:', params);
     const response = await searchNotices(params);
+    console.log('Notice API Response:', response);
     notices.value = response.content;
     totalPages.value = response.totalPages;
+    notices.value.forEach(notice => {
+      console.log('Notice noticeType:', notice.noticeType);
+    });
   } catch (error) {
     console.error('공지사항을 불러오는 중 오류가 발생했습니다:', error);
     notices.value = [];
@@ -94,7 +99,7 @@ const fetchNotices = async () => {
 
 const changeType = (type) => {
   currentType.value = type;
-  currentPage.value = 1;
+  currentPage.value = 1; // 카테고리 변경 시 1페이지로 리셋
 };
 
 const changePage = (page) => {
@@ -102,14 +107,15 @@ const changePage = (page) => {
   currentPage.value = page;
 };
 
-const formatDate = (dateInput) => {
-  if (!dateInput) return '';
-  // Ensure the input is a string before splitting
-  const dateString = String(dateInput);
-  const datePart = dateString.split('T')[0];
-  return datePart.replace(/-/g, '.');
+// formatDate 함수 복원
+const formatDate = (dateArray) => {
+  if (!dateArray || !Array.isArray(dateArray)) return '';
+  const [year, month, day, hour, minute] = dateArray;
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${year}.${pad(month)}.${pad(day)} ${pad(hour)}:${pad(minute)}`;
 };
 
+// goToNoticeDetail 함수 복원
 const goToNoticeDetail = (id) => {
   router.push(`/cs/notice/${id}`);
 };
@@ -121,7 +127,6 @@ onMounted(() => {
 watch([currentType, currentPage], () => {
   fetchNotices();
 });
-
 </script>
 
 <style scoped>
