@@ -8,65 +8,8 @@
 body.admin-layout-active {
   // placeholder rule to avoid empty block lint error
   .admin-scope-initialized { display: none; }
-
-  // ===============================================================
-  // Sidebar Customization
-  // ===============================================================
-  .sidebar {
-    border-right: 1px solid #e3e6f0;
-
-    .sidebar-brand {
-        height: 6.5rem;
-        font-weight: 700;
-        font-size: 1.2rem;
-        color: #212529;
-    }
-
-    .nav-item {
-        .nav-link {
-            color: #5a5c69; // Default link color
-            font-weight: 500;
-            padding: 0.9rem 1rem;
-
-            i {
-                color: #858796; // Icon color
-            }
-
-            &:hover {
-                background-color: #f8f9fa;
-                color: #212529;
-                i {
-                    color: #212529;
-                }
-            }
-        }
-
-        // Active state
-        &.active .nav-link {
-            font-weight: 700;
-            color: #007bff; // Active link color
-            background-color: #f0f6ff;
-
-            i {
-                color: #007bff; // Active icon color
-            }
-        }
-
-        .collapse-inner .collapse-item {
-            &.active,
-            &:active {
-                font-weight: 600;
-                background-color: #f0f6ff;
-            }
-        }
-    }
-
-    .sidebar-heading {
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: #858796;
-    }
-  }
+  // 예시: 사이드바 커스터마이징 필요 시 아래 추가
+  //.sidebar { font-size: 0.95rem; }
 
   // ===============================================================
   // DataTables 공통 커스텀 스타일
