@@ -19,7 +19,7 @@ const router = createRouter({
 });
 
 // 전역 네비게이션 가드: 모든 페이지 이동 전에 실행됩니다.
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore();
   const uiStore = useUiStore();
 
@@ -27,8 +27,11 @@ router.beforeEach((to, from, next) => {
   uiStore.startLoading();
 
   // --- 개발 편의성을 위해 로그인 및 권한 검사 임시 비활성화 ---
+  // 토큰은 있지만 사용자 정보가 없는 경우 복구 시도
+  if(userStore.authToken && !userStore.currentUser) {
+    await userStore.fetchUser();
+  }
   
-  /*
   // 2. 인증이 필요한 페이지에 비로그인 상태로 접근하는 경우를 처리합니다.
   if (to.meta.requiresAuth && !userStore.isLoggedIn) {
     alert('로그인이 필요한 서비스입니다.');
@@ -42,7 +45,6 @@ router.beforeEach((to, from, next) => {
     alert('접근 권한이 없습니다.');
     return next('/'); // 메인 페이지로 리디렉션합니다.
   }
-  */
 
   // 4. 모든 검사를 통과한 경우, 요청된 라우트로 정상적으로 이동합니다.
   next();

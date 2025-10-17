@@ -44,8 +44,12 @@ export const useUserStore = defineStore('user', () => {
    * TODO: 실제 사용자 객체의 role 필드 등을 확인하도록 로직을 수정해야 합니다.
    */
   const isAdmin = computed(() => {
-    // 임시 로직: currentUser 객체가 있고, role이 'ADMIN'인 경우를 가정
-    return currentUser.value && currentUser.value.role === 'ADMIN';
+    // 관리자는 true, 일반 사용자는 false
+    if(currentUser.value?.role === 'ADMIN' || currentUser.value?.role === 'SADMIN'){
+      return true;
+    }else{
+      return false;
+    }
   });
 
 
