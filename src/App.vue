@@ -17,9 +17,15 @@ onMounted(() => {
   if(userStore.isLoggedIn || userStore.currentUser == null) {
     userStore.fetchUser();  //토큰 기반 유저 상태복구
   }
-});
+})
 
+onUnmounted(() => {
+  console.log('App onUnmounted')
 
+  if (userStore.currentUser) {
+    disconnectSse(userStore.currentUser.id)
+  }
+})
 </script>
 
 <template>
