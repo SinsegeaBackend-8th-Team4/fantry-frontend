@@ -35,6 +35,10 @@
     router.push('/login/find');
   }
 
+  const snsLogin = () => {
+    alert("현재 버전에서는 지원하지 않습니다. 일반 로그인을 진행해주세요.");
+  }
+
 </script>
 <template>
   <div class="login-page">
@@ -74,8 +78,8 @@
         <span>sns login</span>
       </div>
       <div class="sns-btns">
-        <button type="button" class="sns-btn naver" name="naver"></button>
-        <button type="button" class="sns-btn kakao" name="kakao"></button>
+        <button type="button" class="sns-btn naver" name="naver" @click="snsLogin"></button>
+        <button type="button" class="sns-btn kakao" name="kakao" @click="snsLogin"></button>
       </div>
     </div>
     <!--SNS Login End-->

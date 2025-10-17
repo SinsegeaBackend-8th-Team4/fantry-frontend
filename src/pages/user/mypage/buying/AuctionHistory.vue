@@ -111,7 +111,7 @@
       if (target) {
         const auctionId = target.dataset.auctionId;
         if (auctionId) {
-          router.push(`/product/auction/${auctionId}`);
+          router.push(`/product/${auctionId}`);
         }
       }
     });

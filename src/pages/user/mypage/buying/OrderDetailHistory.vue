@@ -74,7 +74,7 @@ const formatPrice = (price) => {
 
 const goToProductDetail = () => {
   if (orderData.value?.auctionId) {
-    router.push(`/product/auction/${orderData.value.auctionId}`);
+    router.push(`/product/${orderData.value.auctionId}`);
   }
 };
 
