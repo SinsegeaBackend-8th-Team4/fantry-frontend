@@ -200,7 +200,7 @@ onBeforeUnmount(() => {
     <div class="container-fluid">
       <div
         class="d-flex flex-column align-items-center justify-content-center"
-        style="min-height: 400px"
+        style="min-height: 100px"
       >
         <div class="spinner-border text-primary mb-3" role="status">
           <span class="sr-only">로딩 중...</span>

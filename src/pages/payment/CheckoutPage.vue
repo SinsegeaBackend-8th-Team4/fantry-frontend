@@ -144,7 +144,7 @@ onBeforeRouteLeave((to, _from, next) => {
     <div class="container-fluid">
       <div
         class="d-flex flex-column align-items-center justify-content-center"
-        style="min-height: 300px"
+        style="min-height: 100px"
       >
         <h1 class="hero-title mb-3">주문 최종 확인</h1>
         <p class="hero-subtitle">결제 전 주문 내용을 확인해주세요</p>
