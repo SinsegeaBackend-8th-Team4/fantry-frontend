@@ -1,5 +1,6 @@
 import { EventSourcePolyfill } from 'event-source-polyfill'
 import { apiClient } from './index.js'
+import { useUserStore } from '@/stores/userStore.js'
 
 /* ============================================================================
    Constants
@@ -89,6 +90,27 @@ const sseListeners = {
       sseCallbacks.onMessage(event.data)
     }
   },
+  onDenied: async (event) => {
+    try {
+      // 재발급 API 호출
+      const serverPath = import.meta.env.VITE_API_SERVER_URL
+      const currentToken = localStorage.getItem('accessToken')
+      const res = await axios.post(serverPath + '/api/reissue', null, {
+        withCredentials: true,
+        headers: currentToken ? { Authorization: `Bearer ${currentToken}` } : undefined,
+      })
+      const newAccessToken = res.headers.accesstoken || res.data
+
+      // 로컬 스토리지에 새로운 토큰 저장 + 큐 처리
+      localStorage.setItem('accessToken', newAccessToken)
+    } catch (error) {
+      try {
+        localStorage.removeItem('accessToken')
+      } catch (e) {
+        console.warn('Logout failed inside interceptor', e)
+      }
+    }
+  },
   onError: (event) => {
     if (import.meta.env.DEV && event.status) {
       console.error('[SSE] Error status:', event.status)
@@ -147,6 +169,7 @@ const removeListeners = () => {
   state.eventSource.removeEventListener('open', sseListeners.onOpen)
   state.eventSource.removeEventListener(SSE_EVENT_NAME, sseListeners.onMessage)
   state.eventSource.removeEventListener('error', sseListeners.onError)
+  state.eventSource.removeEventListener('auth-error', sseListeners.onDenied)
 }
 
 /**
@@ -183,6 +206,7 @@ const addEventListeners = (callbacks) => {
   state.eventSource.addEventListener('open', sseListeners.onOpen)
   state.eventSource.addEventListener(SSE_EVENT_NAME, sseListeners.onMessage)
   state.eventSource.addEventListener('error', sseListeners.onError)
+  state.eventSource.addEventListener('auth-error', sseListeners.onDenied)
 }
 
 /**
@@ -209,7 +233,7 @@ export const connectSse = (userId, callbacks = {}) => {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    heartbeatTimeout: 3600000, // 1시간
+    heartbeatTimeout: 2100000, // 35분
     withCredentials: true,
   })
 
