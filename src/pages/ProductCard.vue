@@ -72,7 +72,7 @@ const getThumbnailSrc = (thumbnailImageUrl) => {
       <div class="product-price">
         <span v-if="isAuction" class="price-label">현재가</span>
         <span class="price-value" :class="{ 'auction': isAuction }">
-          {{ formatPrice(isAuction ? item.currentPrice : item.price) }}
+          {{ formatPrice(item.currentPrice) }}
         </span>
       </div>
       <div v-if="isAuction" class="product-endtime">
