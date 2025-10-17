@@ -19,15 +19,19 @@ const router = createRouter({
 });
 
 // 전역 네비게이션 가드: 모든 페이지 이동 전에 실행됩니다.
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore();
   const uiStore = useUiStore();
 
   // 1. 페이지 이동 시작 시 로딩 인디케이터를 활성화합니다.
   uiStore.startLoading();
 
-  // --- 개발 편의성을 위해 로그인 및 권한 검사 활성화 ---
-
+  // --- 개발 편의성을 위해 로그인 및 권한 검사 임시 비활성화 ---
+  // 토큰은 있지만 사용자 정보가 없는 경우 복구 시도
+  if(userStore.authToken && !userStore.currentUser) {
+    await userStore.fetchUser();
+  }
+  
   // 2. 인증이 필요한 페이지에 비로그인 상태로 접근하는 경우를 처리합니다.
   if (to.meta.requiresAuth && !userStore.isLoggedIn) {
     alert('로그인이 필요한 서비스입니다.');

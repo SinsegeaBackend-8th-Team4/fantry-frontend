@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, onUnmounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 // 컴포넌트 Import
 import CommonHeader from '@/components/common/organisms/CommonHeader.vue';
 import CommonFooter from '@/components/common/organisms/CommonFooter.vue';
@@ -18,6 +18,7 @@ import '@/styles/scss/main-user.scss'; // User 전용 번들
 // Hooks & Stores 초기화
 const route = useRoute();
 const uiStore = useUiStore(); // HEAD
+const router = useRouter()
 const userStore = useUserStore(); // develop
 const notificationStore = useNotificationStore(); // develop
 
@@ -25,8 +26,12 @@ const notificationStore = useNotificationStore(); // develop
  * 검색 기능
  */
 const searchInput = ref(''); // 중복 제거
-const onSearch = (v) => { // 중복 제거
-  // TODO: 검색 기능 구현
+const onSearch = (keyword) => { // 중복 제거
+  if (keyword) {
+    router.push({ path: '/product', query: { keyword } })
+  } else {
+    router.push({ path: '/product' })
+  }
 };
 
 /**
