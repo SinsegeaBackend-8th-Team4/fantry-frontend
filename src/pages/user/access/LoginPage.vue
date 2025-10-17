@@ -19,7 +19,12 @@
       const response = await login(username.value, password.value);
       localStorage.setItem("accessToken", response.data.accessToken);
       userStore.setLoginInfo(response.data.tokenMemberResponse, response.data.accessToken);
-      router.push('/');
+      
+      if (userStore.isAdmin) {
+        router.push('/admin');
+      } else {
+        router.push('/');
+      }
     } catch (error) {
       alert(error.response.data.message);
       console.log("로그인결과: ", error);
