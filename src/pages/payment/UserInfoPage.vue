@@ -358,7 +358,7 @@ onBeforeUnmount(() => {
     <div class="container-fluid">
       <div
         class="d-flex flex-column align-items-center justify-content-center"
-        style="min-height: 300px"
+        style="min-height: 100px"
       >
         <h1 class="hero-title mb-3">주문 정보 입력</h1>
         <p class="hero-subtitle">배송을 위한 정보를 입력해주세요</p>
