@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, onUnmounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import CommonHeader from '@/components/common/organisms/CommonHeader.vue'
 import CommonFooter from '@/components/common/organisms/CommonFooter.vue'
 import SearchBar from '@/components/common/molecules/SearchBar.vue'
@@ -10,15 +10,20 @@ import { useNotificationStore } from '@/stores/notificationStore'
 import { useNotification } from '@/utils/notificationComposable'
 
 const route = useRoute()
+const router = useRouter()
 const userStore = useUserStore()
 const notificationStore = useNotificationStore()
 
 /**
- * 검색 기능 (현재 미구현)
+ * 검색 기능
  */
 const searchInput = ref('')
-const onSearch = (v) => {
-  // TODO: 검색 기능 구현
+const onSearch = (keyword) => {
+  if (keyword) {
+    router.push({ path: '/product', query: { keyword } })
+  } else {
+    router.push({ path: '/product' })
+  }
 }
 
 /**
