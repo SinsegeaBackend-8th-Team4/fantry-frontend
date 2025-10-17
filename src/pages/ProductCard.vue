@@ -71,11 +71,12 @@ const getThumbnailSrc = (thumbnailImageUrl) => {
       </div>
       <div class="product-price">
         <span v-if="isAuction" class="price-label">현재가</span>
+        <span v-else class="price-label">구매가</span>
         <span class="price-value" :class="{ 'auction': isAuction }">
           {{ formatPrice(item.currentPrice) }}
         </span>
       </div>
-      <div v-if="isAuction" class="product-endtime">
+      <div class="product-endtime">
         <i class="fa-regular fa-clock"></i>
         <span>{{ getTimeRemaining(item.endTime) }}</span>
       </div>
@@ -148,7 +149,6 @@ const getThumbnailSrc = (thumbnailImageUrl) => {
 }
 .product-price { margin-bottom: 8px; }
 .price-label { font-size: 12px; color: #666; margin-right: 4px; }
-.price-value { font-size: 18px; font-weight: 700; }
-.price-value.auction { color: #dc3545; }
+.price-value { font-size: 18px; font-weight: 700; color: #dc3545; }
 .product-endtime { font-size: 12px; color: #888; display: flex; align-items: center; gap: 4px; }
 </style>
