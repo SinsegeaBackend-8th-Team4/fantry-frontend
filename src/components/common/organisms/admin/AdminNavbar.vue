@@ -167,6 +167,13 @@
 
         <div class="topbar-divider d-none d-sm-block"></div>
 
+        <li class="nav-item">
+            <a class="nav-link" @click="goToMain" title="쇼핑몰 메인으로 이동" style="cursor: pointer;">
+                <i class="fas fa-home fa-fw"></i>
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small">쇼핑몰 메인</span>
+            </a>
+        </li>
+
         <!-- Nav Item - User Information -->
         <li class="nav-item dropdown no-arrow">
             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
@@ -228,5 +235,10 @@ const handleLogout = () => {
   }).catch(error => {
     console.error('로그아웃 에러 : ', error)
   });
+}
+
+// 쇼핑몰 메인으로 이동
+const goToMain = () => {
+  router.push('/');
 }
 </script>
