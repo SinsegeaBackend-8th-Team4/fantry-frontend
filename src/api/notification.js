@@ -313,7 +313,7 @@ export const connectSse = (userId, callbacks = {}) => {
 
   state.userId = userId
   state.isIntentionalClose = false
-  state.eventSource = new EventSourcePolyfill(`${baseURL}/api/notification/${userId}`, {
+  state.eventSource = new EventSourcePolyfill(`${baseURL}/api/notification/sse/${userId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
