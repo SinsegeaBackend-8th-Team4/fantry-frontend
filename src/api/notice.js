@@ -41,5 +41,6 @@ export const searchNotices = (params) => {
  * @returns {Promise<NoticeDetailResponse>}
  */
 export const getNoticeDetail = (noticeId) => {
+    console.log(`Fetching notice detail for ID: ${noticeId}`);
     return unwrap(apiClient.get(`/cs/notices/${noticeId}`));
 };
