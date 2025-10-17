@@ -4,7 +4,9 @@ import { getInspectionsByStatus } from '@/api/adminInspection'
 import { useAdminInspectionStore } from '@/stores/adminInspectionStore'
 import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue'
 import { currencyCol, dateCol } from '@/composables/useDataTableColumns'
+import { useAlertDialog } from '@/composables/useAlertDialog.js';
 
+const {showAlert} = useAlertDialog();
 const adminStore = useAdminInspectionStore()
 
 // 상태 변수
@@ -40,7 +42,7 @@ async function fetchInspections({ page, size, sort, keyword }) {
     }
   } catch (err) {
     console.error('2차 검수 목록 조회 실패:', err)
-    alert(err.message || '데이터를 불러오는 데 실패했습니다.')
+    showAlert('오류', err.message || '데이터를 불러오는 데 실패했습니다.')
     return { rows: [], total: 0 }
   } finally {
     loading.value = false
