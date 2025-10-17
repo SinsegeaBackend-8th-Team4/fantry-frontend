@@ -2,7 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import { useUiStore } from '@/stores/uiStore';
 import userRoutes from './userRoutes';
-import adminRoutes from './adminRoutes';
+import adminRoutes from '././adminRoutes';
+import { showAlert } from '@/composables/useAlertDialog';
 
 /**
  * Vue Router 설정의 중심 파일입니다.
@@ -47,14 +48,14 @@ export function setupRouter() {
 
         // 2. 인증이 필요한 페이지에 비로그인 상태로 접근하는 경우를 처리합니다.
         if (to.meta.requiresAuth && !userStore.isLoggedIn) {
-            alert('로그인이 필요한 서비스입니다.');
+            showAlert('알림', '로그인이 필요한 서비스입니다.');
             const loginPath = to.path.startsWith('/admin') ? '/admin/login' : '/login';
             return next(loginPath);
         }
 
         // 3. 관리자 페이지에 일반 사용자가 접근하는 경우를 처리합니다.
         if (to.meta.isAdmin && !userStore.isAdmin) {
-            alert('접근 권한이 없습니다.');
+            showAlert('경고', '접근 권한이 없습니다.');
             return next('/'); // 메인 페이지로 리디렉션합니다.
         }
 

@@ -282,12 +282,14 @@
     import { subscribe, unsubscribe, publish, disconnect, connect } from '@/services/websocketService';
     import { usePaymentStore } from '@/stores/paymentStore';
     import ProductAuctionPolicy from '@/components/product/ProductAuctionPolicy.vue'; // 경매 이용 안내 컴포넌트
+    import { useAlertDialog } from '@/composables/useAlertDialog';
 
     const route = useRoute();
     const router = useRouter();
     const userStore = useUserStore();
     const paymentStore = usePaymentStore();
     const auctionId = route.params.id;
+    const { showAlert: showAlertDialog } = useAlertDialog();
 
 /* =============================================
 * 2. 상태 (State)
@@ -580,7 +582,7 @@
     // 입찰 금액 서버로 전송 (로그인 상태 확인 포함)
     const sendBid = () => {
         if (!userStore.isLoggedIn) {
-            alert("로그인이 필요한 기능입니다.");
+            showAlertDialog("알림", "로그인이 필요한 기능입니다.");
             return;
         }
 
@@ -603,7 +605,7 @@
      */
     const purchaseNow = () => {
         if (!userStore.isLoggedIn) {
-            alert("로그인이 필요한 기능입니다.");
+            showAlertDialog("알림", "로그인이 필요한 기능입니다.");
             return;
         }
         paymentStore.setAuctionContext(auctionId);
@@ -615,7 +617,7 @@
      */
     const goToPayment = () => {
         if (!userStore.isLoggedIn) {
-            alert("로그인이 필요한 기능입니다.");
+            showAlertDialog("알림", "로그인이 필요한 기능입니다.");
             return;
         }
         paymentStore.setAuctionContext(auctionId);
@@ -628,23 +630,23 @@
         const numericStartPrice = auction.value.price;
 
         if (isNaN(newBid) || newBid <= 0 || newBid % 100 !== 0) {
-            alert("입찰 금액을 100원 단위의 올바른 숫자로 입력해주세요.");
+            showAlertDialog("알림", "입찰 금액을 100원 단위의 올바른 숫자로 입력해주세요.");
             return;
         }
 
         if(newBid > 200000000){
-            alert("입찰 금액은 최대 2억원까지만 가능합니다.");
+            showAlertDialog("알림", "입찰 금액은 최대 2억원까지만 가능합니다.");
             return;
         }
         
         if (numericCurrentPrice === numericStartPrice) {
             if (newBid <= numericStartPrice) {
-                alert(`입찰 금액은 시작가(${formattedStartPrice.value})보다 높아야 합니다.`);
+                showAlertDialog("알림", `입찰 금액은 시작가(${formattedStartPrice.value})보다 높아야 합니다.`);
                 return;
             }
         } else {
             if (newBid < numericCurrentPrice + 1000) {
-                alert(`입찰 금액은 현재가(${formattedCurrentPrice.value})보다 1,000원 이상 높아야 합니다.`);
+                showAlertDialog("알림", `입찰 금액은 현재가(${formattedCurrentPrice.value})보다 1,000원 이상 높아야 합니다.`);
                 return;
             }
         }
@@ -701,7 +703,7 @@
     const openBidModal = () => {
         // 경매 상태 선제적 확인
         if (!['ACTIVE', 'REACTIVE'].includes(auction.value.saleStatus) || isAuctionEnded.value) {
-            alert("경매가 진행중인 상품이 아닙니다.");
+            showAlertDialog("알림", "경매가 진행중인 상품이 아닙니다.");
             // 최신 상태를 보여주기 위해 데이터 갱신
             fetchAuctionData();
             return;

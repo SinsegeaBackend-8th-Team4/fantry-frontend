@@ -92,9 +92,11 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { createInquiry, getMyInquiryList, addInquiryAttachments } from '@/api/inquiry';
 import { useUiStore } from '@/stores/uiStore'; // Import useUiStore
+import { useAlertDialog } from '@/composables/useAlertDialog';
 
 const router = useRouter();
 const uiStore = useUiStore(); // Initialize uiStore
+const { showAlert: showAlertDialog } = useAlertDialog();
 
 const newInquiry = ref({
   csTypeId: '',
@@ -201,7 +203,7 @@ const submitInquiry = async () => {
       await addInquiryAttachments(createdInquiry.inquiryId, formData);
     }
 
-    alert('문의가 성공적으로 등록되었습니다.');
+    showAlertDialog('성공', '문의가 성공적으로 등록되었습니다.');
     // 폼 초기화 및 리디렉션
     newInquiry.value = { csTypeId: '', title: '', content: '' };
     selectedFiles.value = [];
@@ -216,7 +218,7 @@ const submitInquiry = async () => {
 
   } catch (error) {
     console.error('문의 등록 또는 파일 첨부 중 오류가 발생했습니다:', error);
-    alert('문의 등록 또는 파일 첨부에 실패했습니다.');
+    showAlertDialog('오류', '문의 등록 또는 파일 첨부에 실패했습니다.');
   } finally {
     uiStore.stopLoading();
   }
