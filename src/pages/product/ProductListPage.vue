@@ -26,7 +26,7 @@
           <div class="product-card" @click="goToProductDetail(auction.auctionId)">
             <!-- 이미지 및 뱃지 -->
             <div class="product-image-container" :class="{ 'instant-buy-border': auction.saleType === 'INSTANT_BUY', 'auction-border': auction.saleType === 'AUCTION' }">
-              <img :src="getThumbnailSrc(auction.fileInfos[0]?.fileUrl)" alt="상품 썸네일" class="product-image">
+              <img :src="getThumbnailSrc(auction.fileInfos[1]?.fileUrl)" alt="상품 썸네일" class="product-image">
               <span v-if="auction.saleType === 'AUCTION'" class="badge bg-danger product-badge">경매 상품</span>
               <span v-else-if="auction.saleType === 'INSTANT_BUY'" class="badge bg-primary product-badge">일반 판매</span>
             </div>
