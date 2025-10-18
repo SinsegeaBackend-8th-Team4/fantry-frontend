@@ -7,6 +7,7 @@ import { debounce } from 'lodash-es';
 
 const router = useRouter();
 const table = ref(null);
+const loading = ref(false); // loading ref 추가
 
 // --- 필터링 & 검색 관련 상태 ---
 const tableKey = ref(0);
@@ -148,6 +149,10 @@ function attachClickHandlers() {
 onMounted(() => {
   console.log('AdminReturnListPage mounted. Columns:', columns);
   console.log('AdminReturnListPage mounted. Keyword:', keyword.value);
+  console.log('AdminReturnListPage: loading prop for ServerDataTable:', loading.value);
+  if (table.value) {
+    table.value.load(); // ServerDataTable의 load 함수 명시적 호출
+  }
 });
 </script>
 
@@ -194,6 +199,7 @@ onMounted(() => {
           search-placeholder="구매자 이름으로 검색"
           :columns="columns"
           :fetcher="fetcher"
+          :loading="loading"
           @loaded="attachClickHandlers"
         >
           <template #empty>현재 조건에 해당하는 환불/반품 내역이 없습니다.</template>
