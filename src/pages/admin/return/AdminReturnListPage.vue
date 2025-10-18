@@ -54,7 +54,7 @@ async function fetcher({ page, size, sort }) {
 const columns = [
   {
     data: 'returnRequestId',
-    title: '#',
+    title: '요청 ID',
     className: 'text-center',
   },
   {
@@ -104,7 +104,18 @@ const columns = [
       return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
   },
-];
+  {
+    data: null,
+    title: '관리',
+    className: 'text-center',
+    sortable: false,
+    render: (data, type, row) => {
+      return `<button class="btn btn-outline-info btn-sm detail-link" data-detail-id="${row.returnRequestId}">상세 보기</button>`;
+    }
+  }
+].map(col => ({...col,
+    className: 'text-center',
+  }));
 
 // 주문 상세 페이지로 이동
 function goToOrderDetail(orderId) {
