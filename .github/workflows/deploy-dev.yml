@@ -8,13 +8,16 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
+    
+    # [ ✨ 수정 ] 올바른 env 블록 문법을 사용합니다.
     env:
-      BOOTPAY_ID: ${{ secrets.BOOT_PAY_APP_ID }}
-    steps:
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20.19.0' # 또는 22.12.0 이상
+      # [ ✨ 수정 ] 스크립트가 기대하는 이름(BOOTPAY_APPLICATION_ID)으로 시크릿을 전달합니다.
+      SECRET_BOOTPAY_APPLICATION_ID: ${{ secrets.BOOT_PAY_APP_ID }}
+      # 여기에 다른 프론트엔드 시크릿들도 추가하면 됩니다.
+      # 예: SECRET_KAKAO_API_KEY: ${{ secrets.KAKAO_API_KEY }}
 
+    steps:
       - name: Execute frontend deployment script
+        # [ ✨ 수정 ] 'dev' 환경에 맞는 스크립트를 실행합니다.
         run: ~/scripts/deploy-frontend-dev.sh
+        # [ ✨ 수정 ] run 명령어에서는 with 블록을 사용하지 않으므로 삭제합니다.
