@@ -94,16 +94,7 @@ const columns = [
     className: 'text-center',
     render: (val) => {
       if (!val || !Array.isArray(val)) return '-';
-      const dt = new Date(val[0], val[1] - 1, val[2], val[3], val[4], val[5] || 0);
-      
-      const year = dt.getFullYear();
-      const month = String(dt.getMonth() + 1).padStart(2, '0');
-      const day = String(dt.getDate()).padStart(2, '0');
-      const hours = String(dt.getHours()).padStart(2, '0');
-      const minutes = String(dt.getMinutes()).padStart(2, '0');
-      const seconds = String(dt.getSeconds()).padStart(2, '0');
-
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      return `${val[0]}-${String(val[1]).padStart(2, '0')}-${String(val[2]).padStart(2, '0')} ${String(val[3]).padStart(2, '0')}:${String(val[4]).padStart(2, '0')}:${String(val[5] || 0).padStart(2, '0')}`;
     }
   },
   {
