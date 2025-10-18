@@ -7,8 +7,6 @@
     "node": "^20.19.0 || >=22.12.0"
   },
   "scripts": {
-    "dev": "node scripts/env-check.development.js && vite",
-    "build": "node scripts/env-check.production.js && vite build",
     "preview": "vite preview",
     "format": "prettier --write src/"
   },
