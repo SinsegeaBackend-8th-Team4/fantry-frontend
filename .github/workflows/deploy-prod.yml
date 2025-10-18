@@ -9,7 +9,7 @@ jobs:
   deploy:
     runs-on: self-hosted
     env:
-      BOOTPAY_ID: ${{ secrets.BOOT_PAY_APP_ID }}
+      SECRET_BOOTPAY_APPLICATION_ID: ${{ secrets.BOOT_PAY_APP_ID }}
     steps:
       - name: Execute frontend deployment script
         run: ~/scripts/deploy-frontend-prod.sh
