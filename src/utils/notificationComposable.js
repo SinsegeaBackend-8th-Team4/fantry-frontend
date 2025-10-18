@@ -263,6 +263,13 @@ export function useNotification(userStore, useNotificationStore) {
     }
   }
 
+  const subscribeAuction = async (auctionId) => {
+    if (!useNotificationStore.isIncludeAuction(auctionId)) {
+      useNotificationStore.addAuction(auctionId)
+      await subscribe(userStore.currentUser.id, auctionId)
+    }
+  }
+
   /**
    * Service Worker를 등록합니다.
    */
@@ -341,5 +348,6 @@ export function useNotification(userStore, useNotificationStore) {
   return {
     initNotification,
     setupNotification,
+    subscribeAuction,
   }
 }
