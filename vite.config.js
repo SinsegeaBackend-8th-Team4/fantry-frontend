@@ -7,12 +7,25 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   // .env 파일을 명시적으로 불러옵니다.
-  // 서버에서는 .env.local 파일이 우선적으로 로드됩니다.
   const env = loadEnv(mode, process.cwd(), '')
 
-  // [ ✨ 추가된 부분 ]
+  // ===================================================================
+  // ✨ [추가된 부분] 자기 검증 및 디버깅 로직
+  // ===================================================================
+  console.log('--- [Vite Config] Attempting to load .env variables ---')
+  console.log('Loaded variables:', env)
+  console.log('----------------------------------------------------')
+
+  // 빌드를 시작하기 전에, 필수 환경변수가 실제로 로드되었는지 확인합니다.
+  if (!env.VITE_BOOTPAY_APPLICATION_ID) {
+    // 만약 ID가 없다면, 더 이상 진행하지 않고 여기서 즉시 에러를 발생시킵니다.
+    throw new Error(
+      '[FATAL VITE CONFIG ERROR] VITE_BOOTPAY_APPLICATION_ID was not found! Check if the .env.local file is being created correctly before the build starts.',
+    )
+  }
+  // ===================================================================
+
   // Vite의 'define' 옵션을 사용하기 위해 환경변수 객체를 재가공합니다.
-  // 'import.meta.env.VITE_SOME_KEY'를 실제 값으로 교체하도록 만듭니다.
   const processEnv = {}
   for (const key in env) {
     if (key.startsWith('VITE_')) {
@@ -36,7 +49,6 @@ export default defineConfig(({ mode }) => {
       },
     },
     define: {
-      // [ ✨ 수정된 부분 ]
       // 위에서 가공한 환경변수 객체를 주입하여 빌드 시 강제로 값을 포함시킵니다.
       ...processEnv,
       global: 'window',
