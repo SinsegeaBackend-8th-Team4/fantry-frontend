@@ -282,12 +282,15 @@
     import { subscribe, unsubscribe, publish, disconnect, connect } from '@/services/websocketService';
     import { usePaymentStore } from '@/stores/paymentStore';
     import ProductAuctionPolicy from '@/components/product/ProductAuctionPolicy.vue'; // 경매 이용 안내 컴포넌트
+    import { useNotification } from '@/utils/notificationComposable';
+    import { useNotificationStore } from '@/stores/notificationStore';
     import { useAlertDialog } from '@/composables/useAlertDialog';
 
     const route = useRoute();
     const router = useRouter();
     const userStore = useUserStore();
     const paymentStore = usePaymentStore();
+    const notificationComposable = useNotification(userStore, useNotificationStore());
     const auctionId = route.params.id;
     const { showAlert: showAlertDialog } = useAlertDialog();
 
@@ -654,6 +657,7 @@
         const isConfirmed = confirm(`${newBid.toLocaleString()}원 입찰하시겠습니까?`);
 
         if (isConfirmed) {
+            notificationComposable.subscribeAuction(auctionId)
             sendBid();
         }
  	  };
