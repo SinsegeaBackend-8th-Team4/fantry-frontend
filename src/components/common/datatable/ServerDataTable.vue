@@ -26,34 +26,18 @@ const sort = ref({ column: null, dir: null });
 const totalPages = computed(() => Math.max(1, Math.ceil(total.value / props.pageSize)));
 
 async function load() {
-  console.log('ServerDataTable load() called');
-  console.log('ServerDataTable load() - after initial log');
-  // if (props.loading) {
-  //   console.log('ServerDataTable load() skipped due to props.loading');
-  //   return; // 외부 제어 우선
-  // }
-  if (!props.fetcher || typeof props.fetcher !== 'function') {
-    console.error('ServerDataTable: fetcher prop is not a function', props.fetcher);
-    error.value = new Error('Fetcher prop is not a function');
-    return;
-  }
   try {
     loading.value = true;
-    error.value = null; // Clear previous errors
-    console.log('Before calling fetcher');
     const { rows: r, total: t } = await props.fetcher({
       page: page.value,
       size: props.pageSize,
       sort: sort.value.column ? `${sort.value.column},${sort.value.dir}` : undefined,
       keyword: props.keyword || undefined
     });
-    console.log('After calling fetcher');
     rows.value = r;
     total.value = t;
     emit('loaded', { rows: r, total: t });
   } catch (e) {
-    console.error('Error in ServerDataTable load():', e);
-    error.value = e;
     emit('error', e);
   } finally {
     loading.value = false;
@@ -87,46 +71,6 @@ function sortIndicator(col) {
   if (sort.value.column !== col.data) return '';
   return sort.value.dir === 'asc' ? '▲' : '▼';
 }
-
-const tableRef = ref();
-const slots = defineSlots();
-
-/**
- * DataTables draw 완료 후 custom cell 슬롯 마운트
- */
-function hydrateSlots() {
-  if (!tableRef.value) return;
-  const rootEl = tableRef.value.$el || tableRef.value;
-  const placeholders = rootEl.querySelectorAll('[data-dt-slot]');
-  placeholders.forEach(ph => {
-    const slotName = ph.getAttribute('data-dt-slot');
-    const rowIndex = Number(ph.getAttribute('data-row-index'));
-    const rowData = rows.value[rowIndex];
-    // Vue 동적 마운트: 간단히 innerHTML 교체 (복잡 슬롯은 추후 Portal 고려)
-    // 여기서는 단순 text/HTML 템플릿만 권장
-    const vnode = slots[slotName]?.({ value: rowData[slotName.replace('cell-','')], row: rowData });
-    if (Array.isArray(vnode) && vnode.length) {
-      // vnode[0].children 가 문자열/배열일 수 있음 -> toString fallback
-      const content = vnode.map(v => (v.children ?? '')).join('');
-      ph.innerHTML = content;
-    }
-  });
-}
-
-// DataTables 후킹: 간단히 MutationObserver 사용 (최소 구현)
-const observer = new MutationObserver(() => hydrateSlots());
-function observe() {
-  const el = tableRef.value?.$el || tableRef.value;
-  if (!el) return;
-  const tbody = el.querySelector('tbody');
-  if (tbody) observer.observe(tbody, { childList: true, subtree: true });
-}
-
-onMounted(() => {
-  setTimeout(() => { hydrateSlots(); observe(); }, 50);
-});
-
-// Added a comment to trigger re-compilation
 </script>
 
 <template>
