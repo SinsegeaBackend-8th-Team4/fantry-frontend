@@ -26,6 +26,7 @@ const sort = ref({ column: null, dir: null });
 const totalPages = computed(() => Math.max(1, Math.ceil(total.value / props.pageSize)));
 
 async function load() {
+  console.log('ServerDataTable load() called');
   try {
     loading.value = true;
     const { rows: r, total: t } = await props.fetcher({
