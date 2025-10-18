@@ -1,4 +1,4 @@
-// src/dashboard.js
+// src/api/dashboard.js
 import { apiClient } from './index';
 import { unwrap } from './InspectionHelper'; // InspectionHelper는 API 응답을 처리하는 유틸리티로 가정
 
@@ -12,7 +12,7 @@ import { unwrap } from './InspectionHelper'; // InspectionHelper는 API 응답�
  * @returns {Promise<DashboardStats>}
  */
 export const getIntegratedDashboardStats = () => {
-  return unwrap(apiClient.get('/dashboard/integrated'));
+  return unwrap(apiClient.get('/admin/dashboard/integrated'));
 };
 
 /**
@@ -21,7 +21,7 @@ export const getIntegratedDashboardStats = () => {
  * @returns {Promise<MemberDashboardStats>}
  */
 export const getMemberDashboardStats = () => {
-  return unwrap(apiClient.get('/dashboard/members'));
+  return unwrap(apiClient.get('/admin/dashboard/members'));
 };
 
 /**
@@ -30,7 +30,7 @@ export const getMemberDashboardStats = () => {
  * @returns {Promise<OrdersStats>}
  */
 export const getOrderDashboardStats = () => {
-  return unwrap(apiClient.get('/dashboard/orders'));
+  return unwrap(apiClient.get('/admin/dashboard/orders'));
 };
 
 /**
@@ -39,7 +39,7 @@ export const getOrderDashboardStats = () => {
  * @returns {Promise<SalesStats>}
  */
 export const getSalesDashboardStats = () => {
-  return unwrap(apiClient.get('/dashboard/sales'));
+  return unwrap(apiClient.get('/admin/dashboard/sales'));
 };
 
 /**
@@ -48,7 +48,7 @@ export const getSalesDashboardStats = () => {
  * @returns {Promise<BidStats>}
  */
 export const getBidDashboardStats = () => {
-  return unwrap(apiClient.get('/dashboard/bids'));
+  return unwrap(apiClient.get('/admin/dashboard/bids'));
 };
 
 /**
@@ -57,7 +57,7 @@ export const getBidDashboardStats = () => {
  * @returns {Promise<InspectionStats>}
  */
 export const getInspectionDashboardStats = () => {
-  return unwrap(apiClient.get('/dashboard/inspections'));
+  return unwrap(apiClient.get('/admin/dashboard/inspections'));
 };
 
 /**
@@ -66,7 +66,7 @@ export const getInspectionDashboardStats = () => {
  * @returns {Promise<CatalogDashboardStats>}
  */
 export const getCatalogDashboardStats = () => {
-  return unwrap(apiClient.get('/dashboard/catalogs-overview'));
+  return unwrap(apiClient.get('/admin/dashboard/catalogs-overview'));
 };
 
 /**
@@ -75,7 +75,7 @@ export const getCatalogDashboardStats = () => {
  * @returns {Promise<CSDashboardStats>}
  */
 export const getCSDashboardStats = () => {
-  return unwrap(apiClient.get('/dashboard/cs'));
+  return unwrap(apiClient.get('/admin/dashboard/cs'));
 };
 
 /**
@@ -84,5 +84,5 @@ export const getCSDashboardStats = () => {
  * @returns {Promise<FinanceOperationsDashboardStats>}
  */
 export const getFinanceOperationsDashboardStats = () => {
-  return unwrap(apiClient.get('/dashboard/finance-operations'));
+  return unwrap(apiClient.get('/admin/dashboard/finance-operations'));
 };

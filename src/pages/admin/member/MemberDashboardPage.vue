@@ -9,14 +9,14 @@
     <div v-else-if="stats">
       <!-- 요약 카드 -->
       <div class="row">
-        <!-- 총 계정 수 -->
+        <!-- 총 회원 수 -->
         <div class="col-xl-3 col-md-6 mb-4">
           <div class="card border-left-primary shadow h-100 py-2">
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
-                  <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">총 계정 수</div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.accountStats?.totalAccounts?.toLocaleString() || '0' }}</div>
+                  <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">총 회원 수</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.memberStats?.totalMembers?.toLocaleString() || '0' }}</div>
                 </div>
                 <div class="col-auto">
                   <i class="fas fa-users fa-2x text-gray-300"></i>
@@ -26,34 +26,17 @@
           </div>
         </div>
 
-        <!-- 활성 계정 수 -->
+        <!-- 오늘 가입한 회원 수 -->
         <div class="col-xl-3 col-md-6 mb-4">
           <div class="card border-left-success shadow h-100 py-2">
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
-                  <div class="text-xs font-weight-bold text-success text-uppercase mb-1">활성 계정 수</div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.accountStats?.activeAccounts?.toLocaleString() || '0' }}</div>
+                  <div class="text-xs font-weight-bold text-success text-uppercase mb-1">오늘 가입한 회원</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.memberStats?.todayRegisteredMembers?.toLocaleString() || '0' }}</div>
                 </div>
                 <div class="col-auto">
-                  <i class="fas fa-user-check fa-2x text-gray-300"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 비활성 계정 수 -->
-        <div class="col-xl-3 col-md-6 mb-4">
-          <div class="card border-left-warning shadow h-100 py-2">
-            <div class="card-body">
-              <div class="row no-gutters align-items-center">
-                <div class="col mr-2">
-                  <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">비활성 계정 수</div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.accountStats?.inactiveAccounts?.toLocaleString() || '0' }}</div>
-                </div>
-                <div class="col-auto">
-                  <i class="fas fa-user-slash fa-2x text-gray-300"></i>
+                  <i class="fas fa-user-plus fa-2x text-gray-300"></i>
                 </div>
               </div>
             </div>
@@ -76,10 +59,7 @@
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- 추가적인 신고 통계 카드 -->
-      <div class="row">
         <!-- 해결된 신고 건수 -->
         <div class="col-xl-3 col-md-6 mb-4">
           <div class="card border-left-success shadow h-100 py-2">
@@ -130,10 +110,16 @@ const error = ref(null);
 const fetchMemberDashboardStats = async () => {
   loading.value = true;
   try {
+    console.log('API 호출 시작');
     const response = await getMemberDashboardStats();
-    stats.value = response;
+    console.log('회원 대시보드 API 응답:', response);
+    stats.value = {
+      memberStats: response.memberStats || {},
+      reportStats: response.reportStats || {},
+    };
   } catch (e) {
     console.error('회원 대시보드 데이터 조회 실패:', e);
+    console.error('API 호출 실패:', e);
     error.value = '데이터를 불러오는 데 실패했습니다.';
   } finally {
     loading.value = false;
