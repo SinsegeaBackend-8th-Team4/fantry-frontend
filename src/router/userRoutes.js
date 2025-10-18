@@ -166,6 +166,12 @@ const userRoutes = {
       meta: { requiresAuth: true },
     },
     {
+      path: 'mypage/refund/:orderId',
+      name: 'RefundRequest',
+      component: () => import('@/pages/user/mypage/refund/RefundRequestPage.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: 'cs',
       component: CSPageLayout,
       redirect: '/cs/notice',

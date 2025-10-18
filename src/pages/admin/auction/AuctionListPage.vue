@@ -40,6 +40,8 @@
     import { getAuctionList, getAuctionDetails } from '@/api/auction';
     import { productNameFormatter } from '@/utils/tableFormatters';
     
+    import { debounce } from 'lodash-es';
+    
     import { useAlertDialog } from '@/composables/useAlertDialog';
     
     const router = useRouter();
@@ -183,9 +185,9 @@
       }
     });
     
-    watch([saleType, saleStatus], () => {
+    watch([saleType, saleStatus], debounce(() => {
       tableKey.value++;
-    });
+    }, 300));
 const parseJavaLocalDateTime = (dt) => {
     if (!Array.isArray(dt) || dt.length < 5) {
         return null; 
