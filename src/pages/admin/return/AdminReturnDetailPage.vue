@@ -72,13 +72,13 @@ async function confirmReject() {
 }
 
 // 차감 배송비 업데이트
-async function updateDeductedShippingFee() {
-  if (!confirm(`차감 배송비를 ${deductedShippingFeeInput.value.toLocaleString()}원(으)로 저장하시겠습니까?`)) return;
+  async function updateDeductedShippingFee() {  if (!confirm(`차감 배송비를 ${deductedShippingFeeInput.value.toLocaleString()}원(으)로 저장하시겠습니까?`)) return;
 
   loading.value = true;
   try {
     const payload = {
       status: returnRequest.value.status, // 현재 상태 유지
+    };
     await updateAdminReturnRequestStatus(returnRequestId.value, payload);
     showAlertDialog('성공', '차감 배송비가 성공적으로 저장되었습니다.');
     await fetchReturnDetail(); // 정보 새로고침
