@@ -11,14 +11,16 @@ function createEnvFile(fileName) {
   const envPath = path.join(projectRoot, fileName)
 
   if (fs.existsSync(envPath)) {
-    // 파일이 존재하면 내용을 읽어서 키 존재 여부 확인
-    const content = fs.readFileSync(envPath, 'utf-8')
+    // 파일이 존재하면 내용을 읽어서 VITE_BOOTPAY_APPLICATION_ID 라인 삭제
+    let content = fs.readFileSync(envPath, 'utf-8')
+    const lines = content.split('\n')
+    const filteredLines = lines.filter(
+      (line) => !line.includes('VITE_BOOTPAY_APPLICATION_ID')
+    )
 
-    // VITE_BOOTPAY_APPLICATION_ID 키가 없으면 추가
-    if (!content.includes('VITE_BOOTPAY_APPLICATION_ID')) {
-      const newLine = `\nVITE_BOOTPAY_APPLICATION_ID = ${bootpayAppId || ''}\n`
-      fs.appendFileSync(envPath, newLine)
-    }
+    // VITE_BOOTPAY_APPLICATION_ID 추가
+    filteredLines.push(`VITE_BOOTPAY_APPLICATION_ID=${bootpayAppId || ''}`)
+    fs.writeFileSync(envPath, filteredLines.join('\n'))
     return
   }
 
@@ -26,7 +28,7 @@ function createEnvFile(fileName) {
   # Auto-generated on ${new Date().toLocaleString()}
 
   # API Configuration
-  VITE_BOOTPAY_APPLICATION_ID = ${bootpayAppId || ''}
+  VITE_BOOTPAY_APPLICATION_ID=${bootpayAppId || ''}
   `
   fs.writeFileSync(envPath, defaultContent)
 }
