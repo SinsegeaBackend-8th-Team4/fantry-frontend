@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick } from 'vue'; // nextTick 임포트
+import { ref, nextTick, onMounted } from 'vue'; // nextTick, onMounted 임포트
 import { useRouter } from 'vue-router';
 import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
 import { getAdminReturnRequests } from '@/api/adminReturn.js';
