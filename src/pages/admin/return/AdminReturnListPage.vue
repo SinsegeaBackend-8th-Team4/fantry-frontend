@@ -2,7 +2,7 @@
 import { ref, nextTick } from 'vue'; // nextTick 임포트
 import { useRouter } from 'vue-router';
 import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
-import { getAdminReturnList } from '@/api/adminReturn.js';
+import { getAdminReturnRequests } from '@/api/adminReturn.js';
 import { debounce } from 'lodash-es';
 
 const router = useRouter();
@@ -43,7 +43,7 @@ async function fetcher({ page, size, sort }) {
     status: currentStatusFilter.value,
     buyerName: keyword.value || null,
   };
-  const response = await getAdminReturnList(params);
+  const response = await getAdminReturnRequests(params);
   return {
     rows: response.data.content,
     total: response.data.totalElements,
