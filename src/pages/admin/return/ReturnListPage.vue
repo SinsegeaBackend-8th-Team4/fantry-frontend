@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
 import { getAdminReturnList } from '@/api/adminReturn.js';
+import { debounce } from 'lodash-es';
 
 const router = useRouter();
 const table = ref(null);
@@ -11,6 +12,10 @@ const table = ref(null);
 const tableKey = ref(0);
 const keyword = ref(''); // buyerName 검색어
 const currentStatusFilter = ref(null);
+
+// Debounce 적용
+const triggerRefresh = () => tableKey.value++;
+const debouncedRefresh = debounce(triggerRefresh, 300);
 
 // 상태 필터 버튼 목록 정의 (api.md 기반)
 const statusFilters = [
@@ -23,6 +28,11 @@ const statusFilters = [
   { label: '완료됨', value: 'COMPLETED' },
   { label: '사용자 취소', value: 'USER_CANCELLED' },
 ];
+
+function handleStatusFilterClick(value) {
+  currentStatusFilter.value = value;
+  debouncedRefresh();
+}
 
 // --- API ---
 async function fetcher({ page, size, sort }) {
@@ -112,7 +122,7 @@ function goToDetail(returnRequestId) {
                 type="button"
                 class="btn btn-outline-secondary"
                 :class="{ active: currentStatusFilter === filter.value }"
-                @click="currentStatusFilter = filter.value; tableKey++;"
+                @click="handleStatusFilterClick(filter.value)"
               >
                 {{ filter.label }}
               </button>

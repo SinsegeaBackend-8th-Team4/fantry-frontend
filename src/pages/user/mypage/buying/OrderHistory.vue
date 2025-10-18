@@ -222,7 +222,7 @@
       if (refundLink) {
         const orderId = refundLink.dataset.orderId;
         if (orderId) {
-          router.push(`/refund/${orderId}`);    //서버 주소 변경
+          router.push({ name: 'RefundRequest', params: { orderId } });
         }
       }
     });

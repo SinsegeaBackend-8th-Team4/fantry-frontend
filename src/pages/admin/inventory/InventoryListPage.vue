@@ -7,6 +7,8 @@ import { currencyCol } from '@/composables/useDataTableColumns'
 import { useRouter } from 'vue-router'
 import { useAlertDialog } from '@/composables/useAlertDialog';
 
+import { debounce } from 'lodash-es';
+
 const router = useRouter()
 const { showAlert: showAlertDialog } = useAlertDialog();
 
@@ -16,6 +18,10 @@ const keyword = ref('')
 const tableKey = ref(0)
 const allStatuses = ['PENDING_REGIST', 'PENDING_ACTIVE', 'ACTIVE', 'SOLD', 'NOT_SOLD', 'CANCELED', 'REACTIVE'];
 const currentFilter = ref(allStatuses) // 기본값: 전체
+
+// Debounce 적용
+const triggerRefresh = () => tableKey.value++;
+const debouncedRefresh = debounce(triggerRefresh, 300);
 
 // 필터 목록
 const filters = [
@@ -174,7 +180,7 @@ const columns = computed(() => [
 // 필터 변경 시 테이블 리로드
 function changeFilter(statuses) {
   currentFilter.value = statuses
-  tableKey.value++
+  debouncedRefresh()
 }
 
 // 이벤트 위임을 통해 동적 버튼 클릭 처리

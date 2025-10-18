@@ -6,7 +6,7 @@
   </div>
   <div v-else-if="inquiry" class="notice-detail-container">
     <div class="notice-header">
-      <p class="notice-type mb-2">{{ inquiry.csType }}</p>
+      <p class="notice-type mb-2">{{ inquiry.csType ? inquiry.csType.name : 'N/A' }}</p>
       <h2 class="notice-title">{{ inquiry.title }}</h2>
       <div class="notice-meta">
         <span>{{ inquiry.inquiredByName }}</span>

@@ -10,12 +10,20 @@ import AdminLayout from '@/layouts/AdminLayout.vue'
 import AdminContentLayout from '@/pages/admin/AdminContentLayout.vue'
 
 // --- 페이지 컴포넌트 (Lazy Loading) ---
-
 // 대시보드
 const MainDashboardPage = () => import('@/pages/admin/dashboard/MainDashboardPage.vue')
+const MemberDashboardPage = () => import('@/pages/admin/member/MemberDashboardPage.vue')
+const InventoryDashboardPage = () => import('@/pages/admin/inventory/InventoryDashboardPage.vue')
+const SalesDashboardPage = () => import('@/pages/admin/auction/SalesDashboardPage.vue') // 판매 관리 대시보드
+const OrderDashboardPage = () => import('@/pages/admin/order/OrderDashboardPage.vue')
+const BidDashboardPage = () => import('@/pages/admin/bid/BidDashboardPage.vue')
+const InspectionDashboardPage = () => import('@/pages/admin/inspection/InspectionDashboardPage.vue')
+const CatalogDashboardPage = () => import('@/pages/admin/catalog/CatalogDashboardPage.vue')
+const CSDashboardPage = () => import('@/pages/admin/cs/CSDashboardPage.vue')
+const SettlementDashboardPage = () => import('@/pages/admin/settlement/SettlementDashboardPage.vue')
+
 
 // 정산 관리
-const SettlementDashboardPage = () => import('@/pages/admin/settlement/SettlementDashboardPage.vue')
 const SettlementListPage = () => import('@/pages/admin/settlement/SettlementListPage.vue')
 const SettlementSettingPage = () => import('@/pages/admin/settlement/SettlementSettingPage.vue') // 새로 추가
 
@@ -25,7 +33,6 @@ const AdminReturnDetailPage = () => import('@/pages/admin/return/AdminReturnDeta
 const AdminReturnCreatePage = () => import('@/pages/admin/return/AdminReturnCreatePage.vue') // 새로 추가
 
 // CS 관리
-const InquiryDashboardPage = () => import('@/pages/admin/cs/InquiryDashboardPage.vue')
 const AdminInquiryListPage = () => import('@/pages/admin/cs/AdminInquiryListPage.vue') // 새로 추가
 const AdminInquiryDetailPage = () => import('@/pages/admin/cs/AdminInquiryDetailPage.vue') // 새로 추가
 
@@ -38,24 +45,18 @@ const NoticeListPage = () => import('@/pages/admin/cs/NoticeListPage.vue')
 const NoticeDetailPage = () => import('@/pages/admin/cs/NoticeDetailPage.vue')
 const NoticeCreatePage = () => import('@/pages/admin/cs/NoticeCreatePage.vue')
 const NoticeEditPage = () => import('@/pages/admin/cs/NoticeEditPage.vue')
-const NoticeDashboardPage = () => import('@/pages/admin/cs/NoticeDashboardPage.vue')
-const CsWritePage = () => import('@/pages/admin/cs/CsWritePage.vue')
 
-const FaqDashboardPage = () => import('@/pages/admin/cs/FaqDashboardPage.vue')
 
 // 검수 관리
-const InspectionDashboardPage = () => import('@/pages/admin/inspection/InspectionDashboardPage.vue')
 const OnlineInspectionListPage = () => import('@/pages/admin/inspection/OnlineInspectionListPage.vue')
 const OnlineInspectionDetailPage = () => import('@/pages/admin/inspection/OnlineInspectionDetailPage.vue')
 const OfflineInspectionListPage = () => import('@/pages/admin/inspection/OfflineInspectionListPage.vue')
 const OfflineInspectionDetailPage = () => import('@/pages/admin/inspection/OfflineInspectionDetailPage.vue')
 
 // 재고 관리
-const InventoryDashboardPage = () => import('@/pages/admin/inventory/InventoryDashboardPage.vue')
 const InventoryListPage = () => import('@/pages/admin/inventory/InventoryListPage.vue')
 
 // 회원 관리
-const MemberDashboardPage = () => import('@/pages/admin/member/MemberDashboardPage.vue')
 const MemberListPage = () => import('@/pages/admin/member/MemberListPage.vue')
 const MemberDetailPage = () => import('@/pages/admin/member/MemberDetailPage.vue')
 const MemberEditPage = () => import('@/pages/admin/member/MemberEditPage.vue')
@@ -68,7 +69,6 @@ const ReportReceiveListPage = () => import('@/pages/admin/member/ReportReceivedL
 const ReportReceiveEditPage = () => import('@/pages/admin/member/MemberReceivedEditPage.vue')
 
 // 경매 관리
-const AuctionDashboardPage = () => import('@/pages/admin/auction/AuctionDashboardPage.vue')
 const AuctionListPage = () => import('@/pages/admin/auction/AuctionListPage.vue')
 
 // 로그인
@@ -102,22 +102,20 @@ const adminRoutes = [
       {
         path: '', // '/admin' 경로에 대한 기본 페이지
         component: AdminContentLayout,
-        redirect: { name: 'AdminDashboard' }, // 대시보드로 리디렉션
         children: [
-          // --- 대시보드 ---
+          // --- 대시보드 (통합) ---
           {
             path: '',
-            name: 'AdminDashboard',
-            component: MainDashboardPage,
-            meta: { title: 'Dashboard', icon: 'fas fa-fw fa-tachometer-alt', menu: true }, // ⭐️ menu: true 추가
+            name: 'AdminMainDashboard', // Add a name for the main dashboard
+            component: MainDashboardPage, // Point to the MainDashboardPage
+            meta: { title: '대시보드', icon: 'fas fa-fw fa-tachometer-alt', menu: true },
           },
           // --- 회원 관리 ---
           {
             path: 'member',
-            redirect: { name: 'AdminMemberDashboard' },
             meta: { title: '회원관리', icon: 'fas fa-fw fa-users', menu: true },
             children: [
-              { path: 'dashboard', name: 'AdminMemberDashboard', component: MemberDashboardPage, meta: { title: '회원 대시보드' } },
+              { path: 'dashboard', name: 'AdminMemberDashboard', component: MemberDashboardPage, meta: { title: '대시보드' } }, // 회원관리 대시보드 추가
               { path: 'list', name: 'AdminMemberList', component: MemberListPage, meta: { title: '회원 목록' } },
               { path: 'create', name: 'AdminMemberCreate', component: MemberCreatePage, meta: { title: '회원 등록' } },
               { path: 'reportList', name: 'AdminReportList', component: ReportListPage, meta: { title: '신고 관리' } },
@@ -129,119 +127,103 @@ const adminRoutes = [
               { path: 'reportReceiveEdit/:reportId', name: 'AdminReportReceiveEdit', component: ReportReceiveEditPage, props: true, meta: { hidden: true } },
             ],
           },
-          
           // --- 재고 관리 ---
           {
             path: 'inventory',
-            redirect: { name: 'AdminInventoryDashboard' },
             meta: { title: '재고관리', icon: 'fas fa-fw fa-boxes', menu: true },
             children: [
-              { path: 'dashboard', name: 'AdminInventoryDashboard', component: InventoryDashboardPage, meta: { title: '재고 대시보드' } },
+              { path: 'dashboard', name: 'AdminInventoryDashboard', component: InventoryDashboardPage, meta: { title: '대시보드' } }, // 재고관리 대시보드 추가
               { path: 'list', name: 'AdminInventoryList', component: InventoryListPage, meta: { title: '재고 목록' } },
               { path: 'detail/:id', name: 'AdminInventoryDetail', component: () => import('@/pages/admin/inventory/InventoryDetailPage.vue'), props: true, meta: { hidden: true } },
             ],
           },
-          
           // --- 판매 관리 ---
           {
             path: 'sale',
-            redirect: { name: 'AdminSaleDashboard' },
             meta: { title: '판매관리', icon: 'fas fa-fw fa-gavel', menu: true },
             children: [
-              { path: 'dashboard', name: 'AdminSaleDashboard', component: AuctionDashboardPage, meta: { title: '판매 대시보드' } },
+              { path: 'dashboard', name: 'AdminSalesDashboard', component: SalesDashboardPage, meta: { title: '대시보드' } }, // 판매 관리 대시보드 추가
               { path: 'list', name: 'AdminSaleList', component: AuctionListPage, meta: { title: '판매 상품 목록' } },
             ],
           },
-          
           // --- 주문 관리 ---
           {
             path: 'order',
-            redirect: { name: 'AdminOrderList' },
             meta: { title: '주문관리', icon: 'fas fa-fw fa-receipt', menu: true },
             children: [
+              { path: 'dashboard', name: 'AdminOrderDashboard', component: OrderDashboardPage, meta: { title: '대시보드' } }, // 주문관리 대시보드 추가
               { path: 'list', name: 'AdminOrderList', component: () => import('@/pages/admin/order/OrderListPage.vue'), meta: { title: '주문 목록' } },
               { path: 'detail/:orderId', name: 'AdminOrderDetail', component: () => import('@/pages/admin/order/OrderDetailPage.vue'), props: true, meta: { hidden: true } },
             ],
           },
-
           // --- 입찰 관리 ---
           {
             path: 'bid',
-            redirect: { name: 'AdminBidList' },
             meta: { title: '입찰관리', icon: 'fas fa-fw fa-hand-paper', menu: true },
             children: [
+              { path: 'dashboard', name: 'AdminBidDashboard', component: BidDashboardPage, meta: { title: '대시보드' } }, // 입찰관리 대시보드 추가
               { path: 'list', name: 'AdminBidList', component: () => import('@/pages/admin/bid/BidListPage.vue'), meta: { title: '입찰 목록' } },
             ],
           },
-          
           // --- 검수 관리 ---
           {
             path: 'inspection',
-            redirect: { name: 'AdminInspectionDashboard' },
             meta: { title: '검수관리', icon: 'fas fa-fw fa-check-circle', menu: true },
             children: [
-              { path: 'dashboard', name: 'AdminInspectionDashboard', component: InspectionDashboardPage, meta: { title: '검수 대시보드' } },
+              { path: 'dashboard', name: 'AdminInspectionDashboard', component: InspectionDashboardPage, meta: { title: '대시보드' } }, // 검수관리 대시보드 추가
               { path: 'online', name: 'AdminOnlineInspectionList', component: OnlineInspectionListPage, meta: { title: '온라인 1차 검수' } },
               { path: 'online/:id', name: 'AdminOnlineInspectionDetail', component: OnlineInspectionDetailPage, meta: { hidden: true } },
               { path: 'offline', name: 'AdminOfflineInspectionList', component: OfflineInspectionListPage, meta: { title: '오프라인 2차 검수' } },
               { path: 'offline/:id', name: 'AdminOfflineInspectionDetail', component: OfflineInspectionDetailPage, meta: { hidden: true } },
             ],
           },
-
           // --- 카탈로그 관리 ---
           {
             path: 'catalog',
-            redirect: { name: 'AdminCategoryList' },
             meta: { title: '카탈로그관리', icon: 'fas fa-fw fa-book', menu: true },
             children: [
+              { path: 'dashboard', name: 'AdminCatalogDashboard', component: CatalogDashboardPage, meta: { title: '대시보드' } }, // 카탈로그관리 대시보드 추가
               { path: 'categories', name: 'AdminCategoryList', component: CategoryListPage, meta: { title: '카테고리 관리' } },
               { path: 'artists', name: 'AdminArtistList', component: ArtistListPage, meta: { title: '아티스트 관리' } },
             ],
           },
-
           // --- CS 관리 (통합) ---
           {
             path: 'cs-management',
             name: 'AdminCsManagement',
-            redirect: { name: 'AdminInquiryDashboard' },
             meta: { title: 'CS관리', icon: 'fas fa-fw fa-headset', menu: true },
             children: [
+              { path: 'dashboard', name: 'AdminCSDashboard', component: CSDashboardPage, meta: { title: '대시보드' } }, // CS관리 대시보드 추가
               // 1:1 문의
-              { path: 'inquiry-dashboard', name: 'AdminInquiryDashboard', component: InquiryDashboardPage, meta: { title: '문의 현황' } },
               { path: 'inquiry-list', name: 'AdminInquiryList', component: AdminInquiryListPage, meta: { title: '1:1 문의 목록' } },
               { path: 'inquiry-detail/:inquiryId', name: 'AdminInquiryDetail', component: AdminInquiryDetailPage, props: true, meta: { hidden: true } },
 
               // FAQ
-              { path: 'faq-dashboard', name: 'AdminFaqDashboard', component: FaqDashboardPage, meta: { title: 'FAQ 현황' } },
               { path: 'faq-list', name: 'AdminFaqList', component: FaqListPage, meta: { title: 'FAQ 목록' } },
               { path: 'faq-detail/:faqId', name: 'AdminFaqDetail', component: FaqDetailPage, props: true, meta: { hidden: true } },
               { path: 'faq-create', name: 'AdminFaqCreate', component: FaqCreatePage, meta: { title: 'FAQ 등록' } },
               { path: 'faq-edit/:faqId', name: 'AdminFaqEdit', component: FaqEditPage, props: true, meta: { hidden: true } },
 
               // 공지사항
-              { path: 'notice-dashboard', name: 'AdminNoticeDashboard', component: NoticeDashboardPage, meta: { title: '공지사항 현황' } },
               { path: 'notice-list', name: 'AdminNoticeList', component: NoticeListPage, meta: { title: '공지사항 목록' } },
               { path: 'notice-detail/:noticeId', name: 'AdminNoticeDetail', component: NoticeDetailPage, props: true, meta: { hidden: true } },
-              { path: 'notice-create', name: 'AdminNoticeCreate', component: NoticeCreatePage, meta: { title: '공지 등록' } },
+              { path: 'notice-create', name: 'AdminNoticeCreate', component: NoticeCreatePage, meta: { title: '공지사항 등록' } },
               { path: 'notice-edit/:noticeId', name: 'AdminNoticeEdit', component: NoticeEditPage, props: true, meta: { hidden: true } },
-              { path: 'cs-write', name: 'AdminCsWrite', component: CsWritePage, props: true, meta: { hidden: true } },
             ],
           },
-
           // --- 재무/운영 관리 (통합) ---
           {
             path: 'financial-operations',
             name: 'AdminFinancialOperations',
-            redirect: { name: 'AdminSettlementDashboard' },
             meta: { title: '재무/운영관리', icon: 'fas fa-fw fa-dollar-sign', menu: true },
             children: [
+              { path: 'dashboard', name: 'AdminSettlementDashboard', component: SettlementDashboardPage, meta: { title: '대시보드' } }, // 재무/운영관리 대시보드 추가
               // 정산 관리
-              { path: 'settlement-dashboard', name: 'AdminSettlementDashboard', component: SettlementDashboardPage, meta: { title: '정산 대시보드' } },
               { path: 'settlement-list', name: 'AdminSettlementList', component: SettlementListPage, meta: { title: '정산 내역' } },
               { path: 'settlement-settings', name: 'AdminSettlementSettings', component: SettlementSettingPage, meta: { title: '정산 설정' } },
 
               // 반품 관리
-              { path: 'return-list', name: 'AdminReturnList', component: AdminReturnListPage, meta: { title: '반품 목록' } },
+              { path: 'return-list', name: 'AdminReturnList', component: AdminReturnListPage, meta: { title: '반품신청 목록' } },
               { path: 'return-detail/:returnRequestId', name: 'AdminReturnDetail', component: AdminReturnDetailPage, props: true, meta: { hidden: true } },
               { path: 'return-create', name: 'AdminReturnCreate', component: AdminReturnCreatePage, meta: { hidden: true } },
             ],
@@ -252,4 +234,4 @@ const adminRoutes = [
   },
 ]
 
-export default adminRoutes
+export default adminRoutes;

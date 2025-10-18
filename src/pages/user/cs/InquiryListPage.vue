@@ -3,18 +3,12 @@
   import { ref, nextTick, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
   import { getMyInquiryList } from '@/api/inquiry';
+  import { formatDateTime } from '@/utils/tableFormatters.js';
+
   const router = useRouter();
   const dataTableRef = ref(null);
   const keyword = ref('');
   const loading = ref(false);
-
-  // 날짜 포맷 함수
-  function formatDate(dateArray) {
-    if (!dateArray || !Array.isArray(dateArray)) return '';
-    const [year, month, day, hour, minute] = dateArray;
-    const pad = (n) => String(n).padStart(2, '0');
-    return `${year}.${pad(month)}.${pad(day)} ${pad(hour)}:${pad(minute)}`;
-  }
 
   function statusLabel(status) {
     if (!status) return '기타';
@@ -31,13 +25,14 @@
 
   function statusClass(status) {
     const s = (status || '').toString().toUpperCase();
-    return {
-      'badge-pending': s === 'PENDING',
-      'badge-progress': s === 'IN_PROGRESS',
-      'badge-hold': s === 'ON_HOLD',
-      'badge-rejected': s === 'REJECTED',
-      'badge-answered': s === 'ANSWERED'
-    };
+    switch (s) {
+      case 'PENDING': return 'bg-primary';
+      case 'IN_PROGRESS': return 'bg-info';
+      case 'ON_HOLD': return 'bg-warning text-dark';
+      case 'REJECTED': return 'bg-dark';
+      case 'ANSWERED': return 'bg-success';
+      default: return 'bg-secondary';
+    }
   }
 
   // 테이블 컬럼 정의
@@ -77,20 +72,15 @@
       sortable: true,
       render: (data) => {
         const label = statusLabel(data);
-        const classes = Object.entries(statusClass(data))
-          .filter(([_, v]) => v)
-          .map(([k, _]) => k)
-          .join(' ');
-        return `<span class="badge ${classes}">${label}</span>`;
+        const badgeClass = statusClass(data);
+        return `<span class="badge ${badgeClass}">${label}</span>`;
       }
     },
     {
       data: 'inquiredAt',
       title: '날짜',
       sortable: true,
-      render: (data) => {
-        return formatDate(data);
-      }
+      render: (data) => formatDateTime(data)
     },
   ].map(col => ({
     ...col,
@@ -169,11 +159,6 @@
         :page-size="10"
         @loaded="attachClickHandlers"
       >
-        <!-- 커스텀 셀: 날짜 포맷 -->
-        <template #cell-inquiredAt="{ row }">
-          {{ formatDate(row.inquiredAt) }}
-        </template>
-
         <!-- 데이터가 없을 때 -->
         <template #empty>등록된 문의가 없습니다.</template>
       </ServerDataTable>
@@ -223,27 +208,7 @@
     text-align: center;
   }
 
-  /* 상태별 배지 색상 */
-  :deep(.badge-pending) { 
-    background-color: #6c757d; 
-  }
-  
-  :deep(.badge-progress) { 
-    background-color: #007bff; 
-  }
-  
-  :deep(.badge-hold) { 
-    background-color: #ffc107; 
-    color: #000; 
-  }
-  
-  :deep(.badge-rejected) { 
-    background-color: #dc3545; 
-  }
-  
-  :deep(.badge-answered) { 
-    background-color: #28a745; 
-  }
+  /* 상태별 배지 색상은 이제 스크립트에서 Bootstrap 클래스로 동적 관리됩니다. */
 
   /* 테이블 셀 정렬 */
   :deep(table th),

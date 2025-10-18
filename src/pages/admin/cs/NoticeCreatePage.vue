@@ -12,7 +12,7 @@ const newNotice = ref({
   title: '',
   content: '',
   status: 'DRAFT', // 기본값을 'DRAFT'로 변경
-  csTypeId: 3, // 기본값 '기타문의'
+  noticeTypeId: 1, // 기본값 '공지'
 });
 
 const selectedFiles = ref([]);
@@ -20,12 +20,8 @@ const previewFiles = ref([]);
 const error = ref(null);
 
 const typeOptions = [
-  { id: 1, name: '배송문의' },
-  { id: 2, name: '결제문의' },
-  { id: 3, name: '기타문의' },
-  { id: 4, name: '상품문의' },
-  { id: 5, name: '환불/반품 문의' },
-  { id: 6, name: '판매 문의' },
+  { id: 1, name: '공지' },
+  { id: 2, name: '이벤트' },
 ];
 
 const statusOptions = ref([
@@ -91,7 +87,7 @@ function goToList() {
           <div class="row">
             <div class="col-md-6 mb-3">
               <label for="notice-type" class="form-label">유형</label>
-              <select id="notice-type" class="form-select" v-model="newNotice.csTypeId" required>
+              <select id="notice-type" class="form-select" v-model="newNotice.noticeTypeId" required>
                 <option v-for="type in typeOptions" :key="type.id" :value="type.id">{{ type.name }}</option>
               </select>
             </div>

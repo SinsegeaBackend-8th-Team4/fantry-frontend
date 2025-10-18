@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { getInspectionDashboardStats } from '@/api/dashboard.js';
+import { getAccountStats } from '@/api/dashboard.js';
 import BaseChart from '@/components/common/chart/BaseChart.vue';
 import { useChartPalette } from '@/composables/useChartConfig';
 import LoadingSpinner from '@/components/common/atoms/LoadingSpinner.vue';
@@ -11,7 +11,7 @@ const error = ref(null);
 const palette = useChartPalette();
 
 // 차트 데이터 및 옵션
-const inspectionStatusChartData = ref({
+const accountStatusChartData = ref({
   labels: [],
   datasets: [{
     data: [],
@@ -19,38 +19,37 @@ const inspectionStatusChartData = ref({
     hoverOffset: 4
   }]
 });
-const inspectionStatusChartOptions = ref({
+const accountStatusChartOptions = ref({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
     legend: { position: 'right' },
-    title: { display: true, text: '검수 상태별 현황' }
+    title: { display: true, text: '계좌 상태 현황' }
   }
 });
 
-const fetchInspectionDashboardStats = async () => {
+const fetchAccountStats = async () => {
   loading.value = true;
   try {
-    const response = await getInspectionDashboardStats();
+    const response = await getAccountStats();
     stats.value = response;
 
-    // 검수 상태별 차트 데이터 구성
+    // 계좌 상태별 차트 데이터 구성
     const labels = [
-      '제출됨', '온라인 승인', '온라인 반려', '오프라인 검수 중', '오프라인 반려', '완료됨'
+      '총 계좌 수', '활성화된 계좌', '비활성화된 계좌', '환불 가능 계좌', '환불 불가능 계좌'
     ];
     const data = [
-      stats.value.submittedInspections,
-      stats.value.onlineApprovedInspections,
-      stats.value.onlineRejectedInspections,
-      stats.value.offlineInspectingInspections,
-      stats.value.offlineRejectedInspections,
-      stats.value.completedInspections,
+      stats.value.totalAccounts,
+      stats.value.activeAccounts,
+      stats.value.inactiveAccounts,
+      stats.value.refundableAccounts,
+      stats.value.nonRefundableAccounts,
     ];
     const backgroundColors = [
-      palette.primary, palette.success, palette.danger, palette.info, palette.warning, palette.dark
+      palette.primary, palette.success, palette.danger, palette.info, palette.warning
     ];
 
-    inspectionStatusChartData.value = {
+    accountStatusChartData.value = {
       labels: labels.filter((_, i) => data[i] > 0),
       datasets: [{
         data: data.filter(val => val > 0),
@@ -60,22 +59,22 @@ const fetchInspectionDashboardStats = async () => {
     };
 
   } catch (e) {
-    console.error('검수 대시보드 데이터 조회 실패:', e);
-    error.value = '데이터를 불러오는 데 실패했습니다.';
+    console.error('계좌 통계 조회 실패:', e);
+    error.value = '계좌 통계 데이터를 불러오는 데 실패했습니다.';
   } finally {
     loading.value = false;
   }
 };
 
-onMounted(fetchInspectionDashboardStats);
+onMounted(fetchAccountStats);
 </script>
 
 <template>
   <div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">검수 관리 대시보드</h1>
+    <h1 class="h3 mb-4 text-gray-800">계좌 대시보드</h1>
 
     <div v-if="loading" class="text-center py-5">
-      <LoadingSpinner message="검수 통계 데이터를 불러오는 중..." />
+      <LoadingSpinner message="계좌 통계 데이터를 불러오는 중..." />
     </div>
     <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
     <div v-else-if="stats">
@@ -86,27 +85,11 @@ onMounted(fetchInspectionDashboardStats);
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
-                  <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">총 검수 수</div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.totalInspections?.toLocaleString() || '0' }}</div>
+                  <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">총 계좌 수</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.totalAccounts.toLocaleString() }}</div>
                 </div>
                 <div class="col-auto">
-                  <i class="fas fa-clipboard-check fa-2x text-gray-300"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-          <div class="card border-left-warning shadow h-100 py-2">
-            <div class="card-body">
-              <div class="row no-gutters align-items-center">
-                <div class="col mr-2">
-                  <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">제출된 검수</div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.submittedInspections?.toLocaleString() || '0' }}</div>
-                </div>
-                <div class="col-auto">
-                  <i class="fas fa-file-upload fa-2x text-gray-300"></i>
+                  <i class="fas fa-wallet fa-2x text-gray-300"></i>
                 </div>
               </div>
             </div>
@@ -118,11 +101,27 @@ onMounted(fetchInspectionDashboardStats);
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
-                  <div class="text-xs font-weight-bold text-success text-uppercase mb-1">온라인 검수 승인</div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.onlineApprovedInspections?.toLocaleString() || '0' }}</div>
+                  <div class="text-xs font-weight-bold text-success text-uppercase mb-1">활성화된 계좌</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.activeAccounts.toLocaleString() }}</div>
                 </div>
                 <div class="col-auto">
-                  <i class="fas fa-check-double fa-2x text-gray-300"></i>
+                  <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card border-left-danger shadow h-100 py-2">
+            <div class="card-body">
+              <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                  <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">비활성화된 계좌</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.inactiveAccounts.toLocaleString() }}</div>
+                </div>
+                <div class="col-auto">
+                  <i class="fas fa-times-circle fa-2x text-gray-300"></i>
                 </div>
               </div>
             </div>
@@ -134,11 +133,11 @@ onMounted(fetchInspectionDashboardStats);
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
-                  <div class="text-xs font-weight-bold text-info text-uppercase mb-1">오프라인 검수 중</div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.offlineInspectingInspections?.toLocaleString() || '0' }}</div>
+                  <div class="text-xs font-weight-bold text-info text-uppercase mb-1">환불 가능 계좌</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.refundableAccounts.toLocaleString() }}</div>
                 </div>
                 <div class="col-auto">
-                  <i class="fas fa-search fa-2x text-gray-300"></i>
+                  <i class="fas fa-exchange-alt fa-2x text-gray-300"></i>
                 </div>
               </div>
             </div>
@@ -151,11 +150,24 @@ onMounted(fetchInspectionDashboardStats);
         <div class="col-lg-6 mb-4">
           <div class="card shadow mb-4">
             <div class="card-header py-3">
-              <h6 class="m-0 font-weight-bold text-primary">검수 상태별 현황</h6>
+              <h6 class="m-0 font-weight-bold text-primary">계좌 상태 현황</h6>
             </div>
             <div class="card-body">
               <div class="chart-pie pt-4 pb-2">
-                <BaseChart type="doughnut" :data="inspectionStatusChartData" :options="inspectionStatusChartOptions" />
+                <BaseChart type="doughnut" :data="accountStatusChartData" :options="accountStatusChartOptions" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary">월별 계좌 등록 추이 (더미)</h6>
+            </div>
+            <div class="card-body">
+              <div class="chart-area">
+                <BaseChart type="line" :data="{ labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], datasets: [{ label: '등록 수', data: [10, 15, 12, 18, 16, 20], backgroundColor: palette.primary, borderColor: palette.primary, fill: false }] }" />
               </div>
             </div>
           </div>

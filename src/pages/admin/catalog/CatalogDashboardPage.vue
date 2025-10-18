@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { getInspectionDashboardStats } from '@/api/dashboard.js';
+import { getCatalogDashboardStats } from '@/api/dashboard.js';
 import BaseChart from '@/components/common/chart/BaseChart.vue';
 import { useChartPalette } from '@/composables/useChartConfig';
 import LoadingSpinner from '@/components/common/atoms/LoadingSpinner.vue';
@@ -11,7 +11,7 @@ const error = ref(null);
 const palette = useChartPalette();
 
 // 차트 데이터 및 옵션
-const inspectionStatusChartData = ref({
+const artistStatusChartData = ref({
   labels: [],
   datasets: [{
     data: [],
@@ -19,38 +19,35 @@ const inspectionStatusChartData = ref({
     hoverOffset: 4
   }]
 });
-const inspectionStatusChartOptions = ref({
+const artistStatusChartOptions = ref({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
     legend: { position: 'right' },
-    title: { display: true, text: '검수 상태별 현황' }
+    title: { display: true, text: '아티스트 승인 현황' }
   }
 });
 
-const fetchInspectionDashboardStats = async () => {
+const fetchCatalogDashboardStats = async () => {
   loading.value = true;
   try {
-    const response = await getInspectionDashboardStats();
-    stats.value = response;
+    const response = await getCatalogDashboardStats();
+    stats.value = response.catalogStats || {}; // catalogStats를 stats.value에 할당
 
-    // 검수 상태별 차트 데이터 구성
+    // 아티스트 승인 현황 차트 데이터 구성
     const labels = [
-      '제출됨', '온라인 승인', '온라인 반려', '오프라인 검수 중', '오프라인 반려', '완료됨'
+      '승인 대기', '승인됨', '반려됨'
     ];
     const data = [
-      stats.value.submittedInspections,
-      stats.value.onlineApprovedInspections,
-      stats.value.onlineRejectedInspections,
-      stats.value.offlineInspectingInspections,
-      stats.value.offlineRejectedInspections,
-      stats.value.completedInspections,
+      stats.value.pendingArtists,
+      stats.value.approvedArtists,
+      stats.value.rejectedArtists,
     ];
     const backgroundColors = [
-      palette.primary, palette.success, palette.danger, palette.info, palette.warning, palette.dark
+      palette.warning, palette.success, palette.danger
     ];
 
-    inspectionStatusChartData.value = {
+    artistStatusChartData.value = {
       labels: labels.filter((_, i) => data[i] > 0),
       datasets: [{
         data: data.filter(val => val > 0),
@@ -60,22 +57,22 @@ const fetchInspectionDashboardStats = async () => {
     };
 
   } catch (e) {
-    console.error('검수 대시보드 데이터 조회 실패:', e);
+    console.error('카탈로그 대시보드 데이터 조회 실패:', e);
     error.value = '데이터를 불러오는 데 실패했습니다.';
   } finally {
     loading.value = false;
   }
 };
 
-onMounted(fetchInspectionDashboardStats);
+onMounted(fetchCatalogDashboardStats);
 </script>
 
 <template>
   <div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">검수 관리 대시보드</h1>
+    <h1 class="h3 mb-4 text-gray-800">카탈로그 관리 대시보드</h1>
 
     <div v-if="loading" class="text-center py-5">
-      <LoadingSpinner message="검수 통계 데이터를 불러오는 중..." />
+      <LoadingSpinner message="카탈로그 통계 데이터를 불러오는 중..." />
     </div>
     <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
     <div v-else-if="stats">
@@ -86,27 +83,11 @@ onMounted(fetchInspectionDashboardStats);
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
-                  <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">총 검수 수</div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.totalInspections?.toLocaleString() || '0' }}</div>
+                  <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">총 아티스트 수</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.totalArtists?.toLocaleString() || '0' }}</div>
                 </div>
                 <div class="col-auto">
-                  <i class="fas fa-clipboard-check fa-2x text-gray-300"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-          <div class="card border-left-warning shadow h-100 py-2">
-            <div class="card-body">
-              <div class="row no-gutters align-items-center">
-                <div class="col mr-2">
-                  <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">제출된 검수</div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.submittedInspections?.toLocaleString() || '0' }}</div>
-                </div>
-                <div class="col-auto">
-                  <i class="fas fa-file-upload fa-2x text-gray-300"></i>
+                  <i class="fas fa-users fa-2x text-gray-300"></i>
                 </div>
               </div>
             </div>
@@ -118,11 +99,11 @@ onMounted(fetchInspectionDashboardStats);
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
-                  <div class="text-xs font-weight-bold text-success text-uppercase mb-1">온라인 검수 승인</div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.onlineApprovedInspections?.toLocaleString() || '0' }}</div>
+                  <div class="text-xs font-weight-bold text-success text-uppercase mb-1">승인된 아티스트</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.approvedArtists?.toLocaleString() || '0' }}</div>
                 </div>
                 <div class="col-auto">
-                  <i class="fas fa-check-double fa-2x text-gray-300"></i>
+                  <i class="fas fa-check-circle fa-2x text-gray-300"></i>
                 </div>
               </div>
             </div>
@@ -134,11 +115,27 @@ onMounted(fetchInspectionDashboardStats);
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
-                  <div class="text-xs font-weight-bold text-info text-uppercase mb-1">오프라인 검수 중</div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.offlineInspectingInspections?.toLocaleString() || '0' }}</div>
+                  <div class="text-xs font-weight-bold text-info text-uppercase mb-1">총 앨범 수</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.totalAlbums?.toLocaleString() || '0' }}</div>
                 </div>
                 <div class="col-auto">
-                  <i class="fas fa-search fa-2x text-gray-300"></i>
+                  <i class="fas fa-compact-disc fa-2x text-gray-300"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+              <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                  <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">총 카테고리 수</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.totalGoodsCategories?.toLocaleString() || '0' }}</div>
+                </div>
+                <div class="col-auto">
+                  <i class="fas fa-tags fa-2x text-gray-300"></i>
                 </div>
               </div>
             </div>
@@ -151,11 +148,11 @@ onMounted(fetchInspectionDashboardStats);
         <div class="col-lg-6 mb-4">
           <div class="card shadow mb-4">
             <div class="card-header py-3">
-              <h6 class="m-0 font-weight-bold text-primary">검수 상태별 현황</h6>
+              <h6 class="m-0 font-weight-bold text-primary">아티스트 승인 현황</h6>
             </div>
             <div class="card-body">
               <div class="chart-pie pt-4 pb-2">
-                <BaseChart type="doughnut" :data="inspectionStatusChartData" :options="inspectionStatusChartOptions" />
+                <BaseChart type="doughnut" :data="artistStatusChartData" :options="artistStatusChartOptions" />
               </div>
             </div>
           </div>

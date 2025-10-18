@@ -6,6 +6,8 @@ import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue'
 import { currencyCol, dateCol } from '@/composables/useDataTableColumns'
 import { useAlertDialog } from '@/composables/useAlertDialog.js';
 
+import { debounce } from 'lodash-es';
+
 const {showAlert} = useAlertDialog();
 const adminStore = useAdminInspectionStore()
 
@@ -14,6 +16,10 @@ const loading = ref(false) // 로딩 상태
 const keyword = ref('')
 const tableKey = ref(0) // 필터 변경 시 테이블을 강제로 리로드하기 위한 키
 const currentFilter = ref(['SUBMITTED']) // 필터 상태 관리 (기본값 : 1차 제출)
+
+// Debounce 적용
+const triggerRefresh = () => tableKey.value++;
+const debouncedRefresh = debounce(triggerRefresh, 300);
 
 // 필터 목록
 const filters = [
@@ -76,7 +82,7 @@ const columns = [
 // 필터 변경 시 테이블 리로드
 function changeFilter(statuses) {
   currentFilter.value = statuses
-  tableKey.value++
+  debouncedRefresh()
 }
 </script>
 
