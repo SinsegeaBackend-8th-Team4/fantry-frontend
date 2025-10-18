@@ -90,7 +90,11 @@ async function handleSubmit() {
 
     // 2. Upload attachments if any
     if (files.value.length > 0) {
-      await addReturnAttachments(returnRequestId, files.value);
+      const formData = new FormData();
+      files.value.forEach(file => {
+        formData.append('files', file);
+      });
+      await addReturnAttachments(returnRequestId, formData);
     }
 
     showAlert('성공', '환불 신청이 성공적으로 접수되었습니다.');
