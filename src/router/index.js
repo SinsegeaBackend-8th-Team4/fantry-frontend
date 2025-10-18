@@ -3,7 +3,7 @@ import { useUserStore } from '@/stores/userStore';
 import { useUiStore } from '@/stores/uiStore';
 import userRoutes from './userRoutes';
 import adminRoutes from '././adminRoutes';
-import { showAlert } from '@/composables/useAlertDialog';
+import { useAlertDialog } from '@/composables/useAlertDialog';
 
 /**
  * Vue Router 설정의 중심 파일입니다.
@@ -30,6 +30,7 @@ export function setupRouter() {
     // 스토어 인스턴스를 가드 외부에 한 번만 생성하여 안전하게 접근합니다.
     const userStore = useUserStore();
     const uiStore = useUiStore();
+    const { showAlert } = useAlertDialog();
 
     // 전역 네비게이션 가드: 모든 페이지 이동 전에 실행됩니다.
     // 💡 Updated upstream의 비동기 로직을 포함하기 위해 async/await을 추가합니다.

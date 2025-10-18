@@ -48,14 +48,14 @@
             </div>
             <small class="form-text text-muted" v-if="totalFileSize > 0">총 파일 크기: {{ (totalFileSize / (1024 * 1024)).toFixed(2) }} MB</small>
           </div>
-          <button type="submit" class="btn btn-primary btn-lg btn-block" :disabled="isSubmitting || totalFileSize > MAX_FILE_SIZE">
+          <button type="submit" class="btn btn-primary btn-lg btn-block" :disabled="uiStore.isLoading || totalFileSize > MAX_FILE_SIZE">
             문의 등록
           </button>
         </form>
       </div>
     </div>
 
-    <LoadingSpinner :show="isSubmitting" message="문의를 등록하고 있습니다..." />
+    <LoadingSpinner :show="uiStore.isLoading" message="문의를 등록하고 있습니다..." />
 
     <!-- 내 문의 목록 -->
     <!-- <h4 class="mb-4 font-weight-bold">내 문의 내역</h4>
@@ -93,6 +93,7 @@ import { useRouter } from 'vue-router';
 import { createInquiry, getMyInquiryList, addInquiryAttachments } from '@/api/inquiry';
 import { useUiStore } from '@/stores/uiStore'; // Import useUiStore
 import { useAlertDialog } from '@/composables/useAlertDialog';
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue';
 
 const router = useRouter();
 const uiStore = useUiStore(); // Initialize uiStore
