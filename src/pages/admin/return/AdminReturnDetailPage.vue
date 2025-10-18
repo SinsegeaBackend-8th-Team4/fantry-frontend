@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { getAdminReturnDetail, updateAdminReturn } from '@/api/adminReturn.js';
+import { getAdminReturnRequestDetail, updateAdminReturnRequestStatus } from '@/api/adminReturn.js';
 import { formatDateTime } from '@/utils/tableFormatters';
 import { useAlertDialog } from '@/composables/useAlertDialog';
 
@@ -27,7 +27,7 @@ function isImage(url) {
 async function fetchReturnDetail() {
   loading.value = true;
   try {
-    const response = await getAdminReturnDetail(returnRequestId.value);
+    const response = await getAdminReturnRequestDetail(returnRequestId.value);
     returnRequest.value = response.data;
     // 기존 차감 배송비가 있으면 폼에 설정
     deductedShippingFeeInput.value = returnRequest.value.deductedShippingFee || 0;
@@ -79,9 +79,7 @@ async function updateDeductedShippingFee() {
   try {
     const payload = {
       status: returnRequest.value.status, // 현재 상태 유지
-      deductedShippingFee: deductedShippingFeeInput.value,
-    };
-    await updateAdminReturn(returnRequestId.value, payload);
+    await updateAdminReturnRequestStatus(returnRequestId.value, payload);
     showAlertDialog('성공', '차감 배송비가 성공적으로 저장되었습니다.');
     await fetchReturnDetail(); // 정보 새로고침
   } catch (e) {
@@ -101,7 +99,7 @@ async function updateReturnRequest(newStatus, rejectReason = null) {
       deductedShippingFee: deductedShippingFeeInput.value, // 차감 배송비 추가
       // memo 등 필요시 추가
     };
-    await updateAdminReturn(returnRequestId.value, payload);
+    await updateAdminReturnRequestStatus(returnRequestId.value, payload);
     showAlertDialog('성공', '상태가 성공적으로 변경되었습니다.');
     await fetchReturnDetail(); // 정보 새로고침
   } catch (e) {
