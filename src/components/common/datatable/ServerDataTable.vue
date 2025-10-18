@@ -27,18 +27,32 @@ const totalPages = computed(() => Math.max(1, Math.ceil(total.value / props.page
 
 async function load() {
   console.log('ServerDataTable load() called');
+  if (props.loading) {
+    console.log('ServerDataTable load() skipped due to props.loading');
+    return; // 외부 제어 우선
+  }
+  if (!props.fetcher || typeof props.fetcher !== 'function') {
+    console.error('ServerDataTable: fetcher prop is not a function', props.fetcher);
+    error.value = new Error('Fetcher prop is not a function');
+    return;
+  }
   try {
     loading.value = true;
+    error.value = null; // Clear previous errors
+    console.log('Before calling fetcher');
     const { rows: r, total: t } = await props.fetcher({
       page: page.value,
       size: props.pageSize,
       sort: sort.value.column ? `${sort.value.column},${sort.value.dir}` : undefined,
       keyword: props.keyword || undefined
     });
+    console.log('After calling fetcher');
     rows.value = r;
     total.value = t;
     emit('loaded', { rows: r, total: t });
   } catch (e) {
+    console.error('Error in ServerDataTable load():', e);
+    error.value = e;
     emit('error', e);
   } finally {
     loading.value = false;
