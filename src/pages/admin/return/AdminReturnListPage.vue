@@ -44,6 +44,8 @@ async function fetcher({ page, size, sort }) {
     buyerName: keyword.value || null,
   };
   const response = await getAdminReturnRequests(params);
+  console.log('API 응답 content:', response.data.content);
+  console.log('API 응답 totalElements:', response.data.totalElements);
   return {
     rows: response.data.content,
     total: response.data.totalElements,
@@ -139,8 +141,23 @@ function attachClickHandlers() {
         goToOrderDetail(orderId);
       });
     });
+
+    const detailLinks = document.querySelectorAll('.detail-link');
+    detailLinks.forEach(el => {
+      if (el.dataset.bound) return; // 중복 바인딩 방지
+      el.dataset.bound = 'true';
+      el.addEventListener('click', (e) => {
+        const returnRequestId = e.target.dataset.detailId;
+        router.push({ name: 'AdminReturnDetail', params: { returnRequestId } });
+      });
+    });
   });
 }
+
+onMounted(() => {
+  console.log('AdminReturnListPage mounted. Columns:', columns);
+  console.log('AdminReturnListPage mounted. Keyword:', keyword.value);
+});
 </script>
 
 <template>
