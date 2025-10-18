@@ -13,8 +13,9 @@ jobs:
     env:
       # [ ✨ 수정 ] 스크립트가 기대하는 이름(BOOTPAY_APPLICATION_ID)으로 시크릿을 전달합니다.
       SECRET_BOOTPAY_APPLICATION_ID: ${{ secrets.BOOT_PAY_APP_ID }}
-      # 여기에 다른 프론트엔드 시크릿들도 추가하면 됩니다.
-      # 예: SECRET_KAKAO_API_KEY: ${{ secrets.KAKAO_API_KEY }}
+      SECRET_API_SERVER_URL: ${{ secrets.DEV_API_URL }}
+      SECRET_FILE_BASE_URL: ${{ secrets.DEV_FILE_BASE_URL }}
+
 
     steps:
       - name: Execute frontend deployment script
