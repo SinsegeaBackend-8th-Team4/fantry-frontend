@@ -5,7 +5,7 @@
     import { useUserStore } from '@/stores/userStore'
     import { useAlertDialog } from '@/composables/useAlertDialog';
 
-    const { showDialog } = useAlertDialog();
+    const { showAlert: showDialog } = useAlertDialog();
     const userStore = useUserStore();
 
     const router = useRouter();

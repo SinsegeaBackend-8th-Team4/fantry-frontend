@@ -7,12 +7,12 @@
 
 // --- 레이아웃 ---
 import UserLayout from '@/layouts/UserLayout.vue'
-import CSPageLayout from '@/layouts/CSPageLayout.vue'
-import CheckoutPage from '@/pages/payment/CheckoutPage.vue'
-import UserInfoPage from '@/pages/payment/UserInfoPage.vue'
-import PaymentCompletePage from '@/pages/payment/PaymentCompletePage.vue'
 
 // --- 페이지 컴포넌트 (Lazy Loading) ---
+const CSPageLayout = () => import('@/layouts/CSPageLayout.vue');
+const CheckoutPage = () => import('@/pages/payment/CheckoutPage.vue');
+const UserInfoPage = () => import('@/pages/payment/UserInfoPage.vue');
+const PaymentCompletePage = () => import('@/pages/payment/PaymentCompletePage.vue');
 const HomePage = () => import('@/pages/HomePage.vue');
 const LoginPage = () => import('@/pages/user/access/LoginPage.vue');
 const LoginFind = () => import('@/pages/user/access/LoginFind.vue');

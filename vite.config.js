@@ -74,6 +74,27 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    build: {
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              // 주요 라이브러리들을 'vendor' 청크로 분리합니다.
+              const vendors = [
+                'vue', 'vue-router', 'pinia', 'axios', 
+                'chart.js', 'bootstrap', 'jquery', 
+                'quill', '@vueup/vue-quill', 'datatables.net'
+              ];
+              const module = id.split('node_modules/')[1].split('/')[0];
+              if (vendors.some(vendor => module.startsWith(vendor))) {
+                return 'vendor';
+              }
+            }
+          },
+        },
+      },
+    },
   }
 })
 

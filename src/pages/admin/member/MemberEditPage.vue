@@ -135,7 +135,7 @@
     import { updateOneMember, getMemberDetail } from '@/api/member';
     import { useAlertDialog } from '@/composables/useAlertDialog';
 
-    const { showDialog } = useAlertDialog();
+    const { showAlert: showDialog } = useAlertDialog();
     const route = useRoute();
     const router = useRouter();
 

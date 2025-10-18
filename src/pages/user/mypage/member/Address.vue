@@ -8,7 +8,7 @@ import { getAllAddressMember, addAddress, editAddress, deleteAddress, setDefault
 import openAddressSearch from '@/module/kakaoAddressSearch.js';
 import { useAlertDialog } from '@/composables/useAlertDialog';
 
-const { showDialog } = useAlertDialog();
+const { showAlert: showDialog } = useAlertDialog();
 const userStore = useUserStore();
 
 // --- 상태 관리 ---

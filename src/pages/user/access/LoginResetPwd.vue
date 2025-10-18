@@ -2,7 +2,7 @@
   import { reactive, watch } from 'vue';
   import { useAlertDialog } from '@/composables/useAlertDialog';
 
-  const { showDialog } = useAlertDialog();
+  const { showAlert: showDialog } = useAlertDialog();
   //바인드 변수 선언
   const formState = reactive({
     password: '',
