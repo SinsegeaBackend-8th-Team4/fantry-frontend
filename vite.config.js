@@ -1,27 +1,45 @@
 import { fileURLToPath, URL } from 'node:url'
 
-import { defineConfig, loadEnv} from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
+  // .env 파일을 명시적으로 불러옵니다.
+  // 서버에서는 .env.local 파일이 우선적으로 로드됩니다.
+  const env = loadEnv(mode, process.cwd(), '')
+
+  // [ ✨ 추가된 부분 ]
+  // Vite의 'define' 옵션을 사용하기 위해 환경변수 객체를 재가공합니다.
+  // 'import.meta.env.VITE_SOME_KEY'를 실제 값으로 교체하도록 만듭니다.
+  const processEnv = {}
+  for (const key in env) {
+    if (key.startsWith('VITE_')) {
+      processEnv[`import.meta.env.${key}`] = JSON.stringify(env[key])
+    }
+  }
 
   return {
     plugins: [
       vue(),
-      vueDevTools(),
+      // 운영(production) 빌드에서는 devtools를 제외하여 최적화합니다.
+      mode !== 'production' && vueDevTools(),
     ],
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
         '~bootstrap': fileURLToPath(new URL('./node_modules/bootstrap/scss', import.meta.url)),
-        '~startbootstrap-sb-admin-2': fileURLToPath(new URL('./node_modules/startbootstrap-sb-admin-2/scss', import.meta.url))
-      }
+        '~startbootstrap-sb-admin-2': fileURLToPath(
+          new URL('./node_modules/startbootstrap-sb-admin-2/scss', import.meta.url),
+        ),
+      },
     },
     define: {
-      global: 'window'
+      // [ ✨ 수정된 부분 ]
+      // 위에서 가공한 환경변수 객체를 주입하여 빌드 시 강제로 값을 포함시킵니다.
+      ...processEnv,
+      global: 'window',
       // sockjs-client 발생 오류 해결
       //Vite에게 'global' 변수가 'window' 객체를 참조하도록 알려줌
     },
@@ -29,9 +47,9 @@ export default defineConfig(({ mode }) => {
       preprocessorOptions: {
         scss: {
           // node_modules에서 발생하는 Sass 경고를 무시하도록 설정
-          quietDeps: true
-        }
-      }
+          quietDeps: true,
+        },
+      },
     },
     server: {
       proxy: {
@@ -42,7 +60,8 @@ export default defineConfig(({ mode }) => {
           // Cross-Origin 요청을 위해 Origin 헤더를 변경합니다.
           changeOrigin: true,
         },
-      }
-    }
+      },
+    },
   }
 })
+
