@@ -4,7 +4,7 @@
     import { sendAuthCode, signup, checkDuplicateUsername, verifyAuthCode } from '@/api/login';
     import { useAlertDialog } from '@/composables/useAlertDialog';
 
-    const { showDialog } = useAlertDialog();
+    const { showAlert: showDialog } = useAlertDialog();
     const router = useRouter();
 
     // 이전 페이지로 이동 (관리자 로그인 페이지로 설정)

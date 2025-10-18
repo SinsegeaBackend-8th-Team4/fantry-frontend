@@ -8,7 +8,7 @@ import { useUserStore } from '@/stores/userStore';
 import { verifyMemberPassword, deactiveateMember } from '@/api/member'; // deleteMember API import
 import { useAlertDialog } from '@/composables/useAlertDialog';
 
-const { showDialog } = useAlertDialog();
+const { showAlert: showDialog } = useAlertDialog();
 const userStore = useUserStore();
 
 // 상태 관리

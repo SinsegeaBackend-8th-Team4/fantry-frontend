@@ -2,7 +2,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useUserStore } from '@/stores/userStore';
 import { useRouter } from 'vue-router';
 import { apiClient } from '@/api/index.js'; // 로그아웃 API 호출을 위해 사용
-import { showAlert } from '@/composables/useAlertDialog';
+import { useAlertDialog } from '@/composables/useAlertDialog';
 
 /**
  * 사용자 미활동(Idle Time)을 감지하여 자동 로그아웃을 처리하는 Vue Composable
@@ -16,6 +16,7 @@ export function useIdleTimer(timeoutMinutes) {
   
   const userStore = useUserStore();
   const router = useRouter();
+  const { showAlert } = useAlertDialog();
 
   let idleTimer = null; // 미활동 타이머 ID
   const showLogoutMessage = ref(false); // 미활동 메시지 표시 상태

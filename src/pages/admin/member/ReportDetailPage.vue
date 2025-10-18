@@ -57,7 +57,7 @@
   import { getReportDetail } from '@/api/report';
   import { useAlertDialog } from '@/composables/useAlertDialog';
 
-  const { showDialog } = useAlertDialog();
+  const { showAlert: showDialog } = useAlertDialog();
   const router = useRouter();
 
   const report = ref(null);

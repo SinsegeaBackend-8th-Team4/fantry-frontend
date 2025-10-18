@@ -85,7 +85,7 @@ import { useRouter } from 'vue-router';
 import { getReportDetail, updateReceiveReport } from '@/api/report';
 import { useAlertDialog } from '@/composables/useAlertDialog';
 
-const { showDialog } = useAlertDialog();
+const { showAlert: showDialog } = useAlertDialog();
 const router = useRouter();
 
 const report = ref(null);

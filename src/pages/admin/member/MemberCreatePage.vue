@@ -151,7 +151,7 @@
     import { registMember } from '@/api/member';
     import { useAlertDialog } from '@/composables/useAlertDialog';
 
-    const { showDialog } = useAlertDialog();
+    const { showAlert: showDialog } = useAlertDialog();
     const router = useRouter();
 
     const form = ref({
