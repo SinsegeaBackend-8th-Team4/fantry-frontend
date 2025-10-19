@@ -5,9 +5,9 @@ import { useModal } from '@/composables/useModal'
 import { estimatePrice, getMarketAvgPrice } from '@/api/checklist.js'
 import { getOfflineInspectionDetail, approveOfflineInspection, rejectOfflineInspection } from '@/api/adminInspection'
 import { useAdminInspectionStore } from '@/stores/adminInspectionStore'
-import { useAlertDialog } from '@/composables/useAlertDialog.js';
+import { useAlertDialog } from '@/composables/useAlertDialog.js'
 
-const {showAlert} = useAlertDialog();
+const { showAlert } = useAlertDialog()
 const router = useRouter()
 const route = useRoute()
 const adminStore = useAdminInspectionStore()
@@ -49,6 +49,8 @@ onMounted(async () => {
   initImageModal()
   initApproveModal()
   initRejectModal()
+
+  refetchMarketAvg()
 })
 
 // 오프라인 검수 상세 API 조회
@@ -63,7 +65,7 @@ async function fetchDetail(id) {
     currentExpectedPrice.value = res.onlineDetail?.expectedPrice ?? null
 
     // 승인 모달 폼 초기값 설정
-    approveForm.finalBuyPrice = res.finalBuyPrice ?? res.onlineDetail?.expectedPrice ?? null
+    approveForm.finalBuyPrice = res.finalBuyPrice ?? res.onlineDetail?.sellerHopePrice ?? null
     approveForm.priceDeductionReason = res.priceDeductionReason ?? ''
     approveForm.inspectionNotes = res.inspectionNotes ?? ''
   } catch (err) {
@@ -90,7 +92,6 @@ async function recalculateExpectedPrice() {
     const newPrice = await estimatePrice(online.value.goodsCategoryId, selections)
     currentExpectedPrice.value = newPrice
     showAlert('알림', '시스템 예상가가 업데이트되었습니다.')
-
   } catch (err) {
     showAlert('오류', '예상가를 재계산하는 중 오류가 발생했습니다.')
     console.error('예상가 재계산 실패:', err)
@@ -110,8 +111,7 @@ async function refetchMarketAvg() {
   try {
     const res = await getMarketAvgPrice(online.value.goodsCategoryId, online.value.artistId, online.value.albumId)
     currentMarketAvgPrice.value = res.marketAvgPrice
-    showAlert('알림', '최신 시세 정보로 업데이트되었습니다.')
-
+    // showAlert('알림', '최신 시세 정보로 업데이트되었습니다.')
   } catch (err) {
     showAlert('오류', '최신 시세 정보를 가져오는 데 실패했습니다.')
   } finally {
@@ -177,7 +177,6 @@ const reject = async () => {
     await rejectOfflineInspection(inspectionId.value, payload)
     closeRejectModal()
     showAlert('알림', '반려 처리가 완료되었습니다.')
-
 
     setTimeout(() => router.push('/admin/inspection/offline'), 300)
   } catch (err) {
