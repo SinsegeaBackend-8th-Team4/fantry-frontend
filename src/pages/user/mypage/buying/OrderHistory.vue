@@ -155,7 +155,7 @@
   //패치
   async function fetchOrders({page, size, sort, keyword}) {
     const res = await getOrders({
-      params: { memberId: currentMemberId.value }  
+      memberId: currentMemberId.value
     });
     let allOrders = res.data.content;
 
