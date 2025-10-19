@@ -233,10 +233,11 @@ const toLocalISOString = (date) => {
   return `${year}-${month}-${day}T${hours}:${minutes}`
 }
 
-// Returns the local datetime string as-is, as the backend expects local time.
+// 로컬 시간 문자열 (yyyy-MM-ddTHH:mm)을 UTC ISO 문자열로 변환
 const toUtcIsoStringFromLocal = (localDateTimeString) => {
   if (!localDateTimeString) return '';
-  return localDateTimeString;
+  const date = new Date(localDateTimeString);
+  return date.toISOString();
 };
 
 </script>
