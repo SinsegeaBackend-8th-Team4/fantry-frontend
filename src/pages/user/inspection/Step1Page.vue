@@ -7,11 +7,11 @@ import SelectedArtistModal from '@/pages/user/inspection/SelectedArtistModal.vue
 import SelectedAlbumModal from '@/pages/user/inspection/SelectedAlbumModal.vue'
 import { useInspectionStore } from '@/stores/inspectionStore'
 import { storeToRefs } from 'pinia'
-import { useAlertDialog } from '@/composables/useAlertDialog.js';
+import { useAlertDialog } from '@/composables/useAlertDialog.js'
 
 const router = useRouter()
 const inspectionStore = useInspectionStore()
-const {showAlert} = useAlertDialog();
+const { showAlert } = useAlertDialog()
 
 // Store 값
 const {
@@ -56,13 +56,6 @@ const isMarketAvgCalculated = ref(false) // 평균 시세 조회 완료 여부
 const isCategoryDisabled = computed(() => loadingInitial.value)
 const isArtistDisabled = computed(() => loadingInitial.value)
 const isAlbumDisabled = computed(() => !selectedArtist.value || loadingAlbums.value)
-
-// 상품명 미리보기 텍스트
-const previewText = computed(() => {
-  const ak = selectedArtist.value?.nameKo || '[아티스트]'
-  const nm = itemName.value || '[상품명]'
-  return `${ak} ${nm}`
-})
 
 // 체크리스트 필드 파싱
 const fields = computed(() => {
@@ -406,11 +399,6 @@ watch(
               <div class="form-group">
                 <label class="font-weight-medium"> 상품명 <span class="text-danger">*</span> </label>
                 <input type="text" class="form-control" placeholder="예: 한정판 포토카드" v-model="itemName" />
-              </div>
-
-              <!-- 미리보기 -->
-              <div class="form-group">
-                <small class="text-muted">미리보기: {{ previewText }}</small>
               </div>
 
               <!-- 설명 -->

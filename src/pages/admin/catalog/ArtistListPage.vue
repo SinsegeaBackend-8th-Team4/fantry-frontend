@@ -3,9 +3,9 @@ import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import BaseDataTable from '@/components/common/datatable/BaseDataTable.vue'
 import { getArtists, createArtist, updateArtist, deleteArtist } from '@/api/catalog'
 import { useModal } from '@/composables/useModal'
-import { useAlertDialog } from '@/composables/useAlertDialog.js';
+import { useAlertDialog } from '@/composables/useAlertDialog.js'
 
-const {showAlert} = useAlertDialog();
+const { showAlert } = useAlertDialog()
 
 // --- 상태 관리 ---
 const keyword = ref('')
