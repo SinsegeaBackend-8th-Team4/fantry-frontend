@@ -62,6 +62,12 @@ async function fetcher({ page, size, sort, keyword }) {
   };
 }
 
+const formatDateTime = (dt) => {
+  if (!dt || !Array.isArray(dt) || dt.length < 5) return '-';
+  const [year, month, day, hour, minute] = dt;
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')} ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+};
+
 const columns = [
   { data: 'inquiryId', title: '#', className: 'text-center' },
   {
@@ -69,10 +75,15 @@ const columns = [
     title: '문의 유형',
     className: 'text-center',
     render: (data) => {
-      const typeName = data ? data.name : 'N/A';
-      let badgeClass = 'bg-secondary';
+      let typeName = 'N/A';
+      if (typeof data === 'string') {
+        typeName = data;
+      } else if (data && data.name) {
+        typeName = data.name;
+      }
+      let badgeClass = 'bg-secondary text-white'; // Default to white text
       if (typeName === '환불/반품 문의') {
-        badgeClass = 'bg-danger';
+        badgeClass = 'bg-danger text-white';
       }
       return `<span class="badge ${badgeClass}">${typeName}</span>`;
     },
@@ -122,12 +133,7 @@ const columns = [
     data: 'inquiredAt',
     title: '등록일',
     className: 'text-center',
-    render: (val) => {
-      if (!val) return '-';
-      const dt = new Date(Array.isArray(val) ? val.slice(0, 6).join(',') : val);
-      if (isNaN(dt.getTime())) return '-';
-      return dt.toLocaleString('ko-KR');
-    }
+    render: (val) => formatDateTime(val)
   },
 ];
 

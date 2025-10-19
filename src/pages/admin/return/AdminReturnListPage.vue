@@ -44,13 +44,30 @@ async function fetcher({ page, size, sort }) {
     status: currentStatusFilter.value,
     buyerName: keyword.value || null,
   };
-  const response = await getAdminReturnRequests(params);
-  console.log('API 응답 content:', response.data.content);
-  console.log('API 응답 totalElements:', response.data.totalElements);
-  return {
-    rows: response.data.content,
-    total: response.data.totalElements,
-  };
+  console.log('AdminReturnListPage - API Request Params:', params); // Log request format
+  try {
+    const response = await getAdminReturnRequests(params);
+    console.log('AdminReturnListPage - API Response Data:', response); // Log the full response from unwrap
+    // Check if response is valid and has content
+    if (response && response.content) {
+      return {
+        rows: response.content,
+        total: response.totalElements,
+      };
+    } else {
+      console.warn('AdminReturnListPage - API Response is missing content or is malformed:', response);
+      return {
+        rows: [],
+        total: 0,
+      };
+    }
+  } catch (error) {
+    console.error('AdminReturnListPage - API Error:', error);
+    return {
+      rows: [],
+      total: 0,
+    };
+  }
 }
 
 // --- 테이블 컬럼, 이벤트 핸들러 ---
@@ -59,14 +76,13 @@ const columns = [
     data: 'returnRequestId',
     title: '요청 ID',
     className: 'text-center',
+    visible: false, // 요청 ID 숨김
   },
   {
     data: 'orderId',
     title: '주문 번호',
-    className: 'text-center clickable-id-cell',
-    render: (data, type, row) => {
-      return `<span class="order-id-link" data-order-id="${row.orderId}" style="color: blue; cursor: pointer; text-decoration: underline;">${data}</span>`;
-    }
+    className: 'text-center',
+    render: (data) => data, // Just display data as plain text
   },
   { data: 'buyerName', title: '구매자', className: 'text-center' },
   {
@@ -77,14 +93,14 @@ const columns = [
       let badgeClass = 'bg-light text-dark';
       let koreanText = data;
       switch (data) {
-        case 'REQUESTED': badgeClass = 'bg-primary'; koreanText = '요청됨'; break;
-        case 'IN_TRANSIT': badgeClass = 'bg-info'; koreanText = '처리중'; break;
-        case 'INSPECTING': badgeClass = 'bg-warning'; koreanText = '검수중'; break;
-        case 'APPROVED': badgeClass = 'bg-success'; koreanText = '승인됨'; break;
-        case 'REJECTED': badgeClass = 'bg-danger'; koreanText = '거절됨'; break;
-        case 'COMPLETED': badgeClass = 'bg-dark'; koreanText = '완료됨'; break;
-        case 'USER_CANCELLED': badgeClass = 'bg-secondary'; koreanText = '사용자 취소'; break;
-        case 'DELETED': badgeClass = 'bg-danger bg-opacity-50'; koreanText = '삭제됨'; break;
+        case 'REQUESTED': badgeClass = 'bg-primary text-white'; koreanText = '요청됨'; break;
+        case 'IN_TRANSIT': badgeClass = 'bg-info text-white'; koreanText = '처리중'; break;
+        case 'INSPECTING': badgeClass = 'bg-warning text-white'; koreanText = '검수중'; break;
+        case 'APPROVED': badgeClass = 'bg-success text-white'; koreanText = '승인됨'; break;
+        case 'REJECTED': badgeClass = 'bg-danger text-white'; koreanText = '거절됨'; break;
+        case 'COMPLETED': badgeClass = 'bg-dark text-white'; koreanText = '완료됨'; break;
+        case 'USER_CANCELLED': badgeClass = 'bg-secondary text-white'; koreanText = '사용자 취소'; break;
+        case 'DELETED': badgeClass = 'bg-danger bg-opacity-50 text-white'; koreanText = '삭제됨'; break;
       }
       return `<span class="badge ${badgeClass}">${koreanText}</span>`;
     },
@@ -111,39 +127,20 @@ const columns = [
     className: 'text-center',
   }));
 
-// 주문 상세 페이지로 이동
-function goToOrderDetail(orderId) {
-  router.push({ name: 'AdminOrderDetail', params: { orderId } });
-}
-
 // 새 환불/반품 등록 페이지로 이동
 function goToCreate() {
   router.push({ name: 'AdminReturnCreate' });
 }
 
-// 클릭 핸들러 동적 바인딩
-function attachClickHandlers() {
-  nextTick(() => {
-    const orderIdLinks = document.querySelectorAll('.order-id-link');
-    orderIdLinks.forEach(el => {
-      if (el.dataset.bound) return; // 중복 바인딩 방지
-      el.dataset.bound = 'true';
-      el.addEventListener('click', (e) => {
-        const orderId = e.target.dataset.orderId;
-        goToOrderDetail(orderId);
-      });
-    });
+// 이벤트 위임을 통해 동적 버튼 클릭 처리
+function handleMainClick(event) {
+  const target = event.target.closest('.detail-link');
+  if (!target) return;
 
-    const detailLinks = document.querySelectorAll('.detail-link');
-    detailLinks.forEach(el => {
-      if (el.dataset.bound) return; // 중복 바인딩 방지
-      el.dataset.bound = 'true';
-      el.addEventListener('click', (e) => {
-        const returnRequestId = e.target.dataset.detailId;
-        router.push({ name: 'AdminReturnDetail', params: { returnRequestId } });
-      });
-    });
-  });
+  const returnRequestId = target.dataset.detailId;
+  if (returnRequestId) {
+    router.push({ name: 'AdminReturnDetail', params: { returnRequestId } });
+  }
 }
 
 onMounted(() => {
@@ -157,7 +154,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="container-fluid p-4">
+  <main class="container-fluid p-4" @click="handleMainClick"> <!-- Add @click handler here -->
     <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
       <!-- 헤더 -->
       <div class="card-header bg-white border-bottom-0 pt-4 px-4 pb-2">
@@ -200,7 +197,6 @@ onMounted(() => {
           :columns="columns"
           :fetcher="fetcher"
           :loading="loading"
-          @loaded="attachClickHandlers"
         >
           <template #empty>현재 조건에 해당하는 환불/반품 내역이 없습니다.</template>
         </ServerDataTable>
@@ -216,6 +212,10 @@ onMounted(() => {
 }
 
 :deep(table td .order-id-link){ /* 새로운 클래스에 대한 스타일 추가 */
+  pointer-events: auto;
+}
+
+:deep(table td .detail-link){
   pointer-events: auto;
 }
 
