@@ -38,7 +38,7 @@
                 <!-- ====================================================== -->
                 <!-- 1. saleStatus가 ACTIVE일 때만 기존 경매/판매 로직 표시 -->
                 <!-- ====================================================== -->
-                <template v-if="auction.saleStatus === 'ACTIVE' || auction.saleStatus === 'REACTIVE'">
+                <template v-if="['ACTIVE', 'REACTIVE', 'SOLD'].includes(auction.saleStatus)">
                     <!-- Case 1: 경매 상품일 경우 ('AUCTION') -->
                     <template v-if="isAuction">
                         <div class="countdown-timer mb-5">
@@ -748,8 +748,13 @@
 /* =============================================
 * 5. 라이프사이클 훅 (Lifecycle Hooks)
 * ============================================= */
-    onMounted(() => {
-        fetchAuctionData();
+    onMounted(async () => {
+        // 사용자 정보가 없으면 먼저 로드합니다.
+        if (userStore.authToken && !userStore.currentUser) {
+            await userStore.fetchUser();
+        }
+        // 사용자 정보를 기다린 후 경매 데이터를 가져옵니다.
+        await fetchAuctionData();
         console.log("페이지 마운트 됨");
     });
 
