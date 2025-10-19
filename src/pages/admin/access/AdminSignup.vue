@@ -317,7 +317,7 @@
                     <select v-model="formState.emailDomain" :disabled="uiState.isEmailVerified">
                         <option value="">선택하세요</option>
                         <option value="fantry.co.kr">fantry.co.kr</option>
-                        <option value="google.com">google.com</option>
+                        <option value="gmail.com">gmail.com</option>
                     </select>
                 </div>
                 <label class="input-error" v-if="!validation.email.isValid">{{ validation.email.message }}</label>
