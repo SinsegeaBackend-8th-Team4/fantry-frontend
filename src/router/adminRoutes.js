@@ -180,11 +180,11 @@ const adminRoutes = [
             ],
           },
           
-          // --- 재고 관리 ---
+          // --- 재고/판매 관리 ---
           {
             path: 'inventory',
             redirect: { name: 'AdminInventoryDashboard' },
-            meta: { title: '재고관리', icon: 'fas fa-fw fa-boxes', menu: true },
+            meta: { title: '재고/판매 관리', icon: 'fas fa-fw fa-boxes', menu: true },
             children: [
               {
                 path: 'dashboard',
@@ -199,32 +199,17 @@ const adminRoutes = [
                 meta: { title: '재고 목록' },
               },
               {
+                path: 'sale-list',
+                name: 'AdminSaleList',
+                component: AuctionListPage,
+                meta: { title: '판매 상품 목록' },
+              },
+              {
                 path: 'detail/:id',
                 name: 'AdminInventoryDetail',
                 component: () => import('@/pages/admin/inventory/InventoryDetailPage.vue'),
                 props: true,
                 meta: { title: '재고 상세', hidden: true },
-              },
-            ],
-          },
-          
-          // --- 판매 관리 ---
-          {
-            path: 'sale',
-            redirect: { name: 'AdminSaleDashboard' },
-            meta: { title: '판매 관리', icon: 'fas fa-fw fa-gavel', menu: true },
-            children: [
-              {
-                path: 'dashboard',
-                name: 'AdminSaleDashboard',
-                component: AuctionDashboardPage,
-                meta: { title: '판매 대시보드' },
-              },
-              {
-                path: 'list',
-                name: 'AdminSaleList',
-                component: AuctionListPage,
-                meta: { title: '판매 상품 목록' },
               },
             ],
           },
