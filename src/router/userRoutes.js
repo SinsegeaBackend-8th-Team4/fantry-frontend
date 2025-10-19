@@ -7,11 +7,12 @@
 
 // --- 레이아웃 ---
 import UserLayout from '@/layouts/UserLayout.vue'
-import CheckoutPage from '@/pages/payment/CheckoutPage.vue'
-import UserInfoPage from '@/pages/payment/UserInfoPage.vue'
-import PaymentCompletePage from '@/pages/payment/PaymentCompletePage.vue'
 
 // --- 페이지 컴포넌트 (Lazy Loading) ---
+const CSPageLayout = () => import('@/layouts/CSPageLayout.vue');
+const CheckoutPage = () => import('@/pages/payment/CheckoutPage.vue');
+const UserInfoPage = () => import('@/pages/payment/UserInfoPage.vue');
+const PaymentCompletePage = () => import('@/pages/payment/PaymentCompletePage.vue');
 const HomePage = () => import('@/pages/HomePage.vue');
 const LoginPage = () => import('@/pages/user/access/LoginPage.vue');
 const LoginFind = () => import('@/pages/user/access/LoginFind.vue');
@@ -29,9 +30,17 @@ const ProductAuctionPolicyPage = () => import('@/pages/product/ProductAuctionPol
 const InspectionStep1Page = () => import('@/pages/user/inspection/Step1Page.vue')
 const InspectionStep2Page = () => import('@/pages/user/inspection/Step2Page.vue')
 const InspectionStep3Page = () => import('@/pages/user/inspection/Step3Page.vue')
-const InspectionPolicyPage = () => import('@/pages/user/inspection/InspectionPolicyPage.vue'); 
+const InspectionPolicyPage = () => import('@/pages/user/inspection/InspectionPolicyPage.vue')
 // 마이페이지
 const MyPageLayout = () => import('@/pages/user/mypage/MyPage.vue')
+// 고객센터
+
+const FaqPage = () => import('@/pages/user/cs/FaqPage.vue')
+const NoticePage = () => import('@/pages/user/cs/NoticePage.vue')
+const NoticeDetailPage = () => import('@/pages/user/cs/NoticeDetailPage.vue')
+const InquiryWritePage = () => import('@/pages/user/cs/InquiryWritePage.vue')
+const InquiryListPage = () => import('@/pages/user/cs/InquiryListPage.vue')
+const InquiryDetailPage = () => import('@/pages/user/cs/InquiryDetailPage.vue')
 
 const userRoutes = {
   path: '/',
@@ -157,27 +166,68 @@ const userRoutes = {
       meta: { requiresAuth: true },
     },
     {
-      path: 'order',
+      path: 'mypage/refund/:orderId',
+      name: 'RefundRequest',
+      component: () => import('@/pages/user/mypage/refund/RefundRequestPage.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: 'cs',
+      component: CSPageLayout,
+      redirect: '/cs/notice',
       children: [
         {
-          path: 'info',
-          name: 'Info',
-          component: UserInfoPage,
-          meta: { requiredLogin: false },
+          path: 'faq',
+          name: 'FaqPage',
+          component: FaqPage,
         },
         {
-          path: 'checkout',
-          name: 'Checkout',
-          component: CheckoutPage,
-          meta: { requiredLogin: false },
+          path: 'notice',
+          name: 'NoticePage',
+          component: NoticePage,
         },
         {
-          path: 'complete',
-          name: 'Complete',
-          component: PaymentCompletePage,
-          meta: { requiredLogin: false },
+          path: 'notice/:id',
+          name: 'NoticeDetail',
+          component: NoticeDetailPage,
         },
-      ],
+        {
+          path: 'inquiry-write',
+          name: 'InquiryWritePage',
+          component: InquiryWritePage,
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'inquiry-list',
+          name: 'InquiryListPage',
+          component: InquiryListPage,
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'inquiry/:id',
+          name: 'InquiryDetail',
+          component: InquiryDetailPage,
+          meta: { requiresAuth: true },
+        },
+      ]
+    },
+    {
+      path: 'product/order/info',
+      name: 'Info',
+      component: UserInfoPage,
+      meta: { requiredLogin: false },
+    },
+    {
+      path: 'product/order/checkout',
+      name: 'Checkout',
+      component: CheckoutPage,
+      meta: { requiredLogin: false },
+    },
+    {
+      path: 'product/order/complete',
+      name: 'Complete',
+      component: PaymentCompletePage,
+      meta: { requiredLogin: false },
     },
   ],
 }

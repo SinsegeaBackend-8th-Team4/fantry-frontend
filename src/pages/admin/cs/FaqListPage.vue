@@ -3,12 +3,17 @@ import { ref, onMounted, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
 import { searchFaqs } from '@/api/adminFaq.js';
+import { debounce } from 'lodash-es';
 
 const router = useRouter();
 const route = useRoute();
 const table = ref(null);
 const keyword = ref('');
 const tableKey = ref(0);
+
+// Debounce 적용
+const triggerRefresh = () => tableKey.value++;
+const debouncedRefresh = debounce(triggerRefresh, 300);
 
 onMounted(() => {
   const statusFromQuery = route.query.status;
@@ -40,6 +45,16 @@ const typeFilters = [
 ];
 const currentTypeFilter = ref(null);
 
+function handleStatusFilterClick(value) {
+  currentStatusFilter.value = value;
+  debouncedRefresh();
+}
+
+function handleTypeFilterClick(value) {
+  currentTypeFilter.value = value;
+  debouncedRefresh();
+}
+
 async function fetcher({ page, size, sort, keyword }) {
   const response = await searchFaqs({
     page: page,
@@ -59,10 +74,10 @@ const columns = [
   { data: 'faqId', title: '#', className: 'text-center' },
   {
     data: 'csType',
-    title: '문의 유형',
+    title: 'FAQ 유형',
     className: 'text-center',
     render: (data) => {
-      const typeName = data || 'N/A';
+      const typeName = data ? data.name : 'N/A';
       let badgeClass = 'bg-secondary';
       switch (typeName) {
         case '배송': badgeClass = 'bg-primary'; break;
@@ -189,7 +204,7 @@ onMounted(() => {
                 type="button"
                 class="btn btn-outline-secondary"
                 :class="{ active: currentStatusFilter === filter.value }"
-                @click="currentStatusFilter = filter.value; tableKey++;"
+                @click="handleStatusFilterClick(filter.value)"
               >
                 {{ filter.label }}
               </button>
@@ -205,7 +220,7 @@ onMounted(() => {
                 type="button"
                 class="btn btn-outline-secondary"
                 :class="{ active: currentTypeFilter === filter.value }"
-                @click="currentTypeFilter = filter.value; tableKey++;"
+                @click="handleTypeFilterClick(filter.value)"
               >
                 {{ filter.label }}
               </button>

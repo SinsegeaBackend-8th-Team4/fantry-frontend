@@ -1,11 +1,13 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { getAdminReturnDetail, updateAdminReturn } from '@/api/adminReturn.js';
+import { getAdminReturnRequestDetail, updateAdminReturnRequestStatus } from '@/api/adminReturn.js';
 import { formatDateTime } from '@/utils/tableFormatters';
+import { useAlertDialog } from '@/composables/useAlertDialog';
 
 const route = useRoute();
 const router = useRouter();
+const { showAlert: showAlertDialog } = useAlertDialog();
 
 const returnRequestId = ref(Number(route.params.returnRequestId));
 const returnRequest = ref(null);
@@ -25,7 +27,7 @@ function isImage(url) {
 async function fetchReturnDetail() {
   loading.value = true;
   try {
-    const response = await getAdminReturnDetail(returnRequestId.value);
+    const response = await getAdminReturnRequestDetail(returnRequestId.value);
     returnRequest.value = response.data;
     // 기존 차감 배송비가 있으면 폼에 설정
     deductedShippingFeeInput.value = returnRequest.value.deductedShippingFee || 0;
@@ -59,7 +61,7 @@ async function handleStatusChange(newStatus) {
 
 async function confirmReject() {
   if (!rejectReasonInput.value.trim()) {
-    alert('거절 사유를 입력해주세요.');
+    showAlertDialog('알림', '거절 사유를 입력해주세요.');
     return;
   }
   if (!confirm(`상태를 '거절'로 변경하고 거절 사유를 저장하시겠습니까?`)) return;
@@ -70,17 +72,15 @@ async function confirmReject() {
 }
 
 // 차감 배송비 업데이트
-async function updateDeductedShippingFee() {
-  if (!confirm(`차감 배송비를 ${deductedShippingFeeInput.value.toLocaleString()}원(으)로 저장하시겠습니까?`)) return;
+  async function updateDeductedShippingFee() {  if (!confirm(`차감 배송비를 ${deductedShippingFeeInput.value.toLocaleString()}원(으)로 저장하시겠습니까?`)) return;
 
   loading.value = true;
   try {
     const payload = {
       status: returnRequest.value.status, // 현재 상태 유지
-      deductedShippingFee: deductedShippingFeeInput.value,
     };
-    await updateAdminReturn(returnRequestId.value, payload);
-    alert('차감 배송비가 성공적으로 저장되었습니다.');
+    await updateAdminReturnRequestStatus(returnRequestId.value, payload);
+    showAlertDialog('성공', '차감 배송비가 성공적으로 저장되었습니다.');
     await fetchReturnDetail(); // 정보 새로고침
   } catch (e) {
     error.value = '차감 배송비 저장 중 오류가 발생했습니다.';
@@ -99,8 +99,8 @@ async function updateReturnRequest(newStatus, rejectReason = null) {
       deductedShippingFee: deductedShippingFeeInput.value, // 차감 배송비 추가
       // memo 등 필요시 추가
     };
-    await updateAdminReturn(returnRequestId.value, payload);
-    alert('상태가 성공적으로 변경되었습니다.');
+    await updateAdminReturnRequestStatus(returnRequestId.value, payload);
+    showAlertDialog('성공', '상태가 성공적으로 변경되었습니다.');
     await fetchReturnDetail(); // 정보 새로고침
   } catch (e) {
     error.value = '상태 변경 중 오류가 발생했습니다.';

@@ -1,16 +1,22 @@
 <script setup>
-import { ref, nextTick } from 'vue'; // nextTick 임포트
+import { ref, nextTick, onMounted } from 'vue'; // nextTick, onMounted 임포트
 import { useRouter } from 'vue-router';
 import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
-import { getAdminReturnList } from '@/api/adminReturn.js';
+import { getAdminReturnRequests } from '@/api/adminReturn.js';
+import { debounce } from 'lodash-es';
 
 const router = useRouter();
 const table = ref(null);
+const loading = ref(false); // loading ref 추가
 
 // --- 필터링 & 검색 관련 상태 ---
 const tableKey = ref(0);
 const keyword = ref(''); // buyerName 검색어
 const currentStatusFilter = ref(null);
+
+// Debounce 적용
+const triggerRefresh = () => tableKey.value++;
+const debouncedRefresh = debounce(triggerRefresh, 300);
 
 // 상태 필터 버튼 목록 정의 (api.md 기반)
 const statusFilters = [
@@ -24,6 +30,11 @@ const statusFilters = [
   { label: '사용자 취소', value: 'USER_CANCELLED' },
 ];
 
+function handleStatusFilterClick(value) {
+  currentStatusFilter.value = value;
+  debouncedRefresh();
+}
+
 // --- API ---
 async function fetcher({ page, size, sort }) {
   const params = {
@@ -33,7 +44,9 @@ async function fetcher({ page, size, sort }) {
     status: currentStatusFilter.value,
     buyerName: keyword.value || null,
   };
-  const response = await getAdminReturnList(params);
+  const response = await getAdminReturnRequests(params);
+  console.log('API 응답 content:', response.data.content);
+  console.log('API 응답 totalElements:', response.data.totalElements);
   return {
     rows: response.data.content,
     total: response.data.totalElements,
@@ -44,7 +57,7 @@ async function fetcher({ page, size, sort }) {
 const columns = [
   {
     data: 'returnRequestId',
-    title: '#',
+    title: '요청 ID',
     className: 'text-center',
   },
   {
@@ -82,19 +95,21 @@ const columns = [
     className: 'text-center',
     render: (val) => {
       if (!val || !Array.isArray(val)) return '-';
-      const dt = new Date(val[0], val[1] - 1, val[2], val[3], val[4], val[5] || 0);
-      
-      const year = dt.getFullYear();
-      const month = String(dt.getMonth() + 1).padStart(2, '0');
-      const day = String(dt.getDate()).padStart(2, '0');
-      const hours = String(dt.getHours()).padStart(2, '0');
-      const minutes = String(dt.getMinutes()).padStart(2, '0');
-      const seconds = String(dt.getSeconds()).padStart(2, '0');
-
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      return `${val[0]}-${String(val[1]).padStart(2, '0')}-${String(val[2]).padStart(2, '0')} ${String(val[3]).padStart(2, '0')}:${String(val[4]).padStart(2, '0')}:${String(val[5] || 0).padStart(2, '0')}`;
     }
   },
-];
+  {
+    data: null,
+    title: '관리',
+    className: 'text-center',
+    sortable: false,
+    render: (data, type, row) => {
+      return `<button class="btn btn-outline-info btn-sm detail-link" data-detail-id="${row.returnRequestId}">상세 보기</button>`;
+    }
+  }
+].map(col => ({...col,
+    className: 'text-center',
+  }));
 
 // 주문 상세 페이지로 이동
 function goToOrderDetail(orderId) {
@@ -118,8 +133,27 @@ function attachClickHandlers() {
         goToOrderDetail(orderId);
       });
     });
+
+    const detailLinks = document.querySelectorAll('.detail-link');
+    detailLinks.forEach(el => {
+      if (el.dataset.bound) return; // 중복 바인딩 방지
+      el.dataset.bound = 'true';
+      el.addEventListener('click', (e) => {
+        const returnRequestId = e.target.dataset.detailId;
+        router.push({ name: 'AdminReturnDetail', params: { returnRequestId } });
+      });
+    });
   });
 }
+
+onMounted(() => {
+  console.log('AdminReturnListPage mounted. Columns:', columns);
+  console.log('AdminReturnListPage mounted. Keyword:', keyword.value);
+  console.log('AdminReturnListPage: loading prop for ServerDataTable:', loading.value);
+  if (table.value) {
+    table.value.load(); // ServerDataTable의 load 함수 명시적 호출
+  }
+});
 </script>
 
 <template>
@@ -149,7 +183,7 @@ function attachClickHandlers() {
                 type="button"
                 class="btn btn-outline-secondary"
                 :class="{ active: currentStatusFilter === filter.value }"
-                @click="currentStatusFilter = filter.value; tableKey++;"
+                @click="handleStatusFilterClick(filter.value)"
               >
                 {{ filter.label }}
               </button>
@@ -165,6 +199,7 @@ function attachClickHandlers() {
           search-placeholder="구매자 이름으로 검색"
           :columns="columns"
           :fetcher="fetcher"
+          :loading="loading"
           @loaded="attachClickHandlers"
         >
           <template #empty>현재 조건에 해당하는 환불/반품 내역이 없습니다.</template>
