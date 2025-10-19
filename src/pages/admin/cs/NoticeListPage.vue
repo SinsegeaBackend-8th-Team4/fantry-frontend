@@ -58,6 +58,12 @@ async function fetcher({ page, size, sort, keyword }) {
   };
 }
 
+const formatDateTime = (dt) => {
+  if (!dt || !Array.isArray(dt) || dt.length < 5) return '-';
+  const [year, month, day, hour, minute] = dt;
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')} ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+};
+
 const columns = [
   { data: 'noticeId', title: '#', className: 'text-center' },
   {
@@ -150,8 +156,7 @@ function attachClickHandlers() {
       
       el.addEventListener('click', (e) => {
         const noticeId = e.target.dataset.noticeId;
-        router.push({
-          name: 'AdminNoticeDetail',
+        router.push({ name: 'AdminNoticeDetail',
           params: { noticeId }
         });
       });
