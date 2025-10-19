@@ -137,10 +137,9 @@ const formatPrice = (price) => {
   return price != null ? price.toLocaleString() + '원' : '가격 정보 없음';
 };
 
-const formatDate = (dateString) => {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return '';
+const formatDate = (dateArray) => {
+  const date = parseUtcDateArray(dateArray);
+  if (!date || isNaN(date.getTime())) return '';
   return date.toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 };
 
@@ -150,6 +149,16 @@ const getThumbnailSrc = (thumbnailImageUrl) => {
     return `${baseUrl}/${thumbnailImageUrl}`;
   }
   return '/images/ww.png';
+};
+
+// API로부터 받은 UTC 시간 배열을 JS Date 객체로 변환
+const parseUtcDateArray = (dt) => {
+    if (!Array.isArray(dt) || dt.length < 5) {
+        return null;
+    }
+    const [year, month, day, hour, minute, second = 0] = dt;
+    // Date.UTC를 사용하여 UTC 시간으로 Date 객체 생성
+    return new Date(Date.UTC(year, month - 1, day, hour, minute, second));
 };
 
 const goToProductDetail = (auctionId) => {

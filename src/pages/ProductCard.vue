@@ -24,11 +24,14 @@ const goToDetail = () => {
   }
 }
 
-const getTimeRemaining = (endTimeString) => {
-    if (!endTimeString) return '';
+const getTimeRemaining = (endTimeArr) => {
+    if (!endTimeArr || !Array.isArray(endTimeArr)) return '';
     
-    const end = new Date(endTimeString);
-    if (isNaN(end.getTime())) return '';
+    const [year, month, day, hour, minute, second = 0] = endTimeArr;
+    // API에서 UTC 시간 배열을 받으므로 Date.UTC를 사용하여 정확한 Date 객체 생성
+    const end = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
+
+    if (isNaN(end.getTime())) return '계산 중...';
 
     const now = new Date();
     const diff = end - now;

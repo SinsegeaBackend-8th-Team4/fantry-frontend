@@ -338,17 +338,24 @@
         return currentBidPrice.value !== auction.value.startPrice;
     })
     const formatPrice = (price) => price != null ? price.toLocaleString() + '원' : '가격 정보 없음';
-    const formatDate = (dateString) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return '';
+
+    const parseUtcDateArray = (dt) => {
+        if (!Array.isArray(dt) || dt.length < 5) return null;
+        const [year, month, day, hour, minute, second = 0] = dt;
+        return new Date(Date.UTC(year, month - 1, day, hour, minute, second));
+    };
+
+    const formatDate = (dateArray) => {
+        if (!dateArray) return '';
+        const date = parseUtcDateArray(dateArray);
+        if (!date || isNaN(date.getTime())) return '';
         return date.toLocaleString('ko-KR');
     };
 
     const endTimeMs = computed(() => {
         if (!auction.value?.endTime) return null;
-        const dateObj = new Date(auction.value.endTime);
-        return !isNaN(dateObj.getTime()) ? dateObj.getTime() : null;
+        const dateObj = parseUtcDateArray(auction.value.endTime);
+        return dateObj ? dateObj.getTime() : null;
     });
 
     const formattedCurrentPrice = computed(() => formatPrice(currentBidPrice.value));
@@ -474,8 +481,8 @@
             // saleStatus가 ACTIVE 또는 REACTIVE일 때만 경매 관련 로직 수행
             if (['ACTIVE', 'REACTIVE'].includes(auction.value.saleStatus)) {
                 // 경매 종료 여부 초기 확인
-                const endTime = new Date(auction.value.endTime);
-                if (!isNaN(endTime.getTime()) && new Date() > endTime) {
+                const endTime = parseUtcDateArray(auction.value.endTime);
+                if (endTime && new Date() > endTime) {
                     isAuctionEnded.value = true;
                 }
 
