@@ -296,8 +296,7 @@ const toUtcIsoStringFromLocal = (localDateTimeString) => {
               <h5 class="fw-semibold border-bottom pb-2 mb-3">가격 정보</h5>
               <dl class="info-grid">
                 <dt>판매자 희망가</dt><dd class="text-primary fw-bold">{{ formatPrice(info.sellerHopePrice) }}</dd>
-                <dt>시스템 예상가</dt><dd>{{ formatPrice(info.expectedPrice) }}</dd>
-                <dt>팬트리 평균가</dt><dd>{{ formatPrice(info.marketAvgPrice) }}</dd>
+                <dt>최종 판매가</dt><dd class="text-primary fw-bold">{{ formatPrice(info.final_buy_price) }}</dd>
               </dl>
             </section>
 
@@ -340,8 +339,7 @@ const toUtcIsoStringFromLocal = (localDateTimeString) => {
                   </div>
                   <div class="mt-2 d-flex flex-wrap">
                     <button type="button" class="btn btn-sm btn-outline-secondary mr-2 mb-2" @click="saleForm.startPrice = info.sellerHopePrice" :disabled="isLocked || !info.sellerHopePrice">판매자 희망가</button>
-                    <button type="button" class="btn btn-sm btn-outline-info mr-2 mb-2" @click="saleForm.startPrice = info.expectedPrice" :disabled="isLocked || !info.expectedPrice">시스템 예상가</button>
-                    <button type="button" class="btn btn-sm btn-outline-success mb-2" @click="saleForm.startPrice = info.marketAvgPrice" :disabled="isLocked || !info.marketAvgPrice">팬트리 평균가</button>
+                    <button type="button" class="btn btn-sm btn-outline-danger mr-2 mb-2" @click="saleForm.startPrice = info.final_buy_price" :disabled="isLocked || !info.final_buy_price">최종 판매가</button>
                   </div>
                 </div>
 
