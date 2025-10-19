@@ -249,12 +249,17 @@ const proceedToCheckout = () => {
 const loadAuctionDetails = async (id) => {
   try {
     const response = await getAuctionDetails(id)
+    console.log('📦 API 응답:', response.data)
+    console.log('🖼️ fileInfos:', response.data.fileInfos)
 
     // 이미지 URL 처리: 첫 번째 이미지만 추출
     let imageUrl = '/images/fantry_logo.png' // 기본 이미지
     if (response.data.fileInfos && response.data.fileInfos.length > 0) {
       const baseUrl = import.meta.env.VITE_FILE_BASE_URL || ''
       imageUrl = `${baseUrl}/${response.data.fileInfos[0].fileUrl}`
+      console.log('✅ 이미지 URL 생성:', imageUrl)
+    } else {
+      console.log('⚠️ fileInfos 없음 - 기본 이미지 사용')
     }
 
     // 경매 정보에 imageUrl 추가
@@ -262,6 +267,7 @@ const loadAuctionDetails = async (id) => {
       ...response.data,
       imageUrl: imageUrl
     }
+    console.log('💾 auctionDetails.value:', auctionDetails.value)
 
     // Pinia 스토어에 경매 컨텍스트 저장 (imageUrl 포함)
     paymentStore.setAuctionContext(id, auctionDetails.value)
