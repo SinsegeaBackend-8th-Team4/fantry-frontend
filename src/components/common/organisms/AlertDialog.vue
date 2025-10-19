@@ -40,7 +40,7 @@ onMounted(() => {
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="alertDialogLabel">{{ title }}</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="isConfirm ? confirmDialog(false) : isVisible = false"> // Call confirmDialog(false) if isConfirm
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="isConfirm ? confirmDialog(false) : isVisible = false">
              <span aria-hidden="true">&times;</span>
           </button>
         </div>
@@ -48,8 +48,8 @@ onMounted(() => {
           <p v-html="message"></p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal" v-if="isConfirm" @click="confirmDialog(false)">취소</button> // Conditionally render Cancel button
-          <button type="button" class="btn btn-primary" @click="confirmDialog(true)">확인</button> // Call confirmDialog(true)
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" v-if="isConfirm" @click="confirmDialog(false)">취소</button>
+          <button type="button" class="btn btn-primary" @click="confirmDialog(true)">확인</button>
         </div>
       </div>
     </div>
