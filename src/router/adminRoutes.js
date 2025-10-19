@@ -22,6 +22,7 @@ const CatalogDashboardPage = () => import('@/pages/admin/catalog/CatalogDashboar
 const CSDashboardPage = () => import('@/pages/admin/cs/CSDashboardPage.vue')
 const SettlementDashboardPage = () => import('@/pages/admin/settlement/SettlementDashboardPage.vue')
 
+
 // 정산 관리
 const SettlementListPage = () => import('@/pages/admin/settlement/SettlementListPage.vue')
 const SettlementSettingPage = () => import('@/pages/admin/settlement/SettlementSettingPage.vue') // 새로 추가
@@ -44,6 +45,7 @@ const NoticeListPage = () => import('@/pages/admin/cs/NoticeListPage.vue')
 const NoticeDetailPage = () => import('@/pages/admin/cs/NoticeDetailPage.vue')
 const NoticeCreatePage = () => import('@/pages/admin/cs/NoticeCreatePage.vue')
 const NoticeEditPage = () => import('@/pages/admin/cs/NoticeEditPage.vue')
+
 
 // 검수 관리
 const OnlineInspectionListPage = () => import('@/pages/admin/inspection/OnlineInspectionListPage.vue')
@@ -232,4 +234,4 @@ const adminRoutes = [
   },
 ]
 
-export default adminRoutes
+export default adminRoutes;

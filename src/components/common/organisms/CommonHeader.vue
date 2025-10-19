@@ -1,49 +1,47 @@
 <script setup>
-import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/userStore'
-import { useModal } from '@/composables/useModal'
-import { logout } from '@/api/login' // NavigationBar에서 이동
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/userStore';
+import { useModal } from '@/composables/useModal';
+import { logout } from '@/api/login'; // NavigationBar에서 이동
 
-import BrandLogo from '../atoms/BrandLogo.vue'
-import NavigationItem from '../atoms/NavigationItem.vue' // NavigationBar에서 이동
-import NavigationBar from '../molecules/NavigationBar.vue' // NavigationBar는 여전히 별도 컴포넌트로 사용
+import BrandLogo from '../atoms/BrandLogo.vue';
+import NavigationItem from '../atoms/NavigationItem.vue'; // NavigationBar에서 이동
+import NavigationBar from '../molecules/NavigationBar.vue'; // NavigationBar는 여전히 별도 컴포넌트로 사용
 
-const router = useRouter()
-const userStore = useUserStore()
+const router = useRouter();
+const userStore = useUserStore();
 
 // --- NavigationBar에서 이동된 로직 ---
 const handleLogout = () => {
-  logout()
-    .then(() => {
-      userStore.logout()
-      router.push('/')
-    })
-    .catch((error) => {
-      console.error('로그아웃 에러 : ', error)
-    })
-}
+  logout().then(() => {
+    userStore.logout();
+    router.push('/');
+  }).catch(error => {
+    console.error('로그아웃 에러 : ', error);
+  });
+};
 
 const goToMyPage = () => {
-  router.push('/mypage')
-}
+  router.push('/mypage');
+};
 
 // --- 기존 CommonHeader.vue 로직 ---
-const { initModal: initPolicyModal, show: showPolicyModal, hide: hidePolicyModal } = useModal('#policyCheckModal')
+const { initModal: initPolicyModal, show: showPolicyModal, hide: hidePolicyModal } = useModal('#policyCheckModal');
 
 onMounted(() => {
-  initPolicyModal()
-})
+  initPolicyModal();
+});
 
 const goToInspection = () => {
-  hidePolicyModal()
-  router.push('/inspection/step1')
-}
+  hidePolicyModal();
+  router.push('/inspection/step1');
+};
 
 const goToPolicy = () => {
-  hidePolicyModal()
-  router.push('/inspection/policy')
-}
+  hidePolicyModal();
+  router.push('/inspection/policy');
+};
 </script>
 
 <template>
@@ -101,7 +99,6 @@ const goToPolicy = () => {
     </div>
   </div>
 </template>
-<<<<<<< HEAD =======
 
 <style scoped>
 .top-header-section {
@@ -150,4 +147,3 @@ const goToPolicy = () => {
   margin-bottom: 0 !important; /* 네비게이션 바 아래 여백 제거 */
 }
 </style>
->>>>>>> upstream/develop
