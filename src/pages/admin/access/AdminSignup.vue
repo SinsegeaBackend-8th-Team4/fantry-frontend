@@ -4,7 +4,7 @@
     import { sendAuthCode, signup, checkDuplicateUsername, verifyAuthCode } from '@/api/login';
     import { useAlertDialog } from '@/composables/useAlertDialog';
 
-    const { showDialog } = useAlertDialog();
+    const { showAlert: showDialog } = useAlertDialog();
     const router = useRouter();
 
     // 이전 페이지로 이동 (관리자 로그인 페이지로 설정)
@@ -317,7 +317,7 @@
                     <select v-model="formState.emailDomain" :disabled="uiState.isEmailVerified">
                         <option value="">선택하세요</option>
                         <option value="fantry.co.kr">fantry.co.kr</option>
-                        <option value="google.com">google.com</option>
+                        <option value="gmail.com">gmail.com</option>
                     </select>
                 </div>
                 <label class="input-error" v-if="!validation.email.isValid">{{ validation.email.message }}</label>

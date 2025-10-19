@@ -155,7 +155,7 @@
   //패치
   async function fetchOrders({page, size, sort, keyword}) {
     const res = await getOrders({
-      params: { memberId: currentMemberId.value }  
+      memberId: currentMemberId.value
     });
     let allOrders = res.data.content;
 
@@ -222,7 +222,7 @@
       if (refundLink) {
         const orderId = refundLink.dataset.orderId;
         if (orderId) {
-          router.push(`/refund/${orderId}`);    //서버 주소 변경
+          router.push({ name: 'RefundRequest', params: { orderId } });
         }
       }
     });

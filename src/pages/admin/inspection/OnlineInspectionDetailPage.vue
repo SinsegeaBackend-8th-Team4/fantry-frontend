@@ -4,9 +4,9 @@ import { useRouter, useRoute } from 'vue-router'
 import { useModal } from '@/composables/useModal'
 import { getOnlineInspectionDetail, approveOnlineInspection, rejectOnlineInspection } from '@/api/adminInspection'
 import { useAdminInspectionStore } from '@/stores/adminInspectionStore'
-import { useAlertDialog } from '@/composables/useAlertDialog.js';
+import { useAlertDialog } from '@/composables/useAlertDialog.js'
 
-const {showAlert} = useAlertDialog();
+const { showAlert } = useAlertDialog()
 const router = useRouter()
 const route = useRoute()
 const adminStore = useAdminInspectionStore()
@@ -59,8 +59,9 @@ async function fetchDetail(id) {
 
 // 1차 승인 처리
 const approve = async () => {
-  if (!confirm('정말로 승인 처리하시겠습니까?')) return
-  loading.value = true
+  const isConfirmed = await showAlert('확인', '정말로 승인 처리하시겠습니까?', true)
+
+  if (!isConfirmed) return
 
   try {
     await approveOnlineInspection(inspectionId.value)
