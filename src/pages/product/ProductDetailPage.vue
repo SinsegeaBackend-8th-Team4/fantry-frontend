@@ -338,18 +338,23 @@
         return currentBidPrice.value !== auction.value.startPrice;
     })
     const formatPrice = (price) => price != null ? price.toLocaleString() + '원' : '가격 정보 없음';
-    const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleString('ko-KR') : '';
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '';
+        return date.toLocaleString('ko-KR');
+    };
 
     const endTimeMs = computed(() => {
         if (!auction.value?.endTime) return null;
-        const dateObj = parseJavaLocalDateTime(auction.value.endTime);
-        return dateObj ? dateObj.getTime() : null;
+        const dateObj = new Date(auction.value.endTime);
+        return !isNaN(dateObj.getTime()) ? dateObj.getTime() : null;
     });
 
     const formattedCurrentPrice = computed(() => formatPrice(currentBidPrice.value));
     const formattedStartPrice = computed(() => formatPrice(auction.value?.startPrice));
-    const formattedStartTime = computed(() => formatDate(parseJavaLocalDateTime(auction.value?.startTime)));
-    const formattedEndTime = computed(() => formatDate(parseJavaLocalDateTime(auction.value?.endTime)));
+    const formattedStartTime = computed(() => formatDate(auction.value?.startTime));
+    const formattedEndTime = computed(() => formatDate(auction.value?.endTime));
 
     const isMyBidHighest = computed(() => {
         if (!userStore.isLoggedIn || !highestBidderId.value) {
@@ -469,8 +474,8 @@
             // saleStatus가 ACTIVE 또는 REACTIVE일 때만 경매 관련 로직 수행
             if (['ACTIVE', 'REACTIVE'].includes(auction.value.saleStatus)) {
                 // 경매 종료 여부 초기 확인
-                const endTime = parseJavaLocalDateTime(auction.value.endTime);
-                if (endTime && new Date() > endTime) {
+                const endTime = new Date(auction.value.endTime);
+                if (!isNaN(endTime.getTime()) && new Date() > endTime) {
                     isAuctionEnded.value = true;
                 }
 
@@ -575,7 +580,7 @@
             const response = await getBidsByAuctionId(auctionId);
             bidHistory.value = response.data.map(bid => ({
                 bidAmount: bid.bidAmount,
-                bidAt: parseJavaLocalDateTime(bid.bidAt)
+                bidAt: bid.bidAt
             }));
         } catch (err) {
             console.error("Failed to fetch bid history:", err);
@@ -667,14 +672,7 @@
         mainImageSrc.value = newSrc;
     };
 
-    //Java LocalDateTime 배열을 JS Date 객체로 변환
-    const parseJavaLocalDateTime = (dt) => {
-        if (!Array.isArray(dt) || dt.length < 5) {
-            return null;
-        }
-        const [year, month, day, hour, minute, second = 0] = dt;
-        return new Date(year, month - 1, day, hour, minute, second);
-    };
+
 
     // 경매 마감까지 남은 시간 계산 및 표시
     const startCountdown = () => {

@@ -137,9 +137,10 @@ const formatPrice = (price) => {
   return price != null ? price.toLocaleString() + '원' : '가격 정보 없음';
 };
 
-const formatDate = (dateArray) => {
-  const date = parseJavaLocalDateTime(dateArray);
-  if (!date) return '';
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
   return date.toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 };
 
@@ -149,15 +150,6 @@ const getThumbnailSrc = (thumbnailImageUrl) => {
     return `${baseUrl}/${thumbnailImageUrl}`;
   }
   return '/images/ww.png';
-};
-
-//Java LocalDateTime 배열을 JS Date 객체로 변환
-const parseJavaLocalDateTime = (dt) => {
-    if (!Array.isArray(dt) || dt.length < 5) {
-        return null;
-    }
-    const [year, month, day, hour, minute, second = 0] = dt;
-    return new Date(year, month - 1, day, hour, minute, second);
 };
 
 const goToProductDetail = (auctionId) => {

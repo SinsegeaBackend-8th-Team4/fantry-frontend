@@ -24,12 +24,11 @@ const goToDetail = () => {
   }
 }
 
-const getTimeRemaining = (endTimeArr) => {
-    if (!endTimeArr || !Array.isArray(endTimeArr)) return '';
+const getTimeRemaining = (endTimeString) => {
+    if (!endTimeString) return '';
     
-    // 배열 → Date 객체 변환 (month - 1 주의)
-    const [year, month, day, hour, minute, second] = endTimeArr;
-    const end = new Date(year, month - 1, day, hour, minute, second);
+    const end = new Date(endTimeString);
+    if (isNaN(end.getTime())) return '';
 
     const now = new Date();
     const diff = end - now;
