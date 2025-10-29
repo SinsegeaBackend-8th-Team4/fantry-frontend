@@ -1,5 +1,6 @@
 // User theme entry: variables -> bootstrap -> custom -> extension
 
+<<<<<<< HEAD
 @use 'variables-user' as *;      // 사용자 테마 변수
 @use '~bootstrap/bootstrap' as *;
 @use 'user-custom' as *;         // 네임스페이스 적용된 사용자 커스텀
@@ -9,3 +10,9 @@ html, body {
   margin: 0;
   padding: 0;
 }
+=======
+@import './variables-user';      // 사용자 테마 변수
+@import 'bootstrap/scss/bootstrap.scss';
+@import './user-custom';         // 네임스페이스 적용된 사용자 커스텀
+@import '../css/style.extension.css'; // (필요 시 SCSS로 마이그레이션 예정)
+>>>>>>> origin/main

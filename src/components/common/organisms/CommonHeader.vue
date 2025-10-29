@@ -46,12 +46,24 @@ const goToPolicy = () => {
 
 <template>
   <div class="container-fluid">
+<<<<<<< HEAD
     <div class="top-header-section">
       <!-- 좌측: 로고 & 검색창 -->
       <div class="left-group">
         <BrandLogo type="text" />
         <div class="search-area">
           <slot name="searchBar"></slot>
+=======
+    <!-- 상단 얇은 정보 바: 기존 bg-secondary 대신 커스텀 .top-bar 적용 -->
+    <div class="row top-bar py-2 px-xl-5">
+      <div class="col-lg-6 d-none d-lg-block">
+        <div class="d-inline-flex align-items-center">
+          <a class="text-dark" href="">FAQs</a>
+          <span class="text-muted px-2">|</span>
+          <a class="text-dark" href="">Help</a>
+          <span class="text-muted px-2">|</span>
+          <a class="text-dark" href="">Support</a>
+>>>>>>> origin/main
         </div>
       </div>
 
@@ -71,7 +83,11 @@ const goToPolicy = () => {
       </div>
     </div>
   </div>
+<<<<<<< HEAD
   <div class="container-fluid main-nav-wrapper">
+=======
+  <div class="container-fluid mb-5 main-nav-wrapper">
+>>>>>>> origin/main
     <div class="row main-nav-bar px-xl-5">
       <div class="col-lg-12">
         <NavigationBar />

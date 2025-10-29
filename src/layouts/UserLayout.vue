@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, onUnmounted } from 'vue';
+<<<<<<< HEAD
 import { useRoute, useRouter } from 'vue-router';
 // 컴포넌트 Import
 import CommonHeader from '@/components/common/organisms/CommonHeader.vue';
@@ -69,6 +70,40 @@ onUnmounted(() => {
       <CommonFooter />
     </template>
     <LoadingSpinner :show="uiStore.isLoading" />   </div>
+=======
+import { useRoute } from 'vue-router';
+import CommonHeader from '@/components/common/organisms/CommonHeader.vue';
+import CommonFooter from '@/components/common/organisms/CommonFooter.vue';
+import SearchBar from '@/components/common/molecules/SearchBar.vue';
+import '@/styles/scss/main-user.scss'; // User 전용 번들
+
+const route = useRoute();
+const searchInput = ref('');
+const onSearch = (v) => {};
+
+// 로그인 페이지에서는 헤더/푸터 숨김
+const isShowChrome = computed(() => route.path !== '/login');
+
+// 스타일 범위 표시 (레이아웃 활성화)
+document.body.classList.add('user-layout-active');
+onUnmounted(() => document.body.classList.remove('user-layout-active'));
+</script>
+
+<template>
+  <div>
+    <template v-if="isShowChrome">
+      <CommonHeader>
+        <template #saerchBar>
+          <SearchBar v-model="searchInput" :onSearch="onSearch" />
+        </template>
+      </CommonHeader>
+    </template>
+    <router-view />
+    <template v-if="isShowChrome">
+      <CommonFooter />
+    </template>
+  </div>
+>>>>>>> origin/main
 </template>
 
 <style scoped></style>

@@ -6,8 +6,12 @@ export function useChartPalette() {
     success: '#1cc88a',
     warning: '#f6c23e',
     danger: '#e74a3b',
+<<<<<<< HEAD
     neutral: '#858796',
     info: '#36b9cc' // 추가: Bootstrap info color
+=======
+    neutral: '#858796'
+>>>>>>> origin/main
   };
 }
 

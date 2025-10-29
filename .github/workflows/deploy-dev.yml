@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
+<<<<<<< HEAD
     
     # [ ✨ 수정 ] 올바른 env 블록 문법을 사용합니다.
     env:
@@ -22,3 +23,8 @@ jobs:
         # [ ✨ 수정 ] 'dev' 환경에 맞는 스크립트를 실행합니다.
         run: ~/scripts/deploy-frontend-dev.sh
         # [ ✨ 수정 ] run 명령어에서는 with 블록을 사용하지 않으므로 삭제합니다.
+=======
+    steps:
+      - name: Execute frontend deployment script
+        run: ~/scripts/deploy-frontend-dev.sh
+>>>>>>> origin/main

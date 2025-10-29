@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 @use 'variables-admin' as *;
 
+=======
+>>>>>>> origin/main
 /**
  * 관리자 전용 커스텀 확장
  * - 전역 충돌 방지를 위해 body.admin-layout-active 네임스페이스 사용
@@ -10,6 +13,7 @@ body.admin-layout-active {
   .admin-scope-initialized { display: none; }
   // 예시: 사이드바 커스터마이징 필요 시 아래 추가
   //.sidebar { font-size: 0.95rem; }
+<<<<<<< HEAD
 
   // ===============================================================
   // DataTables 공통 커스텀 스타일
@@ -53,4 +57,6 @@ body.admin-layout-active {
     align-items: center !important;
     gap: 4px;
   }
+=======
+>>>>>>> origin/main
 }

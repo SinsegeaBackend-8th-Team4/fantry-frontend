@@ -6,6 +6,7 @@
  */
 
 // --- 레이아웃 ---
+<<<<<<< HEAD
 import UserLayout from '@/layouts/UserLayout.vue'
 
 // --- 페이지 컴포넌트 (Lazy Loading) ---
@@ -41,6 +42,15 @@ const NoticeDetailPage = () => import('@/pages/user/cs/NoticeDetailPage.vue')
 const InquiryWritePage = () => import('@/pages/user/cs/InquiryWritePage.vue')
 const InquiryListPage = () => import('@/pages/user/cs/InquiryListPage.vue')
 const InquiryDetailPage = () => import('@/pages/user/cs/InquiryDetailPage.vue')
+=======
+import UserLayout from '@/layouts/UserLayout.vue';
+
+// --- 페이지 컴포넌트 (Lazy Loading) ---
+const HomePage = () => import('@/pages/HomePage.vue');
+const LoginPage = () => import('@/pages/LoginPage.vue');
+const ProductListPage = () => import('@/pages/product/ProductListPage.vue');
+const ProductDetailPage = () => import('@/pages/product/ProductDetailPage.vue');
+>>>>>>> origin/main
 
 const userRoutes = {
   path: '/',
@@ -53,6 +63,7 @@ const userRoutes = {
     },
     {
       path: 'login',
+<<<<<<< HEAD
       children: [
         {
           path: '',
@@ -114,6 +125,11 @@ const userRoutes = {
           meta: { requiredLogin: false },
         },
       ],
+=======
+      name: 'Login',
+      component: LoginPage,
+      meta: { requiredLogin: false },
+>>>>>>> origin/main
     },
     {
       path: 'product',
@@ -122,6 +138,7 @@ const userRoutes = {
       meta: { requiredLogin: false },
     },
     {
+<<<<<<< HEAD
       path: 'product/:id',
       name: 'ProductDetail',
       component: ProductDetailPage,
@@ -233,3 +250,14 @@ const userRoutes = {
 }
 
 export default userRoutes
+=======
+      path: 'product/detail/:id',
+      name: 'ProductDetail',
+      component: ProductDetailPage,
+      meta: { requiresAuth: true },
+    },
+  ],
+};
+
+export default userRoutes;
+>>>>>>> origin/main

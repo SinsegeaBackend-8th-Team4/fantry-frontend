@@ -5,6 +5,7 @@ import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vitejs.dev/config/
+<<<<<<< HEAD
 export default defineConfig(({ mode }) => {
   // .env 파일을 명시적으로 불러옵니다.
   const env = loadEnv(mode, process.cwd(), '')
@@ -98,3 +99,24 @@ export default defineConfig(({ mode }) => {
   }
 })
 
+=======
+export default defineConfig({
+  plugins: [
+    vue(),
+    vueDevTools(),
+  ],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url))
+    }
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // node_modules에서 발생하는 Sass 경고를 무시하도록 설정
+        quietDeps: true
+      }
+    }
+  }
+})
+>>>>>>> origin/main

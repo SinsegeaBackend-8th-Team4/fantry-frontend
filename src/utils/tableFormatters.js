@@ -6,6 +6,7 @@ export function formatCurrency(v) {
 }
 
 export function formatDateTime(v) {
+<<<<<<< HEAD
   if (!v) return '-';
 
   let dt;
@@ -95,4 +96,7 @@ export function productNameFormatter(value) {
         }[match];
     });
     return `<div class="text-truncate" title="${escapedValue}">${escapedValue}</div>`;
+=======
+  return v ? new Date(v).toLocaleString() : '-';
+>>>>>>> origin/main
 }

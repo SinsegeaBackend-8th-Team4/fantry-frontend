@@ -1,7 +1,10 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+<<<<<<< HEAD
 import { getMemberByToken } from '@/api/member.js';
 import { disconnectSse } from '@/api/notification';
+=======
+>>>>>>> origin/main
 
 /**
  * 사용자 관련 전역 상태를 관리하는 Pinia 스토어입니다.
@@ -23,7 +26,11 @@ export const useUserStore = defineStore('user', () => {
    * @type {import('vue').Ref<string|null>}
    * @description 서버로부터 발급받은 인증 토큰(JWT).
    */
+<<<<<<< HEAD
   const authToken = ref(localStorage.getItem('accessToken')||null);
+=======
+  const authToken = ref(null);
+>>>>>>> origin/main
 
 
   // ==========================================================================
@@ -34,10 +41,14 @@ export const useUserStore = defineStore('user', () => {
    * @type {import('vue').ComputedRef<boolean>}
    * @description 사용자의 로그인 여부를 반환합니다.
    */
+<<<<<<< HEAD
   //const isLoggedIn = computed(() => !!authToken.value && !!currentUser.value);
   const isLoggedIn = computed(() => {
     return !!authToken.value;
   });
+=======
+  const isLoggedIn = computed(() => !!authToken.value && !!currentUser.value);
+>>>>>>> origin/main
 
   /**
    * @type {import('vue').ComputedRef<boolean>}
@@ -45,12 +56,17 @@ export const useUserStore = defineStore('user', () => {
    * TODO: 실제 사용자 객체의 role 필드 등을 확인하도록 로직을 수정해야 합니다.
    */
   const isAdmin = computed(() => {
+<<<<<<< HEAD
     // 관리자는 true, 일반 사용자는 false
     if(currentUser.value?.role === 'ADMIN' || currentUser.value?.role === 'SADMIN'){
       return true;
     }else{
       return false;
     }
+=======
+    // 임시 로직: currentUser 객체가 있고, role이 'ADMIN'인 경우를 가정
+    return currentUser.value && currentUser.value.role === 'ADMIN';
+>>>>>>> origin/main
   });
 
 
@@ -62,17 +78,25 @@ export const useUserStore = defineStore('user', () => {
    * @description 로그인 성공 후, 사용자 정보와 토큰을 상태에 저장합니다.
    * @param {{ user: object, token: string }} payload - 로그인 API 응답 데이터
    */
+<<<<<<< HEAD
   function setLoginInfo(user, token) {
     currentUser.value = user;
     authToken.value = token;
     // TODO: 토큰을 localStorage에 저장하여 페이지 새로고침 시에도 로그인 유지
     localStorage.setItem('accessToken', token);
+=======
+  function setLoginInfo({ user, token }) {
+    currentUser.value = user;
+    authToken.value = token;
+    // TODO: 토큰을 localStorage에 저장하여 페이지 새로고침 시에도 로그인 유지
+>>>>>>> origin/main
   }
 
   /**
    * @description 로그아웃 시, 모든 사용자 관련 상태를 초기화합니다.
    */
   function logout() {
+<<<<<<< HEAD
     disconnectSse()
     
     currentUser.value = null;
@@ -110,6 +134,13 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
+=======
+    currentUser.value = null;
+    authToken.value = null;
+    // TODO: localStorage에 저장된 토큰도 삭제
+  }
+
+>>>>>>> origin/main
   // 스토어에서 외부로 노출할 상태, 게터, 액션을 반환합니다.
   return {
     // State
@@ -121,6 +152,9 @@ export const useUserStore = defineStore('user', () => {
     // Actions
     setLoginInfo,
     logout,
+<<<<<<< HEAD
     fetchUser,
+=======
+>>>>>>> origin/main
   };
 });

@@ -1,5 +1,6 @@
 // src/api/index.js
 import axios from 'axios';
+<<<<<<< HEAD
 import { useUserStore } from '@/stores/userStore.js';
 
 // Axios 클라이언트 인스턴스 생성
@@ -32,6 +33,33 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
+=======
+
+// Axios 클라이언트 인스턴스 생성
+const apiClient = axios.create({
+  /**
+   * API 서버의 기본 URL을 설정합니다.
+   * - 로컬 개발 환경에서는 Vite의 프록시 설정을 통해 '/api' 요청을 백엔드 서버로 전달합니다.
+   * - .env 파일 등을 통해 환경별로 다른 URL을 주입하는 것이 이상적입니다.
+   */
+  baseURL: '/api',
+
+  /**
+   * 요청 타임아웃을 10초로 설정합니다.
+   * 이 시간 내에 서버로부터 응답을 받지 못하면 요청은 실패 처리됩니다.
+   */
+  timeout: 10000,
+
+  /**
+   * 요청 헤더의 기본값을 설정합니다.
+   * 모든 요청에 'Content-Type'으로 'application/json'을 포함시킵니다.
+   */
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+>>>>>>> origin/main
 /*
  * 요청 인터셉터 (Request Interceptor)
  * - 모든 API 요청이 서버로 전송되기 전에 가로채어 특정 작업을 수행합니다.
@@ -39,10 +67,18 @@ const processQueue = (error, token = null) => {
  */
 apiClient.interceptors.request.use(
   config => {
+<<<<<<< HEAD
     const token = localStorage.getItem('accessToken'); // 로컬 스토리지에서 토큰 가져오기
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+=======
+    // TODO: Pinia 스토어 등에서 로그인 토큰을 가져와 헤더에 추가하는 로직 구현
+    // const token = userStore.token;
+    // if (token) {
+    //   config.headers.Authorization = `Bearer ${token}`;
+    // }
+>>>>>>> origin/main
     return config;
   },
   error => {
@@ -58,6 +94,7 @@ apiClient.interceptors.request.use(
  */
 apiClient.interceptors.response.use(
   response => {
+<<<<<<< HEAD
     return response;  // 정상 응답은 그대로 반환
   },
   // 400번대 이상 오류 발생 시 처리
@@ -133,10 +170,21 @@ apiClient.interceptors.response.use(
         return Promise.reject(err);
       });
     }
+=======
+    // 서버로부터 받은 응답 데이터를 그대로 반환합니다.
+    return response;
+  },
+  error => {
+    // TODO: 응답 상태 코드에 따른 공통 에러 처리 로직 구현
+    // if (error.response && error.response.status === 401) {
+    //   // 로그아웃 처리 또는 토큰 갱신 로직
+    // }
+>>>>>>> origin/main
     return Promise.reject(error);
   }
 );
 
+<<<<<<< HEAD
 // 로그인이 필요없는 API 요청을 위한 별도 Axios 인스턴스
 const publicApiClient = axios.create({
   baseURL: import.meta.env.VITE_API_SERVER_URL+'/api',
@@ -148,3 +196,6 @@ const publicApiClient = axios.create({
 });
 
 export {apiClient, publicApiClient};
+=======
+export default apiClient;
+>>>>>>> origin/main

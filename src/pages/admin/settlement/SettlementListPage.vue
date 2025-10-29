@@ -8,6 +8,7 @@ import ServerDataTable from '@/components/common/datatable/ServerDataTable.vue';
 import BaseChart from '@/components/common/chart/BaseChart.vue';
 import { useChartPalette, makeLineDataset } from '@/composables/useChartConfig';
 import { currencyCol, dateTimeCol, textCol } from '@/composables/useDataTableColumns';
+<<<<<<< HEAD
 import { getAdminSettlements } from '@/api/adminSettlement.js'; // API 임포트
 import { debounce } from 'lodash-es';
 
@@ -71,6 +72,42 @@ const columns = [
   },
   dateTimeCol('requestedAt', '요청일'),
   dateTimeCol('completedAt', '완료일'),
+=======
+
+function badgeClass(status) {
+  return {
+    'wait': status === '대기',
+    '완료': status === '완료',
+    '보류': status === '보류'
+  };
+}
+
+const keyword = ref('');
+
+// fetcher: 실제 API 연동 시 axios 호출로 교체
+async function fetchSettlements({ page, size, sort, keyword }) {
+  await new Promise(r => setTimeout(r, 300)); // mock delay
+  const total = 57;
+  const start = (page - 1) * size;
+  const rows = Array.from({ length: size }).map((_, i) => {
+    const id = start + i + 1;
+    return {
+      id,
+      orderNo: 'O-' + String(20250000 + id),
+      amount: 100000 + (id * 1234) % 500000,
+      createdAt: Date.now() - id * 3600_000,
+      status: id % 3 === 0 ? '대기' : (id % 3 === 1 ? '완료' : '보류')
+    };
+  }).filter(r => !keyword || r.orderNo.includes(keyword));
+  return { rows, total };
+}
+
+const columns = [
+  textCol('orderNo', '주문번호'),
+  currencyCol('amount', '정산금액'),
+  dateTimeCol('createdAt', '생성일'),
+  { data: 'status', title: '상태', sortable: true }
+>>>>>>> origin/main
 ];
 
 // Chart 데이터
@@ -99,6 +136,7 @@ const chartOptions = { scales: { y: { beginAtZero: true } } };
       </div>
     </div>
 
+<<<<<<< HEAD
     <div class="card shadow-sm border-0 rounded-3 overflow-hidden mb-4">
       <div class="card-body p-4">
         <div class="d-flex flex-column gap-3 mb-4">
@@ -136,15 +174,35 @@ const chartOptions = { scales: { y: { beginAtZero: true } } };
         </ServerDataTable>
       </div>
     </div>
+=======
+    <ServerDataTable
+      v-model:keyword="keyword"
+      :columns="columns"
+      :fetcher="fetchSettlements"
+      :page-size="10"
+      @loaded="info => console.log('loaded', info)"
+    >
+      <template #empty>정산 데이터가 없습니다.</template>
+      <template #cell-status="{ row }">
+        <span class="badge" :class="badgeClass(row.status)">{{ row.status }}</span>
+      </template>
+    </ServerDataTable>
+>>>>>>> origin/main
   </div>
 </template>
 
 <style scoped lang="scss">
 .settlement-list-page {
   .badge { font-weight: 500; }
+<<<<<<< HEAD
   .badge.REQUESTED { background:#007bff; } // primary
   .badge.IN_PROGRESS { background:#17a2b8; } // info
   .badge.COMPLETED { background:#28a745; } // success
   .badge.FAILED { background:#dc3545; } // danger
+=======
+  .badge.wait, .badge.대기 { background:#f6c23e; }
+  .badge.완료 { background:#1cc88a; }
+  .badge.보류 { background:#e74a3b; }
+>>>>>>> origin/main
 }
 </style>

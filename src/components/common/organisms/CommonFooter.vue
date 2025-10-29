@@ -7,9 +7,27 @@ const router = useRouter()
 </script>
 
 <template>
+<<<<<<< HEAD
   <div class="container-fluid app-footer text-dark pt-3">
     <div class="row px-xl-5 pt-3">
       <div class="col-lg-12">
+=======
+  <div class="container-fluid app-footer text-dark mt-5 pt-5">
+    <div class="row px-xl-5 pt-5">
+      <div class="col-lg-4 col-md-12 mb-5 pr-3 pr-xl-5">
+        <BrandLogo />
+        <p>
+          Dolore erat dolor sit lorem vero amet. Sed sit lorem magna, ipsum no sit erat lorem et
+          magna ipsum dolore amet erat.
+        </p>
+        <p class="mb-2">
+          <i class="fa fa-map-marker-alt text-primary mr-3"></i>123 Street, New York, USA
+        </p>
+        <p class="mb-2"><i class="fa fa-envelope text-primary mr-3"></i>info@example.com</p>
+        <p class="mb-0"><i class="fa fa-phone-alt text-primary mr-3"></i>+012 345 67890</p>
+      </div>
+      <div class="col-lg-8 col-md-12">
+>>>>>>> origin/main
         <div class="row">
           <div class="col-lg-3 col-md-6 mb-4 company-info">
             <h5 class="font-weight-bold text-dark mb-2">(주)팬트리</h5>
@@ -49,10 +67,21 @@ const router = useRouter()
         </div>
       </div>
     </div>
+<<<<<<< HEAD
     <div class="row footer-bottom-bar mx-xl-5 py-2">
       <div class="col-md-6 px-xl-0">
         <p class="mb-md-0 text-center text-md-left text-dark">
           &copy; <a class="text-dark font-weight-semi-bold" href="#">Fantry Corp.</a> All Rights Reserved.
+=======
+  <div class="row footer-bottom-bar mx-xl-5 py-4">
+      <div class="col-md-6 px-xl-0">
+        <p class="mb-md-0 text-center text-md-left text-dark">
+          &copy; <a class="text-dark font-weight-semi-bold" href="#">www.fantry.dunckdns.org</a>. All Rights
+          Reserved. Designed by
+          <a class="text-dark font-weight-semi-bold" href="https://htmlcodex.com">HTML Codex</a
+          ><br />
+          Distributed By <a href="https://themewagon.com" target="_blank">ThemeWagon</a>
+>>>>>>> origin/main
         </p>
       </div>
     </div>

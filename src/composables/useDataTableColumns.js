@@ -1,11 +1,15 @@
 // useDataTableColumns.js
 // DataTables 컬럼 헬퍼 (포맷 공통화)
 
+<<<<<<< HEAD
 // currencyCol: 금액 표시용 (천단위 구분 + '원' 단위)
+=======
+>>>>>>> origin/main
 export const currencyCol = (data, title = '금액') => ({
   data,
   title,
   className: 'text-end',
+<<<<<<< HEAD
   render: (v) => (v ?? 0).toLocaleString() + '원',
 })
 
@@ -25,3 +29,15 @@ export const dateCol = (data, title = '일자') => ({
 
 // textCol: 기본 텍스트 표시
 export const textCol = (data, title) => ({ data, title })
+=======
+  render: (v) => (v ?? 0).toLocaleString() + '원'
+});
+
+export const dateTimeCol = (data, title = '일시') => ({
+  data,
+  title,
+  render: (v) => v ? new Date(v).toLocaleString() : '-'
+});
+
+export const textCol = (data, title) => ({ data, title });
+>>>>>>> origin/main

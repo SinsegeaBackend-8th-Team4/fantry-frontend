@@ -2,6 +2,7 @@
  * 사용자(User) 테마 전용 변수
  * - Bootstrap 컴파일 이전에 import 되며 사용자 팔레트를 정의합니다.
  */
+<<<<<<< HEAD
 $primary: #FF69B4;
 $secondary: #BF94E4;
 $light: #F8F8F8;
@@ -9,6 +10,13 @@ $dark: #4169E1;
 $body-color: #6A8CDA;
 $border-light-color: #F0E6FA;
 $light-gray: #F5EEF8;
+=======
+$primary: #D19C97;
+$secondary: #EDF1FF;
+$light: #FFFFFF;
+$dark: #1C1C1C;
+$body-color: #6F6F6F;
+>>>>>>> origin/main
 $headings-color: $dark;
 $border-color: $secondary;
 $input-border-color: $secondary;

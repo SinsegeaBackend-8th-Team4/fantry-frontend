@@ -36,6 +36,7 @@ onMounted(async() => {
     <!-- Main Banner Start -->
     <MainBannerCarousel>
       <CarouselItemHolder :isActive="true">
+<<<<<<< HEAD
         <div class="banner-container">
           <!-- 배경 그라데이션 오버레이 -->
           <div class="banner-overlay"></div>
@@ -89,6 +90,64 @@ onMounted(async() => {
             <div class="circle circle-1"></div>
             <div class="circle circle-2"></div>
             <div class="circle circle-3"></div>
+=======
+        <img
+          class="img-fluid"
+          src="https://images.pexels.com/photos/247600/pexels-photo-247600.jpeg"
+          alt="Image"
+          loading="lazy"
+        />
+        <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
+          <div class="p-3" style="max-width: 700px">
+            <h4 class="text-light text-uppercase font-weight-medium mb-3">
+              10% Off Your First Order
+            </h4>
+            <h3 class="display-4 text-white font-weight-semi-bold mb-4">Fantry Project</h3>
+            <p class="mx-md-5 px-5">
+              Welcome to our collaborative Fantry project space.
+            </p>
+            <a href="" class="btn btn-light py-2 px-3">Explore Now</a>
+          </div>
+        </div>
+      </CarouselItemHolder>
+      <CarouselItemHolder>
+        <img
+          class="img-fluid"
+          src="https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg"
+          alt="Image"
+          loading="lazy"
+        />
+        <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
+          <div class="p-3" style="max-width: 700px">
+            <h4 class="text-light text-uppercase font-weight-medium mb-3">
+              10% Off Your First Order
+            </h4>
+            <h3 class="display-4 text-white font-weight-semi-bold mb-4">High-Quality Products</h3>
+            <p class="mx-md-5 px-5">
+              Discover a wide range of amazing products.
+            </p>
+            <a href="" class="btn btn-light py-2 px-3">Shop Now</a>
+          </div>
+        </div>
+      </CarouselItemHolder>
+      <CarouselItemHolder>
+        <img
+          class="img-fluid"
+          src="https://images.pexels.com/photos/1227513/pexels-photo-1227513.jpeg"
+          alt="Image"
+          loading="lazy"
+        />
+        <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
+          <div class="p-3" style="max-width: 700px">
+            <h4 class="text-light text-uppercase font-weight-medium mb-3">
+              10% Off Your First Order
+            </h4>
+            <h3 class="display-4 text-white font-weight-semi-bold mb-4">Join Our Community</h3>
+            <p class="mx-md-5 px-5">
+              Be a part of the Fantry community.
+            </p>
+            <a href="" class="btn btn-light py-2 px-3">Learn More</a>
+>>>>>>> origin/main
           </div>
         </div>
       </CarouselItemHolder>

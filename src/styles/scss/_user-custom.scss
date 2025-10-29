@@ -1,11 +1,15 @@
+<<<<<<< HEAD
 
 @use 'variables-user' as *;
 
+=======
+>>>>>>> origin/main
 /**
  * 사용자 레이아웃 커스텀 스타일 (Bootstrap 이후)
  * - 전역 오염 방지를 위해 body.user-layout-active 네임스페이스 사용
  */
 body.user-layout-active {
+<<<<<<< HEAD
   background-color: $light !important;
   /* 헤더 상단 정보 바 */
   background: $light;
@@ -16,6 +20,20 @@ body.user-layout-active {
   border-top: 1px solid $border-light-color; /* 기존 border-top 흐릿한 느낌 대체 */
   border-bottom: 1px solid $border-light-color;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+=======
+  /* 헤더 상단 정보 바 */
+  .top-bar {
+    background: #ffffff;
+    border-bottom: 1px solid #e4e7ec;
+  }
+
+  /* 네비게이션 바 컨테이너 */
+  .main-nav-bar {
+    background: #ffffff;
+    border-top: 1px solid #f0f2f5; /* 기존 border-top 흐릿한 느낌 대체 */
+    border-bottom: 1px solid #f5f6f7;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+>>>>>>> origin/main
   }
 
   /* 네비게이션 내부 링크 hover 대비 향상 */
@@ -26,6 +44,7 @@ body.user-layout-active {
 
   /* ================= Footer ================= */
   .app-footer {
+<<<<<<< HEAD
     background: $light-gray;
     border-top: 1px solid $border-light-color;
   }
@@ -45,6 +64,20 @@ body.user-layout-active {
   .header-main-section {
     background-color: $light;
   }
+=======
+    background:#ffffff;
+    border-top:1px solid #e5e7ea;
+  }
+  .app-footer p { color: $dark; }
+  .app-footer a { color: $dark; }
+  .app-footer a:hover { color: $primary; }
+
+  .footer-bottom-bar {
+    border-top:1px solid #eceff2;
+    margin-top:2rem;
+  }
+
+>>>>>>> origin/main
   .font-weight-medium { font-weight: 500; }
   .font-weight-semi-bold { font-weight: 600; }
 
@@ -58,7 +91,11 @@ body.user-layout-active {
 
   .navbar-light .navbar-nav .nav-link {
     padding: 20px 10px;
+<<<<<<< HEAD
     color: #5a5c69;
+=======
+    color: $dark;
+>>>>>>> origin/main
     outline: none;
   }
   .navbar-light .navbar-nav .nav-link:hover,
@@ -85,7 +122,11 @@ body.user-layout-active {
     position: relative; display: inline-block; letter-spacing: 1px;
     font-weight: bold; color: $dark;
   }
+<<<<<<< HEAD
   .section-title span { position: relative; background: $light; z-index: 1; }
+=======
+  .section-title span { position: relative; background: #ffffff; z-index: 1; }
+>>>>>>> origin/main
   .section-title::before {
     position: absolute; content: ""; top: 50%; left: 0; width: 100%; height: 2px;
     margin-top: -1px; background: $dark;
@@ -112,4 +153,7 @@ body.user-layout-active {
 
 @-webkit-keyframes action { 0% { transform: translateY(0); } 100% { transform: translateY(-15px); } }
 @keyframes action { 0% { transform: translateY(0); } 100% { transform: translateY(-15px); } }
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main

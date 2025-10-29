@@ -1,5 +1,6 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
+<<<<<<< HEAD
 // useUiStore는 이제 router/index.js에서 사용하므로 제거합니다.
 // import { useUiStore } from './stores/uiStore'; 
 
@@ -54,3 +55,21 @@ const toastOption = {
 // 5. vue-toastification 등록 및 앱 마운트
 app.use(Toast, toastOption)
 app.mount('#app')
+=======
+import App from './App.vue';
+import router from './router';
+
+// Global vendor CSS (순수 전역만) - Bootstrap CSS는 각 레이아웃 SCSS에서 변수 적용 후 컴파일
+import '@fortawesome/fontawesome-free/css/all.min.css';
+import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
+
+// JS vendors (Bootstrap JS 는 전역 1회만)
+import jQuery from 'jquery';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+window.$ = window.jQuery = jQuery; // jQuery 의존 플러그인 호환
+
+const app = createApp(App);
+app.use(router);
+app.use(createPinia());
+app.mount('#app');
+>>>>>>> origin/main
